@@ -13,6 +13,10 @@
     .form-group input { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; }
     .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
   </style>
+
+  <!-- Importando o Firebase SDK via CDN Global -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <div class="login-card">
@@ -25,10 +29,41 @@
       <label>Senha</label>
       <input type="password" id="senhaLogin" placeholder="••••••••">
     </div>
-    <button class="btn-login" onclick="fazerLoginReal()">Entrar</button>
+    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
   </div>
 
-  <!-- Importante: type="module" para suportar o Firebase -->
-  <script type="module" src="../js/auth.js"></script>
+  <script>
+    // Configuração oficial do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDa9ztrK6VxFVelBP0ge6-31V05gnztJw",
+      authDomain: "reuniao-d1b29.firebaseapp.com",
+      projectId: "reuniao-d1b29",
+      storageBucket: "reuniao-d1b29.firebasestorage.app",
+      messagingSenderId: "887897617950",
+      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+    };
+
+    // Inicializa o Firebase Compat
+    firebase.initializeApp(firebaseConfig);
+
+    // Função de Login Direta
+    function fazerLogin() {
+      const email = document.getElementById("emailLogin").value;
+      const senha = document.getElementById("senhaLogin").value;
+
+      if (!email || !senha) {
+        alert("Por favor, preencha o e-mail e a senha.");
+        return;
+      }
+
+      firebase.auth().signInWithEmailAndPassword(email, senha)
+        .then((userCredential) => {
+          window.location.href = "calendar.html";
+        })
+        .catch((error) => {
+          alert("Erro ao entrar: " + error.message);
+        });
+    }
+  </script>
 </body>
 </html>
