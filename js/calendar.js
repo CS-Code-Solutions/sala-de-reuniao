@@ -1,62 +1,76 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Aguarda um instante para garantir que a autenticação carregou o email
+    // Renderiza a agenda assim que o DOM carrega
     setTimeout(() => {
         carregarAgenda();
-    }, 500);
+    }, 300);
 });
 
 function carregarAgenda() {
-    const container = document.getElementById("gridHorarios");
-    if (!container) return;
+    const gridContainer = document.getElementById("gridHorarios");
+    const proxContainer = document.getElementById("listaProximas");
+    
+    if (!gridContainer || !proxContainer) return;
 
-    container.innerHTML = "";
+    gridContainer.innerHTML = "";
+    proxContainer.innerHTML = "";
 
-    // Grade de horários detalhada inspirada no design padrão
+    // Base de dados simulada para gerar o visual exato da imagem
     const horarios = [
-        { inicio: "07:00", fim: "07:30", status: "disponivel" },
-        { inicio: "07:30", fim: "10:00", status: "reservado", por: "Alex", assunto: "Planejamento Estratégico" },
-        { inicio: "10:00", fim: "11:00", status: "disponivel" },
-        { inicio: "11:00", fim: "12:00", status: "reservado", por: "Bruna", assunto: "Reunião de equipe" },
-        { inicio: "12:00", fim: "13:30", status: "disponivel" },
-        { inicio: "13:30", fim: "15:00", status: "reservado", por: "Carlos", assunto: "Projeto Alfa" },
-        { inicio: "15:00", fim: "16:00", status: "disponivel" },
-        { inicio: "16:00", fim: "17:00", status: "reservado", por: "Fernanda", assunto: "Revisão de resultados" }
+        { hora: "07:00", inicio: "07:00", fim: "07:30", status: "disponivel", cor: "green" },
+        { hora: "08:00", inicio: "07:30", fim: "10:00", status: "reservado", titulo: "Planejamento Estratégico", responsavel: "Alex", tipo: "Reunião", cor: "blue" },
+        { hora: "10:00", inicio: "10:00", fim: "11:00", status: "disponivel", cor: "green" },
+        { hora: "11:00", inicio: "11:00", fim: "12:00", status: "reservado", titulo: "Reunião de equipe", responsavel: "Bruna", tipo: "Reunião", cor: "blue" },
+        { hora: "12:00", inicio: "12:00", fim: "13:30", status: "disponivel", cor: "green" },
+        { hora: "14:00", inicio: "13:30", fim: "15:00", status: "reservado", titulo: "Projeto Alfa", responsavel: "Carlos", tipo: "Reunião", cor: "purple" },
+        { hora: "16:00", inicio: "15:00", fim: "16:00", status: "disponivel", cor: "green" },
+        { hora: "17:00", inicio: "16:00", fim: "17:00", status: "reservado", titulo: "Revisão de resultados", responsavel: "Fernanda", tipo: "Reunião", cor: "blue" }
     ];
 
     horarios.forEach(slot => {
-        const div = document.createElement("div");
-        div.className = `slot-item ${slot.status}`;
+        // 1. Gerar Bloco Principal na Grelha (Esquerda)
+        const row = document.createElement("div");
+        row.className = "time-row";
         
         if (slot.status === "reservado") {
-            div.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${slot.inicio} - ${slot.fim}</span>
-                    <strong style="color: var(--text-main); font-size: 15px;">${slot.assunto}</strong>
-                    <span style="font-size: 13px; color: var(--text-muted);">Responsável: ${slot.por}</span>
+            row.innerHTML = `
+                <div class="time-label">${slot.hora}</div>
+                <div class="event-block ${slot.cor}">
+                    <div class="event-time">${slot.inicio} - ${slot.fim}</div>
+                    <div class="event-title">${slot.titulo}</div>
+                    <div class="event-meta">${slot.responsavel} • ${slot.tipo}</div>
                 </div>
-                <button onclick="solicitarNegociacao('${slot.por}')" style="padding: 8px 16px; background: #fee2e2; color: #b91c1c; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Negociar / Ver</button>
             `;
-        } else {
-            div.innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 4px;">
-                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${slot.inicio} - ${slot.fim}</span>
-                    <span style="color: #10b981; font-weight: 600; font-size: 14px;">● Disponível</span>
+            
+            // 2. Adicionar simultaneamente à barra de Próximas Reservas (Direita)
+            const upItem = document.createElement("div");
+            upItem.className = "upcoming-item";
+            upItem.innerHTML = `
+                <div class="dot ${slot.cor}"></div>
+                <div class="up-info">
+                    <span class="up-time">${slot.inicio} - ${slot.fim}</span>
+                    <span class="up-title">${slot.titulo}</span>
+                    <span class="up-meta">${slot.responsavel}</span>
                 </div>
-                <button onclick="abrirModalReserva('${slot.inicio}', '${slot.fim}')" style="padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Reservar</button>
+            `;
+            proxContainer.appendChild(upItem);
+            
+        } else {
+            row.innerHTML = `
+                <div class="time-label">${slot.hora}</div>
+                <div class="event-block ${slot.cor}" style="cursor:pointer;" onclick="abrirModalReserva('${slot.inicio}', '${slot.fim}')">
+                    <div class="event-time"><span>●</span> ${slot.inicio} - ${slot.fim} • Disponível</div>
+                </div>
             `;
         }
-        container.appendChild(div);
+        
+        gridContainer.appendChild(row);
     });
 }
 
-function solicitarNegociacao(responsavel) {
-    alert(`Este horário já está reservado por ${responsavel}. Entre em contato para negociar a liberação.`);
-}
-
 function abrirModalReserva(inicio, fim) {
-    const nomeReuniao = prompt(`Deseja reservar o horário das ${inicio} às ${fim}?\nDigite o nome da reunião:`);
+    const nomeReuniao = prompt(`Nova Reserva: ${inicio} às ${fim}\nQual o nome da reunião?`);
     if (nomeReuniao) {
-        alert(`Reserva confirmada com sucesso para: ${nomeReuniao}!`);
-        carregarAgenda(); // Atualiza a grade em tempo real
+        alert(`Sucesso! "${nomeReuniao}" foi agendada.`);
+        // Em um sistema real, aqui chamaríamos o Firebase (Firestore) para salvar
     }
 }
