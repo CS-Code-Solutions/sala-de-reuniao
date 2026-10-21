@@ -1,7 +1,7 @@
 import { auth } from "./firebase-config.js";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Função de Login Real
+// Função de Login Real ligada globalmente
 window.fazerLoginReal = function() {
     const email = document.getElementById("emailLogin").value;
     const senha = document.getElementById("senhaLogin").value;
@@ -12,8 +12,7 @@ window.fazerLoginReal = function() {
     }
 
     signInWithEmailAndPassword(auth, email, senha)
-        .then((userCredential) => {
-            // Login bem-sucedido, redireciona para a agenda
+        .then(() => {
             window.location.href = "calendar.html";
         })
         .catch((error) => {
@@ -21,7 +20,7 @@ window.fazerLoginReal = function() {
         });
 };
 
-// Função de Logout Real
+// Função de Logout Real ligada globalmente
 window.fazerLogoutReal = function() {
     signOut(auth).then(() => {
         window.location.href = "login.html";
@@ -30,23 +29,21 @@ window.fazerLogoutReal = function() {
     });
 };
 
-// Verifica o estado da sessão em todas as páginas protegidas
+// Verifica o estado da sessão e protege as rotas
 export function verificarAutenticacao() {
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Utilizador autenticado
             const nomeDisplay = document.getElementById("userNameDisplay");
             if (nomeDisplay) {
                 nomeDisplay.innerText = user.email.split('@')[0];
             }
 
-            // Exemplo: Se o e-mail contiver 'admin', libera o menu de administrador
+            // Libera o menu de administração se for o e-mail de teste/admin
             if (user.email.includes("admin") || user.email.includes("teste")) {
                 const adminMenu = document.getElementById("adminMenu");
                 if (adminMenu) adminMenu.style.display = "block";
             }
         } else {
-            // Se não estiver logado e não estiver na página de login, redireciona
             if (!window.location.pathname.includes("login.html")) {
                 window.location.href = "login.html";
             }
