@@ -6,7 +6,7 @@
   <title>MeetingRoom - Entrar</title>
   <link rel="stylesheet" href="../css/global.css">
   <style>
-    body { justify-content: center; align-items: center; background: #f1f5f9; }
+    body { justify-content: center; align-items: center; background: #f1f5f9; display: flex; height: 100vh; }
     .login-card { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
     .login-card h2 { margin-bottom: 24px; text-align: center; }
     .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
@@ -25,17 +25,10 @@
       <label>Senha</label>
       <input type="password" id="senhaLogin" placeholder="••••••••">
     </div>
-    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+    <button class="btn-login" onclick="fazerLoginReal()">Entrar</button>
   </div>
 
-  <script>
-    function fazerLogin() {
-      const email = document.getElementById("emailLogin").value;
-      // Simulando salvamento de sessão e perfil admin para teste
-      const perfil = email.includes("admin") ? "admin" : "usuario";
-      localStorage.setItem("usuarioAtual", JSON.stringify({ nome: email.split('@')[0] || "Utilizador", perfil: perfil }));
-      window.location.href = "calendar.html";
-    }
-  </script>
+  <!-- Importante: type="module" para suportar o Firebase -->
+  <script type="module" src="../js/auth.js"></script>
 </body>
 </html>
