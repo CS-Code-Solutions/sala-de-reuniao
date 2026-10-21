@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeetingRoom - Salas de Reunião</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+
+  <!-- Menu Lateral -->
+  <aside class="sidebar">
+    <div class="logo-area">
+      <h2>📅 MeetingRoom</h2>
+    </div>
+    <nav class="nav-links">
+      <a href="calendar.html">Agenda</a>
+      <a href="my-reservations.html">Minhas Reservas</a>
+      <a href="rooms.html" class="active">Salas</a>
+      <a href="notifications.html">Notificações</a>
+      <a href="admin-users.html" id="adminMenu" style="display:none;">Usuários (Admin)</a>
+    </nav>
+    <div class="user-profile">
+      <span id="userNameDisplay">Carregando...</span>
+      <a href="login.html" onclick="localStorage.clear();">Sair</a>
+    </div>
+  </aside>
+
+  <!-- Conteúdo Principal -->
+  <main class="main-content">
+    <header class="topbar">
+      <h1>Salas Disponíveis</h1>
+    </header>
+
+    <section class="schedule-grid-container">
+      <div class="time-slots">
+        
+        <!-- Sala 01 -->
+        <div class="slot-item" style="border-left: 5px solid var(--primary);">
+          <div>
+            <strong>Sala de Reuniões 01</strong>
+            <p>👥 Capacidade: 8 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Videoconferência, Quadro</p>
+          </div>
+          <span style="color: #10b981; font-weight: 600;">Ativa</span>
+        </div>
+
+        <!-- Sala 02 -->
+        <div class="slot-item" style="border-left: 5px solid #cbd5e1;">
+          <div>
+            <strong>Sala de Reuniões 02</strong>
+            <p>👥 Capacidade: 6 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Quadro</p>
+          </div>
+          <span style="color: var(--text-muted); font-weight: 600;">Em breve</span>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/auth.js"></script>
+</body>
+</html>
