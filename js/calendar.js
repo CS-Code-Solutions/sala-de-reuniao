@@ -1,20 +1,26 @@
-// Exemplo estruturado de controle de horários e prevenção de conflitos
 document.addEventListener("DOMContentLoaded", () => {
-    verificarAutenticacao();
-    carregarAgenda();
+    // Aguarda um instante para garantir que a autenticação carregou o email
+    setTimeout(() => {
+        carregarAgenda();
+    }, 500);
 });
 
 function carregarAgenda() {
-    const salaId = document.getElementById("salaSelect").value;
     const container = document.getElementById("gridHorarios");
+    if (!container) return;
+
     container.innerHTML = "";
 
-    // Simulação de horários do dia (07:00 às 18:00)
+    // Grade de horários detalhada inspirada no design padrão
     const horarios = [
         { inicio: "07:00", fim: "07:30", status: "disponivel" },
         { inicio: "07:30", fim: "10:00", status: "reservado", por: "Alex", assunto: "Planejamento Estratégico" },
         { inicio: "10:00", fim: "11:00", status: "disponivel" },
-        { inicio: "11:00", fim: "12:00", status: "reservado", por: "Bruna", assunto: "Reunião de equipe" }
+        { inicio: "11:00", fim: "12:00", status: "reservado", por: "Bruna", assunto: "Reunião de equipe" },
+        { inicio: "12:00", fim: "13:30", status: "disponivel" },
+        { inicio: "13:30", fim: "15:00", status: "reservado", por: "Carlos", assunto: "Projeto Alfa" },
+        { inicio: "15:00", fim: "16:00", status: "disponivel" },
+        { inicio: "16:00", fim: "17:00", status: "reservado", por: "Fernanda", assunto: "Revisão de resultados" }
     ];
 
     horarios.forEach(slot => {
@@ -23,15 +29,20 @@ function carregarAgenda() {
         
         if (slot.status === "reservado") {
             div.innerHTML = `
-                <span>${slot.inicio} - ${slot.fim}</span>
-                <strong>${slot.assunto} (${slot.por})</strong>
-                <button onclick="solicitarNegociacao('${slot.por}')">Negociar / Ver</button>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${slot.inicio} - ${slot.fim}</span>
+                    <strong style="color: var(--text-main); font-size: 15px;">${slot.assunto}</strong>
+                    <span style="font-size: 13px; color: var(--text-muted);">Responsável: ${slot.por}</span>
+                </div>
+                <button onclick="solicitarNegociacao('${slot.por}')" style="padding: 8px 16px; background: #fee2e2; color: #b91c1c; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Negociar / Ver</button>
             `;
         } else {
             div.innerHTML = `
-                <span>${slot.inicio} - ${slot.fim}</span>
-                <span class="status-livre">Disponível</span>
-                <button onclick="abrirModalReserva('${slot.inicio}', '${slot.fim}')">Reservar</button>
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">${slot.inicio} - ${slot.fim}</span>
+                    <span style="color: #10b981; font-weight: 600; font-size: 14px;">● Disponível</span>
+                </div>
+                <button onclick="abrirModalReserva('${slot.inicio}', '${slot.fim}')" style="padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Reservar</button>
             `;
         }
         container.appendChild(div);
@@ -39,7 +50,7 @@ function carregarAgenda() {
 }
 
 function solicitarNegociacao(responsavel) {
-    alert(`Este horário já está reservado por ${responsavel}. Entre em contato para negociar a liberação ou solicite ao Administrador.`);
+    alert(`Este horário já está reservado por ${responsavel}. Entre em contato para negociar a liberação.`);
 }
 
 function abrirModalReserva(inicio, fim) {
