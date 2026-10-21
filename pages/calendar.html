@@ -6,17 +6,86 @@
   <title>MeetingRoom - Agenda</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
+  <style>
+    /* Estilos específicos para o layout avançado da Agenda */
+    .calendar-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
+    
+    /* Cabeçalho da Agenda */
+    .cal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+    .cal-title-area h1 { font-size: 24px; color: #1e293b; margin-bottom: 4px; }
+    .cal-title-area p { font-size: 14px; color: #64748b; }
+    
+    .cal-controls { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+    .date-nav { display: flex; align-items: center; gap: 12px; background: white; padding: 6px 16px; border-radius: 8px; border: 1px solid #e2e8f0; font-weight: 600; color: #334155; font-size: 14px; }
+    .date-nav button { background: none; border: none; cursor: pointer; color: #64748b; font-weight: bold; }
+    
+    .view-toggles { display: flex; background: white; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; }
+    .view-toggles button { padding: 8px 16px; border: none; background: white; color: #64748b; font-weight: 600; font-size: 13px; cursor: pointer; border-right: 1px solid #e2e8f0; }
+    .view-toggles button:last-child { border-right: none; }
+    .view-toggles button.active { background: #2563eb; color: white; }
+    
+    .room-select { padding: 8px 16px; border-radius: 8px; border: 1px solid #e2e8f0; color: #334155; font-weight: 600; background: white; font-size: 13px; outline: none; }
+
+    /* Layout Principal: 2 Colunas */
+    .cal-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
+    @media (max-width: 1024px) { .cal-layout { grid-template-columns: 1fr; } }
+    
+    /* Grelha de Horários (Esquerda) */
+    .cal-main { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+    .cal-main-header { display: flex; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-size: 14px; font-weight: 600; color: #475569; }
+    
+    .schedule-list { padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; }
+    .time-row { display: flex; gap: 16px; }
+    .time-label { width: 50px; font-size: 13px; color: #94a3b8; font-weight: 600; padding-top: 8px; text-align: right; }
+    
+    .event-block { flex: 1; padding: 12px 16px; border-radius: 8px; border-left: 4px solid; display: flex; flex-direction: column; gap: 4px; }
+    .event-block.green { background-color: #f0fdf4; border-color: #22c55e; }
+    .event-block.blue { background-color: #eff6ff; border-color: #3b82f6; }
+    .event-block.purple { background-color: #faf5ff; border-color: #a855f7; }
+    
+    .event-time { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+    .event-block.green .event-time { color: #16a34a; }
+    .event-block.blue .event-time { color: #2563eb; }
+    .event-block.purple .event-time { color: #9333ea; }
+    
+    .event-title { font-size: 15px; font-weight: 700; color: #1e293b; }
+    .event-meta { font-size: 13px; color: #64748b; font-weight: 500; }
+
+    /* Barra Lateral (Direita) */
+    .cal-sidebar { display: flex; flex-direction: column; gap: 24px; }
+    
+    .side-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .side-card h3 { font-size: 16px; color: #1e293b; margin-bottom: 16px; }
+    
+    .room-info { display: flex; gap: 12px; }
+    .room-img { width: 80px; height: 60px; background-color: #e2e8f0; border-radius: 8px; object-fit: cover; }
+    .room-details h4 { font-size: 14px; color: #1e293b; margin-bottom: 8px; }
+    .room-details p { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    
+    .upcoming-list { display: flex; flex-direction: column; gap: 16px; }
+    .upcoming-item { display: flex; gap: 12px; align-items: flex-start; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; }
+    .dot.blue { background-color: #3b82f6; }
+    .dot.purple { background-color: #a855f7; }
+    .up-info { display: flex; flex-direction: column; gap: 2px; }
+    .up-time { font-size: 13px; font-weight: 700; color: #334155; }
+    .up-title { font-size: 13px; color: #475569; }
+    .up-meta { font-size: 12px; color: #94a3b8; }
+    .btn-link { color: #2563eb; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 16px; }
+  </style>
 </head>
 <body>
 
-  <!-- Menu Lateral -->
+  <!-- Menu Lateral Principal -->
   <aside class="sidebar">
     <div class="logo-area">
-      <h2>📅 MeetingRoom</h2>
+      <h2 style="color: var(--primary); display: flex; align-items: center; gap: 8px;">
+        <span style="font-size: 20px;">📅</span> MeetingRoom
+      </h2>
     </div>
     <nav class="nav-links">
       <a href="calendar.html" class="active">Agenda</a>
-      <a href="my-reservations.html">Minhas Reservas</a>
+      <a href="my-reservations.html">Minhas reservas</a>
       <a href="rooms.html">Salas</a>
       <a href="notifications.html">Notificações</a>
       <a href="admin-users.html" id="adminMenu" style="display:none;">Usuários (Admin)</a>
@@ -28,29 +97,81 @@
   </aside>
 
   <!-- Conteúdo Principal -->
-  <main class="main-content">
-    <header class="topbar">
-      <h1>Agenda de Reuniões</h1>
-      <div class="room-selector">
-        <select id="salaSelect" onchange="carregarAgenda()">
-          <option value="1">Sala de Reuniões 01 (Cap. 8)</option>
-          <option value="2">Sala de Reuniões 02 (Cap. 6)</option>
+  <main class="main-content calendar-wrapper">
+    
+    <!-- Cabeçalho Completo -->
+    <header class="cal-header">
+      <div class="cal-title-area">
+        <h1>Agenda de Reuniões</h1>
+        <p>Visualize e gerencie as reservas das salas de reunião.</p>
+      </div>
+      <div class="cal-controls">
+        <div class="date-nav">
+          <button>&lt;</button>
+          <span>28 de out. de 2025</span>
+          <button>📅</button>
+          <button>&gt;</button>
+        </div>
+        <div class="view-toggles">
+          <button class="active">Dia</button>
+          <button>Semana</button>
+          <button>Mês</button>
+        </div>
+        <select class="room-select" id="salaSelect" onchange="carregarAgenda()">
+          <option value="1">Sala de Reuniões 01</option>
+          <option value="2">Sala de Reuniões 02</option>
         </select>
       </div>
     </header>
 
-    <!-- Grade de Horários -->
-    <section class="schedule-grid-container">
-      <div id="gridHorarios" class="time-slots">
-        <!-- Preenchido dinamicamente via js/calendar.js -->
+    <!-- Layout Agenda + Sidebar Direita -->
+    <div class="cal-layout">
+      
+      <!-- Grelha de Horários (Esquerda) -->
+      <div class="cal-main">
+        <div class="cal-main-header">
+          <span>Sala de Reuniões 01</span>
+          <span>Terça, 28 de outubro de 2025</span>
+        </div>
+        <div class="schedule-list" id="gridHorarios">
+          <!-- Preenchido via calendar.js -->
+        </div>
       </div>
-    </section>
+
+      <!-- Barra Lateral da Sala (Direita) -->
+      <div class="cal-sidebar">
+        
+        <!-- Detalhes da Sala -->
+        <div class="side-card">
+          <h3>Detalhes da sala</h3>
+          <div class="room-info">
+            <!-- Imagem genérica placeholder que simula a sala -->
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
+            <div class="room-details">
+              <h4>Sala de Reuniões 01</h4>
+              <p>👥 Capacidade: 8 pessoas</p>
+              <p>💻 Equipamentos: TV, Videoconferência...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Próximas Reservas -->
+        <div class="side-card">
+          <h3>Próximas reservas</h3>
+          <div class="upcoming-list" id="listaProximas">
+            <!-- Preenchido via calendar.js -->
+          </div>
+          <a href="#" class="btn-link">Ver todas →</a>
+        </div>
+
+      </div>
+    </div>
   </main>
 
-<script type="module">
+  <script type="module">
     import { verificarAutenticacao } from "../js/auth.js";
     verificarAutenticacao();
   </script>
-  <script src="../js/calendar.js"></script> <!-- (ou o js correspondente da página) -->
+  <script src="../js/calendar.js"></script>
 </body>
 </html>
