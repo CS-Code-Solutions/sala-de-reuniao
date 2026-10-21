@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeetingRoom - Gestão de Utilizadores</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="logo-area">
+      <h2>📅 MeetingRoom</h2>
+    </div>
+    <nav class="nav-links">
+      <a href="calendar.html">Agenda</a>
+      <a href="my-reservations.html">Minhas Reservas</a>
+      <a href="rooms.html">Salas</a>
+      <a href="notifications.html">Notificações</a>
+      <a href="admin-users.html" class="active">Usuários (Admin)</a>
+    </nav>
+    <div class="user-profile">
+      <span id="userNameDisplay">Carregando...</span>
+      <a href="login.html" onclick="localStorage.clear();">Sair</a>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h1>Gerenciamento de Utilizadores</h1>
+      <button onclick="abrirNovoUsuario()" style="padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer;">+ Novo Utilizador</button>
+    </header>
+
+    <section class="schedule-grid-container">
+      <div id="listaUtilizadores" class="time-slots">
+        <div class="slot-item">
+          <div>
+            <strong>Ana Costa</strong>
+            <p>ana@empresa.com</p>
+          </div>
+          <span style="color: var(--primary); font-weight: 600;">Administrador</span>
+        </div>
+        <div class="slot-item">
+          <div>
+            <strong>Bruno Lima</strong>
+            <p>bruno@empresa.com</p>
+          </div>
+          <span style="color: var(--text-muted);">Usuário</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/users.js"></script>
+</body>
+</html>
