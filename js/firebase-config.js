@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebas
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-// Sua configuração oficial obtida no painel do Firebase
+// Configuração oficial extraída diretamente do seu painel do Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDa9ztrK6VxFVelBP0ge6-31V05gnztJw",
   authDomain: "reuniao-d1b29.firebaseapp.com",
