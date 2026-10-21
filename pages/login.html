@@ -14,7 +14,7 @@
     .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
   </style>
 
-  <!-- Firebase App & Auth Compat SDKs (Mesmo padrão estável do outro projeto) -->
+  <!-- Firebase App & Auth Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
@@ -23,7 +23,7 @@
     <h2>📅 MeetingRoom</h2>
     <div class="form-group">
       <label>E-mail</label>
-      <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" required>
+      <input type="email" id="emailLogin" placeholder="teste@reuniao.com" required>
     </div>
     <div class="form-group">
       <label>Senha</label>
@@ -33,7 +33,7 @@
   </div>
 
   <script>
-    // Configuração oficial exata do projeto reuniao-d1b29
+    // Configuração exata do seu painel do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDa9ztrK6VxFVelBP0ge6-31V05gnztJw",
       authDomain: "reuniao-d1b29.firebaseapp.com",
@@ -43,10 +43,9 @@
       appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
     };
 
-    // Inicializa o Firebase no modo Compat
+    // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
 
-    // Função de Login testada e segura
     function fazerLogin() {
       const email = document.getElementById("emailLogin").value.trim();
       const senha = document.getElementById("senhaLogin").value.trim();
@@ -57,8 +56,7 @@
       }
 
       firebase.auth().signInWithEmailAndPassword(email, senha)
-        .then((userCredential) => {
-          // Sucesso no login, redireciona para a agenda
+        .then(() => {
           window.location.href = "calendar.html";
         })
         .catch((error) => {
