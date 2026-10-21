@@ -1,7 +1,7 @@
 import { auth } from "./firebase-config.js";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-// Função de Login Real ligada globalmente
+// Função de Login Real ligada globalmente ao botão
 window.fazerLoginReal = function() {
     const email = document.getElementById("emailLogin").value;
     const senha = document.getElementById("senhaLogin").value;
