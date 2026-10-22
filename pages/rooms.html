@@ -4,7 +4,7 @@
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeetingRoom - Salas de Reunião</title>
+  <title>MeetingRoom - Salas</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
@@ -13,58 +13,36 @@
     .page-header h1 { font-size: 24px; color: #1e293b; }
     .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
     
-    .room-card {
-      background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;
-      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
-    }
-    .room-info-group { display: flex; gap: 16px; align-items: center; }
-    .room-thumb { width: 90px; height: 65px; border-radius: 8px; object-fit: cover; background: #e2e8f0; }
-    .room-details { display: flex; flex-direction: column; gap: 4px; }
-    
-    .btn-edit {
-      padding: 8px 16px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;
-      border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s;
-    }
-    .btn-edit:hover { background: #dbeafe; }
+    .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .room-card-item { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; display: flex; flex-direction: column; gap: 16px; border-left: 5px solid #2563eb; }
+    .room-card-item.inativa { border-left-color: #94a3b8; opacity: 0.7; }
+    .room-card-item.embreve { border-left-color: #d97706; }
 
-    /* ESTILOS DO MODAL FLUTUANTE */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-    .modal-card {
-      background: white;
-      width: 100%;
-      max-width: 450px;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      animation: fadeIn 0.2s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .room-info-box { display: flex; gap: 16px; }
+    .room-card-img { width: 100px; height: 80px; border-radius: 8px; object-fit: cover; background: #e2e8f0; }
+    .room-details h3 { font-size: 16px; color: #1e293b; margin-bottom: 4px; }
+    .room-details p { font-size: 13px; color: #64748b; margin-bottom: 2px; }
+
+    .room-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+    
+    .badge-status { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+    .badge-status.ativa { background: #dcfce7; color: #15803d; }
+    .badge-status.inativa { background: #f1f5f9; color: #64748b; }
+    .badge-status.embreve { background: #fef3c7; color: #b45309; }
+
+    .btn-edit-room { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
+    .btn-edit-room:hover { background: #e2e8f0; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
+    .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
-    .form-group input { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
-    .form-group input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
-    
+    .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
     .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save:hover { background: #1d4ed8; }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -72,26 +50,17 @@
     @media (max-width: 1024px) {
       .sidebar { display: none; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      
-      .mobile-topbar-bar {
-        display: flex; justify-content: space-between; align-items: center;
-        background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
-        margin: -16px -16px 20px -16px;
-      }
-      .mobile-bottom-nav {
-        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-        background: white; border-top: 1px solid #e2e8f0; padding: 10px 0;
-        justify-content: space-around; align-items: center; z-index: 1000;
-        box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
-      }
-      .mob-nav-item {
-        display: flex; flex-direction: column; align-items: center;
-        text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px;
-      }
+      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin: -16px -16px 20px -16px; }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2563eb; }
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -115,51 +84,59 @@
   <main class="main-content page-wrapper">
     <div class="mobile-topbar-bar">
       <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #2563eb;">Perfil</span>
     </div>
 
     <header class="page-header">
       <h1>Salas Disponíveis</h1>
-      <button onclick="abrirModalNovaSala()" style="padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
+      <button id="btnNovaSala" onclick="abrirModalSala()" style="display:none; padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
     </header>
 
-    <section class="schedule-grid-container">
-      <div id="listaSalasContainer" class="time-slots" style="display: flex; flex-direction: column; gap: 16px;">
-        <!-- Renderizado dinamicamente pelo JS -->
+    <section>
+      <div id="listaSalasContainer" class="rooms-grid">
+        <p style="color: #64748b; font-size: 14px;">A carregar salas...</p>
       </div>
     </section>
   </main>
 
-  <!-- MODAL FLUTUANTE DE EDIÇÃO / CRIAÇÃO DE SALA -->
+  <!-- MODAL DE CRIAR/EDITAR SALA -->
   <div class="modal-overlay" id="modalSala">
     <div class="modal-card">
-      <div>
-        <h3 class="modal-title" id="modalTitulo">Editar Sala</h3>
-        <p style="font-size: 13px; color: #64748b;">Preencha os detalhes e comodidades da sala.</p>
-      </div>
-
+      <h3 class="modal-title" id="modalSalaTitulo">Editar Sala</h3>
+      <input type="hidden" id="editSalaId">
+      
       <div class="form-group">
         <label>Nome da Sala</label>
         <input type="text" id="inputNomeSala" placeholder="Ex: Sala de Reuniões 01">
       </div>
 
       <div class="form-group">
-        <label>Capacidade (Pessoas)</label>
+        <label>Capacidade (pessoas)</label>
         <input type="number" id="inputCapacidade" placeholder="Ex: 8">
       </div>
 
       <div class="form-group">
-        <label>Comodidades / Equipamentos</label>
+        <label>Equipamentos</label>
         <input type="text" id="inputEquipamentos" placeholder="Ex: TV, Videoconferência, Quadro">
       </div>
 
       <div class="form-group">
-        <label>Foto da Sala (Upload)</label>
-        <input type="file" id="inputFotoSala" accept="image/*" style="font-size: 13px;">
+        <label>Status da Sala</label>
+        <select id="inputStatusSala">
+          <option value="Ativa">Ativa</option>
+          <option value="Inativa">Inativa</option>
+          <option value="Em breve">Em breve</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>URL da Imagem</label>
+        <input type="text" id="inputImagemSala" placeholder="https://...">
       </div>
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalSala()">Cancelar</button>
-        <button class="btn-save" onclick="salvarSala()">Salvar Alterações</button>
+        <button class="btn-save" onclick="salvarSalaFirebase()">Guardar Alterações</button>
       </div>
     </div>
   </div>
@@ -173,63 +150,148 @@
   </nav>
 
   <script>
-    let salasData = [
-      { id: 1, nome: "Sala de Reuniões 01", capacidade: "8", equipamentos: "TV, Videoconferência, Quadro", status: "Ativa", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" },
-      { id: 2, nome: "Sala de Reuniões 02", capacidade: "6", equipamentos: "TV, Quadro", status: "Em breve", foto: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80" }
-    ];
-
-    let salaEditandoId = null;
+    let usuarioEhAdmin = false;
+    let listaSalasGlobal = [];
 
     document.addEventListener("DOMContentLoaded", () => {
-      renderizarSalas();
+      const firebaseConfig = {
+        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+        authDomain: "reuniao-d1b29.firebaseapp.com",
+        projectId: "reuniao-d1b29",
+        storageBucket: "reuniao-d1b29.firebasestorage.app",
+        messagingSenderId: "887897617950",
+        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          const emailUsuario = user.email.toLowerCase();
+          const nomeBase = emailUsuario.split('@')[0];
+
+          try {
+            const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
+            if (doc.exists) {
+              const dados = doc.data();
+              if (dados.apelido) document.getElementById("userNameDisplay").innerText = dados.apelido;
+              else document.getElementById("userNameDisplay").innerText = nomeBase;
+
+              if (dados.cargo === "Administrador") usuarioEhAdmin = true;
+            }
+          } catch(e) {}
+
+          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) usuarioEhAdmin = true;
+
+          if (usuarioEhAdmin) {
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
+            document.getElementById("btnNovaSala").style.display = "block";
+          }
+
+          carregarSalas();
+        } else {
+          window.location.href = "../index.html";
+        }
+      });
     });
 
-    function renderizarSalas() {
+    function carregarSalas() {
       const container = document.getElementById("listaSalasContainer");
-      if (!container) return;
+      container.innerHTML = "<p style='color: #64748b;'>A carregar salas...</p>";
 
-      container.innerHTML = "";
-      salasData.forEach(sala => {
-        const card = document.createElement("div");
-        card.className = "room-card";
-        card.style.borderLeft = `5px solid ${sala.status === 'Ativa' ? 'var(--primary)' : '#cbd5e1'}`;
-        card.innerHTML = `
-          <div class="room-info-group">
-            <img src="${sala.foto}" alt="${sala.nome}" class="room-thumb">
-            <div class="room-details">
-              <strong style="font-size: 16px; color: #1e293b;">${sala.nome}</strong>
-              <p style="color: #64748b; font-size: 13px;">👥 Capacidade: ${sala.capacidade} pessoas &nbsp;•&nbsp; 💻 Equipamentos: ${sala.equipamentos}</p>
+      firebase.firestore().collection("salas").get().then((snapshot) => {
+        container.innerHTML = "";
+        listaSalasGlobal = [];
+
+        if (snapshot.empty) {
+          // Se não houver salas cadastradas no Firestore, cria as duas padrão para teste
+          criarSalasPadrao();
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const sala = doc.data();
+          listaSalasGlobal.push({ id: doc.id, ...sala });
+          
+          const status = sala.status || "Ativa";
+          let classeStatus = "ativa";
+          let textoStatus = "Ativa";
+          let classeCard = "";
+
+          if (status === "Inativa") {
+            classeStatus = "inativa";
+            textoStatus = "Inativa";
+            classeCard = "inativa";
+          } else if (status === "Em breve") {
+            classeStatus = "embreve";
+            textoStatus = "Em breve";
+            classeCard = "embreve";
+          }
+
+          const div = document.createElement("div");
+          div.className = `room-card-item ${classeCard}`;
+          div.innerHTML = `
+            <div class="room-info-box">
+              <img src="${sala.imagem || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80'}" alt="Sala" class="room-card-img">
+              <div class="room-details">
+                <h3>${sala.nome}</h3>
+                <p>👥 Capacidade: ${sala.capacidade || 8} pessoas</p>
+                <p>💻 Equipamentos: ${sala.equipamentos || 'TV, Videoconferência...'}</p>
+              </div>
             </div>
-          </div>
-          <div class="room-actions" style="display: flex; align-items: center; gap: 8px;">
-            <span style="color: ${sala.status === 'Ativa' ? '#10b981' : 'var(--text-muted)'}; font-weight: 600; font-size: 14px;">${sala.status}</span>
-            <button class="btn-edit" onclick="abrirModalEditarSala(${sala.id})">✏️ Editar</button>
-          </div>
-        `;
-        container.appendChild(card);
+            <div class="room-actions">
+              <span class="badge-status ${classeStatus}">${textoStatus}</span>
+              ${usuarioEhAdmin ? `<button class="btn-edit-room" onclick="abrirModalEdicao('${doc.id}')">✏️ Editar</button>` : ''}
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }).catch(err => {
+        container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar salas: ${err.message}</p>`;
       });
     }
 
-    function abrirModalNovaSala() {
-      salaEditandoId = null;
-      document.getElementById("modalTitulo").innerText = "Adicionar Nova Sala";
+    function criarSalasPadrao() {
+      const db = firebase.firestore();
+      db.collection("salas").add({
+        nome: "Sala de Reuniões 01",
+        capacidade: 8,
+        equipamentos: "TV, Videoconferência, Quadro",
+        status: "Ativa",
+        imagem: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
+      });
+      db.collection("salas").add({
+        nome: "Sala de Reuniões 02",
+        capacidade: 6,
+        equipamentos: "TV, Quadro",
+        status: "Em breve",
+        imagem: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80"
+      }).then(() => {
+        carregarSalas();
+      });
+    }
+
+    function abrirModalSala() {
+      document.getElementById("modalSalaTitulo").innerText = "Nova Sala";
+      document.getElementById("editSalaId").value = "";
       document.getElementById("inputNomeSala").value = "";
       document.getElementById("inputCapacidade").value = "";
       document.getElementById("inputEquipamentos").value = "";
-      document.getElementById("inputFotoSala").value = "";
+      document.getElementById("inputStatusSala").value = "Ativa";
+      document.getElementById("inputImagemSala").value = "";
       document.getElementById("modalSala").style.display = "flex";
     }
 
-    function abrirModalEditarSala(id) {
-      const sala = salasData.find(s => s.id === id);
+    function abrirModalEdicao(id) {
+      const sala = listaSalasGlobal.find(s => s.id === id);
       if (!sala) return;
 
-      salaEditandoId = id;
-      document.getElementById("modalTitulo").innerText = "Editar Sala";
-      document.getElementById("inputNomeSala").value = sala.nome;
-      document.getElementById("inputCapacidade").value = sala.capacidade;
-      document.getElementById("inputEquipamentos").value = sala.equipamentos;
-      document.getElementById("inputFotoSala").value = "";
+      document.getElementById("modalSalaTitulo").innerText = "Editar Sala";
+      document.getElementById("editSalaId").value = sala.id;
+      document.getElementById("inputNomeSala").value = sala.nome || "";
+      document.getElementById("inputCapacidade").value = sala.capacidade || "";
+      document.getElementById("inputEquipamentos").value = sala.equipamentos || "";
+      document.getElementById("inputStatusSala").value = sala.status || "Ativa";
+      document.getElementById("inputImagemSala").value = sala.imagem || "";
       document.getElementById("modalSala").style.display = "flex";
     }
 
@@ -237,45 +299,42 @@
       document.getElementById("modalSala").style.display = "none";
     }
 
-    function salvarSala() {
+    function salvarSalaFirebase() {
+      const id = document.getElementById("editSalaId").value;
       const nome = document.getElementById("inputNomeSala").value.trim();
-      const capacidade = document.getElementById("inputCapacidade").value.trim();
+      const capacidade = document.getElementById("inputCapacidade").value;
       const equipamentos = document.getElementById("inputEquipamentos").value.trim();
-      const inputFoto = document.getElementById("inputFotoSala");
+      const status = document.getElementById("inputStatusSala").value;
+      const imagem = document.getElementById("inputImagemSala").value.trim();
 
-      if (!nome || !capacidade) {
-        alert("Por favor, preencha o nome e a capacidade da sala.");
+      if (!nome) {
+        alert("Preencha o nome da sala.");
         return;
       }
 
-      let novaFotoUrl = null;
-      if (inputFoto.files && inputFoto.files[0]) {
-        novaFotoUrl = URL.createObjectURL(inputFoto.files[0]);
-      }
+      const dadosSala = {
+        nome: nome,
+        capacidade: capacidade ? parseInt(capacidade) : 8,
+        equipamentos: equipamentos,
+        status: status,
+        imagem: imagem || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
+      };
 
-      if (salaEditandoId !== null) {
-        const sala = salasData.find(s => s.id === salaEditandoId);
-        if (sala) {
-          sala.nome = nome;
-          sala.capacidade = capacidade;
-          sala.equipamentos = equipamentos;
-          if (novaFotoUrl) sala.foto = novaFotoUrl;
-        }
+      const db = firebase.firestore();
+
+      if (id) {
+        db.collection("salas").doc(id).update(dadosSala).then(() => {
+          fecharModalSala();
+          alert("Sala atualizada com sucesso!");
+          carregarSalas();
+        }).catch(err => alert("Erro ao atualizar: " + err.message));
       } else {
-        const nova = {
-          id: Date.now(),
-          nome: nome,
-          capacidade: capacidade,
-          equipamentos: equipamentos || "Padrão",
-          status: "Ativa",
-          foto: novaFotoUrl || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
-        };
-        salasData.push(nova);
+        db.collection("salas").add(dadosSala).then(() => {
+          fecharModalSala();
+          alert("Sala criada com sucesso!");
+          carregarSalas();
+        }).catch(err => alert("Erro ao criar: " + err.message));
       }
-
-      renderizarSalas();
-      fecharModalSala();
-      alert("Sala guardada com sucesso!");
     }
   </script>
 
