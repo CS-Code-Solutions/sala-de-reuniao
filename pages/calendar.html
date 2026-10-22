@@ -64,6 +64,11 @@
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
+    /* MODAL DE ALERTA ELEGANTE */
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-ok:hover { background: #1d4ed8; }
+
     .cal-sidebar { display: flex; flex-direction: column; gap: 24px; }
     .side-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
     .side-card h3 { font-size: 16px; color: #1e293b; margin-bottom: 16px; }
@@ -193,6 +198,16 @@
     </div>
   </div>
 
+  <!-- MODAL DE ALERTA PERSONALIZADO -->
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;" id="modalAlertaIcone">🎉</div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Sucesso</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
+
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item active"><span>📅</span> Agenda</a>
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
@@ -255,6 +270,18 @@
         }
       });
     });
+
+    function mostrarAlerta(titulo, texto, icone = "🎉") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      document.getElementById("modalAlertaIcone").innerText = icone;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+      carregarAgenda();
+    }
 
     function atualizarCabecalhoData() {
       const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
@@ -460,7 +487,7 @@
       const sala = document.getElementById("salaSelect").value;
 
       if (!titulo) {
-        alert("Por favor, preencha o nome da reunião.");
+        mostrarAlerta("Atenção", "Por favor, preencha o nome da reunião.", "⚠️");
         return;
       }
 
@@ -473,25 +500,23 @@
         horarioFim: fim,
         sala: sala,
         data: window.dataSelecionadaGlobal,
-        responsavel: apelidoUsuarioGlobal, // Usa o apelido obtido do Firestore
+        responsavel: apelidoUsuarioGlobal,
         userId: userId,
         criadoEm: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         document.getElementById("modalNovaReserva").style.display = "none";
-        alert("Reserva criada com sucesso!");
-        carregarAgenda();
+        mostrarAlerta("Sucesso", "Reserva criada com sucesso!", "🎉");
       }).catch(err => {
-        alert("Erro ao criar reserva: " + err.message);
+        mostrarAlerta("Erro", "Erro ao criar reserva: " + err.message, "❌");
       });
     }
 
     function excluirReserva(id) {
       if (confirm("Tem certeza que deseja excluir esta reserva?")) {
         firebase.firestore().document(`reservas/${id}`).delete().then(() => {
-          alert("Reserva excluída com sucesso!");
-          carregarAgenda();
+          mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
         }).catch(err => {
-          alert("Erro ao excluir: " + err.message);
+          mostrarAlerta("Erro", "Erro ao excluir: " + err.message, "❌");
         });
       }
     }
