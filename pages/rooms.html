@@ -17,14 +17,54 @@
       background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;
       display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
     }
-    .room-info-group { display: flex; flex-direction: column; gap: 4px; }
-    .room-actions { display: flex; gap: 8px; }
+    .room-info-group { display: flex; gap: 16px; align-items: center; }
+    .room-thumb { width: 90px; height: 65px; border-radius: 8px; object-fit: cover; background: #e2e8f0; }
+    .room-details { display: flex; flex-direction: column; gap: 4px; }
     
     .btn-edit {
       padding: 8px 16px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;
       border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s;
     }
     .btn-edit:hover { background: #dbeafe; }
+
+    /* ESTILOS DO MODAL FLUTUANTE */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: white;
+      width: 100%;
+      max-width: 450px;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
+    .form-group input { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    .form-group input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    
+    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save:hover { background: #1d4ed8; }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -38,7 +78,6 @@
         background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
         margin: -16px -16px 20px -16px;
       }
-
       .mobile-bottom-nav {
         display: flex; position: fixed; bottom: 0; left: 0; right: 0;
         background: white; border-top: 1px solid #e2e8f0; padding: 10px 0;
@@ -80,37 +119,50 @@
 
     <header class="page-header">
       <h1>Salas Disponíveis</h1>
-      <button onclick="abrirNovaSala()" style="padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
+      <button onclick="abrirModalNovaSala()" style="padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
     </header>
 
     <section class="schedule-grid-container">
-      <div class="time-slots" style="display: flex; flex-direction: column; gap: 16px;">
-        
-        <div class="room-card" style="border-left: 5px solid var(--primary);">
-          <div class="room-info-group">
-            <strong style="font-size: 16px; color: #1e293b;">Sala de Reuniões 01</strong>
-            <p style="color: #64748b; font-size: 13px;">👥 Capacidade: 8 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Videoconferência, Quadro</p>
-          </div>
-          <div class="room-actions">
-            <span style="color: #10b981; font-weight: 600; margin-right: 8px; font-size: 14px;">Ativa</span>
-            <button class="btn-edit" onclick="editarSala('Sala de Reuniões 01', '8', 'TV, Videoconferência, Quadro')">✏️ Editar</button>
-          </div>
-        </div>
-
-        <div class="room-card" style="border-left: 5px solid #cbd5e1;">
-          <div class="room-info-group">
-            <strong style="font-size: 16px; color: #1e293b;">Sala de Reuniões 02</strong>
-            <p style="color: #64748b; font-size: 13px;">👥 Capacidade: 6 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Quadro</p>
-          </div>
-          <div class="room-actions">
-            <span style="color: var(--text-muted); font-weight: 600; margin-right: 8px; font-size: 14px;">Em breve</span>
-            <button class="btn-edit" onclick="editarSala('Sala de Reuniões 02', '6', 'TV, Quadro')">✏️ Editar</button>
-          </div>
-        </div>
-
+      <div id="listaSalasContainer" class="time-slots" style="display: flex; flex-direction: column; gap: 16px;">
+        <!-- Renderizado dinamicamente pelo JS -->
       </div>
     </section>
   </main>
+
+  <!-- MODAL FLUTUANTE DE EDIÇÃO / CRIAÇÃO DE SALA -->
+  <div class="modal-overlay" id="modalSala">
+    <div class="modal-card">
+      <div>
+        <h3 class="modal-title" id="modalTitulo">Editar Sala</h3>
+        <p style="font-size: 13px; color: #64748b;">Preencha os detalhes e comodidades da sala.</p>
+      </div>
+
+      <div class="form-group">
+        <label>Nome da Sala</label>
+        <input type="text" id="inputNomeSala" placeholder="Ex: Sala de Reuniões 01">
+      </div>
+
+      <div class="form-group">
+        <label>Capacidade (Pessoas)</label>
+        <input type="number" id="inputCapacidade" placeholder="Ex: 8">
+      </div>
+
+      <div class="form-group">
+        <label>Comodidades / Equipamentos</label>
+        <input type="text" id="inputEquipamentos" placeholder="Ex: TV, Videoconferência, Quadro">
+      </div>
+
+      <div class="form-group">
+        <label>Foto da Sala (Upload)</label>
+        <input type="file" id="inputFotoSala" accept="image/*" style="font-size: 13px;">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharModalSala()">Cancelar</button>
+        <button class="btn-save" onclick="salvarSala()">Salvar Alterações</button>
+      </div>
+    </div>
+  </div>
 
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
@@ -120,22 +172,112 @@
   </nav>
 
   <script>
-    function editarSala(nomeAtual, capacidadeAtual, equipamentosAtuais) {
-      const novoNome = prompt("Editar Nome da Sala:", nomeAtual);
-      if (novoNome === null) return;
-      const novaCapacidade = prompt("Editar Capacidade (pessoas):", capacidadeAtual);
-      if (novaCapacidade === null) return;
-      const novosEquipamentos = prompt("Editar Equipamentos:", equipamentosAtuais);
-      if (novosEquipamentos === null) return;
+    let salasData = [
+      { id: 1, nome: "Sala de Reuniões 01", capacidade: "8", equipamentos: "TV, Videoconferência, Quadro", status: "Ativa", foto: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" },
+      { id: 2, nome: "Sala de Reuniões 02", capacidade: "6", equipamentos: "TV, Quadro", status: "Em breve", foto: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80" }
+    ];
 
-      alert(`Sala "${novoNome}" atualizada com sucesso!\nCapacidade: ${novaCapacidade}\nEquipamentos: ${novosEquipamentos}`);
+    let salaEditandoId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderizarSalas();
+    });
+
+    function renderizarSalas() {
+      const container = document.getElementById("listaSalasContainer");
+      if (!container) return;
+
+      container.innerHTML = "";
+      salasData.forEach(sala => {
+        const card = document.createElement("div");
+        card.className = "room-card";
+        card.style.borderLeft = `5px solid ${sala.status === 'Ativa' ? 'var(--primary)' : '#cbd5e1'}`;
+        card.innerHTML = `
+          <div class="room-info-group">
+            <img src="${sala.foto}" alt="${sala.nome}" class="room-thumb">
+            <div class="room-details">
+              <strong style="font-size: 16px; color: #1e293b;">${sala.nome}</strong>
+              <p style="color: #64748b; font-size: 13px;">👥 Capacidade: ${sala.capacidade} pessoas &nbsp;•&nbsp; 💻 Equipamentos: ${sala.equipamentos}</p>
+            </div>
+          </div>
+          <div class="room-actions" style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: ${sala.status === 'Ativa' ? '#10b981' : 'var(--text-muted)'}; font-weight: 600; font-size: 14px;">${sala.status}</span>
+            <button class="btn-edit" onclick="abrirModalEditarSala(${sala.id})">✏️ Editar</button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
     }
 
-    function abrirNovaSala() {
-      const nome = prompt("Nome da nova sala:");
-      if (nome) {
-        alert(`Sala "${nome}" criada com sucesso!`);
+    function abrirModalNovaSala() {
+      salaEditandoId = null;
+      document.getElementById("modalTitulo").innerText = "Adicionar Nova Sala";
+      document.getElementById("inputNomeSala").value = "";
+      document.getElementById("inputCapacidade").value = "";
+      document.getElementById("inputEquipamentos").value = "";
+      document.getElementById("inputFotoSala").value = "";
+      document.getElementById("modalSala").style.display = "flex";
+    }
+
+    function abrirModalEditarSala(id) {
+      const sala = salasData.find(s => s.id === id);
+      if (!sala) return;
+
+      salaEditandoId = id;
+      document.getElementById("modalTitulo").innerText = "Editar Sala";
+      document.getElementById("inputNomeSala").value = sala.nome;
+      document.getElementById("inputCapacidade").value = sala.capacidade;
+      document.getElementById("inputEquipamentos").value = sala.equipamentos;
+      document.getElementById("inputFotoSala").value = "";
+      document.getElementById("modalSala").style.display = "flex";
+    }
+
+    function fecharModalSala() {
+      document.getElementById("modalSala").style.display = "none";
+    }
+
+    function salvarSala() {
+      const nome = document.getElementById("inputNomeSala").value.trim();
+      const capacidade = document.getElementById("inputCapacidade").value.trim();
+      const equipamentos = document.getElementById("inputEquipamentos").value.trim();
+      const inputFoto = document.getElementById("inputFotoSala");
+
+      if (!nome || !capacidade) {
+        alert("Por favor, preencha o nome e a capacidade da sala.");
+        return;
       }
+
+      let novaFotoUrl = null;
+      if (inputFoto.files && inputFoto.files[0]) {
+        // Cria uma URL local temporária para a imagem selecionada no upload
+        novaFotoUrl = URL.createObjectURL(inputFoto.files[0]);
+      }
+
+      if (salaEditandoId !== null) {
+        // Atualizar sala existente
+        const sala = salasData.find(s => s.id === salaEditandoId);
+        if (sala) {
+          sala.nome = nome;
+          sala.capacidade = capacidade;
+          sala.equipamentos = equipamentos;
+          if (novaFotoUrl) sala.foto = novaFotoUrl;
+        }
+      } else {
+        // Criar nova sala
+        const nova = {
+          id: Date.now(),
+          nome: nome,
+          capacidade: capacidade,
+          equipamentos: equipamentos || "Padrão",
+          status: "Ativa",
+          foto: novaFotoUrl || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
+        };
+        salasData.push(nova);
+      }
+
+      renderizarSalas();
+      fecharModalSala();
+      alert("Sala guardada com sucesso!");
     }
   </script>
 
