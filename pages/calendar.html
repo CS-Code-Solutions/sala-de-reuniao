@@ -7,10 +7,8 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    /* Estilos específicos para o layout avançado da Agenda */
     .calendar-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
     
-    /* Cabeçalho da Agenda */
     .cal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
     .cal-title-area h1 { font-size: 24px; color: #1e293b; margin-bottom: 4px; }
     .cal-title-area p { font-size: 14px; color: #64748b; }
@@ -26,11 +24,8 @@
     
     .room-select { padding: 8px 16px; border-radius: 8px; border: 1px solid #e2e8f0; color: #334155; font-weight: 600; background: white; font-size: 13px; outline: none; }
 
-    /* Layout Principal: 2 Colunas */
     .cal-layout { display: grid; grid-template-columns: 1fr 320px; gap: 24px; }
-    @media (max-width: 1024px) { .cal-layout { grid-template-columns: 1fr; } }
     
-    /* Grelha de Horários (Esquerda) */
     .cal-main { background: white; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
     .cal-main-header { display: flex; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-size: 14px; font-weight: 600; color: #475569; }
     
@@ -51,9 +46,7 @@
     .event-title { font-size: 15px; font-weight: 700; color: #1e293b; }
     .event-meta { font-size: 13px; color: #64748b; font-weight: 500; }
 
-    /* Barra Lateral (Direita) */
     .cal-sidebar { display: flex; flex-direction: column; gap: 24px; }
-    
     .side-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
     .side-card h3 { font-size: 16px; color: #1e293b; margin-bottom: 16px; }
     
@@ -72,11 +65,58 @@
     .up-title { font-size: 13px; color: #475569; }
     .up-meta { font-size: 12px; color: #94a3b8; }
     .btn-link { color: #2563eb; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 16px; }
+
+    /* BOTÃO HAMBURGUER E MENU MÓVEL */
+    .mobile-topbar-bar { display: none; }
+    .mobile-bottom-nav { display: none; }
+
+    @media (max-width: 1024px) {
+      .cal-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
+      
+      /* Barra de topo mobile com hambúrguer */
+      .mobile-topbar-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: white;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e2e8f0;
+        margin: -16px -16px 20px -16px;
+      }
+      .mob-logo { font-weight: bold; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+      
+      .mobile-bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        background: white;
+        border-top: 1px solid #e2e8f0;
+        padding: 10px 0;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+      }
+      .mob-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-decoration: none;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 600;
+        gap: 4px;
+      }
+      .mob-nav-item.active { color: #2563eb; }
+      .mob-nav-item span { font-size: 18px; }
+    }
   </style>
 </head>
 <body>
 
-  <!-- Menu Lateral Principal -->
+  <!-- Menu Lateral (PC) -->
   <aside class="sidebar">
     <div class="logo-area">
       <h2 style="color: var(--primary); display: flex; align-items: center; gap: 8px;">
@@ -92,15 +132,19 @@
     </nav>
     <div class="user-profile">
       <span id="userNameDisplay">Carregando...</span>
-     <!-- Substitua o <a href="#" ...> por este: -->
-          <a href="my-reservations.html" class="btn-link">Ver todas →</a>
+      <a href="#" onclick="fazerLogoutReal(); return false;">Sair</a>
     </div>
   </aside>
 
   <!-- Conteúdo Principal -->
   <main class="main-content calendar-wrapper">
     
- <!-- Cabeçalho Completo -->
+    <!-- Topo Móvel (Aparece apenas em Telemóvel) -->
+    <div class="mobile-topbar-bar">
+      <div class="mob-logo"><span>📅</span> MeetingRoom</div>
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #2563eb;">Perfil</span>
+    </div>
+
     <header class="cal-header">
       <div class="cal-title-area">
         <h1>Agenda de Reuniões</h1>
@@ -125,28 +169,22 @@
       </div>
     </header>
 
-    <!-- Layout Agenda + Sidebar Direita -->
     <div class="cal-layout">
       
-      <!-- Grelha de Horários (Esquerda) -->
+      <!-- Grelha (Esquerda) -->
       <div class="cal-main">
         <div class="cal-main-header">
           <span>Sala de Reuniões 01</span>
           <span>Terça, 28 de outubro de 2025</span>
         </div>
-        <div class="schedule-list" id="gridHorarios">
-          <!-- Preenchido via calendar.js -->
-        </div>
+        <div class="schedule-list" id="gridHorarios"></div>
       </div>
 
-      <!-- Barra Lateral da Sala (Direita) -->
+      <!-- Sidebar Direita -->
       <div class="cal-sidebar">
-        
-        <!-- Detalhes da Sala -->
         <div class="side-card">
           <h3>Detalhes da sala</h3>
           <div class="room-info">
-            <!-- Imagem genérica placeholder que simula a sala -->
             <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
             <div class="room-details">
               <h4>Sala de Reuniões 01</h4>
@@ -156,18 +194,31 @@
           </div>
         </div>
 
-        <!-- Próximas Reservas -->
         <div class="side-card">
           <h3>Próximas reservas</h3>
-          <div class="upcoming-list" id="listaProximas">
-            <!-- Preenchido via calendar.js -->
-          </div>
+          <div class="upcoming-list" id="listaProximas"></div>
           <a href="my-reservations.html" class="btn-link">Ver todas →</a>
         </div>
-
       </div>
+
     </div>
   </main>
+
+  <!-- BARRA DE NAVEGAÇÃO INFERIOR MÓVEL (Estilo App na versão Telemóvel) -->
+  <nav class="mobile-bottom-nav">
+    <a href="calendar.html" class="mob-nav-item active">
+      <span>📅</span> Agenda
+    </a>
+    <a href="my-reservations.html" class="mob-nav-item">
+      <span>📋</span> Reservas
+    </a>
+    <a href="rooms.html" class="mob-nav-item">
+      <span>🚪</span> Salas
+    </a>
+    <a href="notifications.html" class="mob-nav-item">
+      <span>🔔</span> Avisos
+    </a>
+  </nav>
 
   <script type="module">
     import { verificarAutenticacao } from "../js/auth.js";
