@@ -292,56 +292,7 @@
               div.className = "slot-row reserved";
               div.innerHTML = `
                 <div>
-                  <span style="font-size: 12px; font-weight: 700; color: #2563eb;">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
-                  <h4 style="font-size: 15px; color: #1e293b; margin: 2px 0;">${reserva.titulo}</h4>
-                  <p style="font-size: 12px; color: #64748b;">Responsável: ${reserva.responsavel || 'Equipa'}</p>
-                </div>
-                <div>
-                  ${usuarioEhAdmin ? `<button class="btn-action-slot btn-delete-admin" onclick="excluirReserva('${reserva.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
-                </div>
-              `;
-            } else {
-              div.className = "slot-row available";
-              div.innerHTML = `
-                <div>
-                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
-                  <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Clique para agendar reunião neste horário.</p>
-                </div>
-                <button class="btn-action-slot btn-reserve">📅 Agendar</button>
-              `;
-              div.onclick = () => abrirModalReserva(hora, dataStr);
-            }
-            container.appendChild(div);
-          });
-        } else {
-          // Visualização de Semana ou Mês (Lista Geral de Reservas do Período)
-          if (snapshot.empty) {
-            container.innerHTML = `<p style="color: #64748b; padding: 12px;">Nenhuma reserva encontrada para este período.</p>`;
-            return;
-          }
-
-          snapshot.forEach(doc => {
-            const reserva = doc.data();
-            const div = document.createElement("div");
-            div.className = "slot-row reserved";
-            div.innerHTML = `
-              <div>
-                <span style="font-size: 11px; font-weight: 700; color: #64748b;">📅 Data: ${reserva.data} | ⏰ ${reserva.horarioInicio} - ${reserva.horarioFim}</span>
-                <h4 style="font-size: 15px; color: #1e293b; margin: 2px 0;">${reserva.titulo}</h4>
-                <p style="font-size: 12px; color: #64748b;">Responsável: ${reserva.responsavel || 'Equipa'}</p>
-              </div>
-              <div>
-                ${usuarioEhAdmin ? `<button class="btn-action-slot btn-delete-admin" onclick="excluirReserva('${doc.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
-              </div>
-            `;
-            container.appendChild(div);
-          });
-        }
-      }).catch(err => {
-        container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar reservas: ${err.message}</p>`;
-      });
-    }
-
+                  
     function abrirModalReserva(horaInicio, dataStr) {
       document.getElementById("reservaHorarioInicio").value = horaInicio;
       document.getElementById("inputTituloReserva").value = "";
