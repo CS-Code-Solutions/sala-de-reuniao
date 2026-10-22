@@ -104,7 +104,7 @@
       <a href="my-reservations.html">Minhas reservas</a>
       <a href="rooms.html" class="active">Salas</a>
       <a href="notifications.html">Notificações</a>
-      <a href="admin-users.html" id="adminMenu" style="display:none;">Usuários (Admin)</a>
+      <a href="admin-users.html" class="admin-only-item" style="display:none;">Usuários (Admin)</a>
     </nav>
     <div class="user-profile">
       <span id="userNameDisplay">Carregando...</span>
@@ -169,7 +169,7 @@
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
     <a href="rooms.html" class="mob-nav-item active"><span>🚪</span> Salas</a>
     <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
-    <a href="admin-users.html" id="adminMenu" style="display:none;">Usuários (Admin)</a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
 
   <script>
@@ -250,12 +250,10 @@
 
       let novaFotoUrl = null;
       if (inputFoto.files && inputFoto.files[0]) {
-        // Cria uma URL local temporária para a imagem selecionada no upload
         novaFotoUrl = URL.createObjectURL(inputFoto.files[0]);
       }
 
       if (salaEditandoId !== null) {
-        // Atualizar sala existente
         const sala = salasData.find(s => s.id === salaEditandoId);
         if (sala) {
           sala.nome = nome;
@@ -264,7 +262,6 @@
           if (novaFotoUrl) sala.foto = novaFotoUrl;
         }
       } else {
-        // Criar nova sala
         const nova = {
           id: Date.now(),
           nome: nome,
