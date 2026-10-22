@@ -99,7 +99,7 @@
   <!-- Conteúdo Principal -->
   <main class="main-content calendar-wrapper">
     
-    <!-- Cabeçalho Completo -->
+ <!-- Cabeçalho Completo -->
     <header class="cal-header">
       <div class="cal-title-area">
         <h1>Agenda de Reuniões</h1>
@@ -107,15 +107,15 @@
       </div>
       <div class="cal-controls">
         <div class="date-nav">
-          <button>&lt;</button>
-          <span>28 de out. de 2025</span>
-          <button>📅</button>
-          <button>&gt;</button>
+          <button onclick="mudarData(-1)">&lt;</button>
+          <span id="dataAtualExibicao">Carregando...</span>
+          <button onclick="resetarData()">📅</button>
+          <button onclick="mudarData(1)">&gt;</button>
         </div>
-        <div class="view-toggles">
-          <button class="active">Dia</button>
-          <button>Semana</button>
-          <button>Mês</button>
+        <div class="view-toggles" id="viewTogglesGroup">
+          <button class="active" onclick="mudarVisualizacao('dia', this)">Dia</button>
+          <button onclick="mudarVisualizacao('semana', this)">Semana</button>
+          <button onclick="mudarVisualizacao('mes', this)">Mês</button>
         </div>
         <select class="room-select" id="salaSelect" onchange="carregarAgenda()">
           <option value="1">Sala de Reuniões 01</option>
