@@ -12,16 +12,35 @@
     .page-header { margin-bottom: 24px; }
     .page-header h1 { font-size: 24px; color: #1e293b; margin-bottom: 4px; }
     .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
-    
-    .notif-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; display: flex; flex-direction: column; gap: 20px; }
-    .notif-item { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid #e2e8f0; }
-    .notif-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .switch { position: relative; display: inline-block; width: 48px; height: 24px; }
+
+    .notification-card {
+      background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px;
+      max-width: 500px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .notif-header h2 { font-size: 18px; color: #1e293b; margin-bottom: 4px; }
+    .notif-header p { font-size: 13px; color: #64748b; }
+
+    .notif-item {
+      display: flex; justify-content: space-between; align-items: center; padding-top: 12px; padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9; gap: 16px;
+    }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-info h4 { font-size: 14px; color: #1e293b; margin-bottom: 2px; }
+    .notif-info p { font-size: 12px; color: #64748b; }
+
+    /* ESTILO DO TOGGLE SWITCH */
+    .switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 24px; }
-    .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-    input:checked + .slider { background-color: var(--primary); }
-    input:checked + .slider:before { transform: translateX(24px); }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 26px; }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: #2563eb; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* MODAL DE ALERTA ELEGANTE */
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-ok:hover { background: #1d4ed8; }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -29,27 +48,17 @@
     @media (max-width: 1024px) {
       .sidebar { display: none; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      
-      .mobile-topbar-bar {
-        display: flex; justify-content: space-between; align-items: center;
-        background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
-        margin: -16px -16px 20px -16px;
-      }
-
-      .mobile-bottom-nav {
-        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-        background: white; border-top: 1px solid #e2e8f0; padding: 10px 0;
-        justify-content: space-around; align-items: center; z-index: 1000;
-        box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
-      }
-      .mob-nav-item {
-        display: flex; flex-direction: column; align-items: center;
-        text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px;
-      }
+      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin: -16px -16px 20px -16px; }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2563eb; }
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -73,41 +82,65 @@
   <main class="main-content page-wrapper">
     <div class="mobile-topbar-bar">
       <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #2563eb;">Perfil</span>
     </div>
 
     <header class="page-header">
       <h1>Configurações de Notificações</h1>
     </header>
 
-    <section class="schedule-grid-container">
-      <div class="notif-card">
-        <h3>Receber notificações</h3>
-        <p style="color: #64748b; font-size: 14px; margin-top: -10px;">Escolha como deseja ser notificado sobre as suas reservas.</p>
-        
-        <div class="notif-item">
-          <div>
-            <strong>E-mail</strong>
-            <p style="font-size: 13px; color: #64748b;">Confirmações e cancelamentos.</p>
-          </div>
-          <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+    <section>
+      <div class="notification-card">
+        <div class="notif-header">
+          <h2>Receber notificações</h2>
+          <p>Escolha como deseja ser notificado sobre as suas reservas.</p>
         </div>
+
         <div class="notif-item">
-          <div>
-            <strong>Notificações no celular</strong>
-            <p style="font-size: 13px; color: #64748b;">Avisos em tempo real.</p>
+          <div class="notif-info">
+            <h4>E-mail</h4>
+            <p>Confirmações e cancelamentos.</p>
           </div>
-          <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+          <label class="switch">
+            <input type="checkbox" id="toggleEmail" onchange="salvarPreferenciaNotificacao()">
+            <span class="slider"></span>
+          </label>
         </div>
+
         <div class="notif-item">
-          <div>
-            <strong>Reservas de outras pessoas</strong>
-            <p style="font-size: 13px; color: #64748b;">Alerta de novas marcações na mesma sala.</p>
+          <div class="notif-info">
+            <h4>Notificações no celular</h4>
+            <p>Avisos em tempo real.</p>
           </div>
-          <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+          <label class="switch">
+            <input type="checkbox" id="toggleCelular" onchange="salvarPreferenciaNotificacao()">
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="notif-item">
+          <div class="notif-info">
+            <h4>Reservas de outras pessoas</h4>
+            <p>Alerta de novas marcações na mesma sala.</p>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggleOutras" onchange="salvarPreferenciaNotificacao()">
+            <span class="slider"></span>
+          </label>
         </div>
       </div>
     </section>
   </main>
+
+  <!-- MODAL DE ALERTA PERSONALIZADO -->
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;" id="modalAlertaIcone">🔔</div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Preferências</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="modalAlertaTexto">Configurações guardadas com sucesso!</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
 
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
@@ -116,6 +149,92 @@
     <a href="notifications.html" class="mob-nav-item active"><span>🔔</span> Avisos</a>
     <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
+
+  <script>
+    let usuarioAtualId = null;
+    let usuarioEhAdmin = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+        authDomain: "reuniao-d1b29.firebaseapp.com",
+        projectId: "reuniao-d1b29",
+        storageBucket: "reuniao-d1b29.firebasestorage.app",
+        messagingSenderId: "887897617950",
+        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          usuarioAtualId = user.uid;
+          const emailUsuario = user.email.toLowerCase();
+          let nomeBase = emailUsuario.split('@')[0];
+
+          try {
+            const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
+            if (doc.exists) {
+              const dados = doc.data();
+              if (dados.apelido && dados.apelido.trim() !== "") {
+                nomeBase = dados.apelido;
+              }
+              if (dados.cargo === "Administrador") usuarioEhAdmin = true;
+
+              // Carrega preferências salvas se existirem
+              if (dados.notificacoes) {
+                document.getElementById("toggleEmail").checked = !!dados.notificacoes.email;
+                document.getElementById("toggleCelular").checked = !!dados.notificacoes.celular;
+                document.getElementById("toggleOutras").checked = !!dados.notificacoes.outras;
+              }
+            }
+          } catch(e) {}
+
+          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
+            usuarioEhAdmin = true;
+          }
+
+          document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
+
+          if (usuarioEhAdmin) {
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
+          }
+        } else {
+          window.location.href = "../index.html";
+        }
+      });
+    });
+
+    function mostrarAlerta(titulo, texto, icone = "🔔") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      document.getElementById("modalAlertaIcone").innerText = icone;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+    }
+
+    function salvarPreferenciaNotificacao() {
+      if (!usuarioAtualId) return;
+
+      const notificacoes = {
+        email: document.getElementById("toggleEmail").checked,
+        celular: document.getElementById("toggleCelular").checked,
+        outras: document.getElementById("toggleOutras").checked
+      };
+
+      firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
+        notificacoes: notificacoes
+      }).then(() => {
+        // Feedback subtil ou modal elegante
+        console.log("Preferências de notificação atualizadas.");
+      }).catch(err => {
+        console.error("Erro ao guardar preferências:", err);
+      });
+    }
+  </script>
 
   <script type="module">
     import { verificarAutenticacao } from "../js/auth.js";
