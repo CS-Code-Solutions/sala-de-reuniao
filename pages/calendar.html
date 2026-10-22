@@ -473,7 +473,7 @@
         horarioFim: fim,
         sala: sala,
         data: window.dataSelecionadaGlobal,
-        responsavel: apelidoUsuarioGlobal, // Usa o apelido configurado
+        responsavel: apelidoUsuarioGlobal, // Usa o apelido obtido do Firestore
         userId: userId,
         criadoEm: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
