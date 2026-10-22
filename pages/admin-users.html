@@ -181,7 +181,7 @@
       db.collection("usuarios").get().then((querySnapshot) => {
         container.innerHTML = "";
         if (querySnapshot.empty) {
-          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado na nuvem.</p>`;
+          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado na nuvem ainda. Clique em "+ Novo Utilizador" para adicionar.</p>`;
           return;
         }
 
@@ -191,21 +191,20 @@
           div.className = "user-card";
           div.innerHTML = `
             <div>
-              <strong style="color: #1e293b; font-size: 15px;">${user.nome}</strong>
-              <p style="color: #64748b; font-size: 13px; margin-top: 2px;">${user.email}</p>
+              <strong style="color: #1e293b; font-size: 15px;">${user.nome || 'Utilizador sem nome'}</strong>
+              <p style="color: #64748b; font-size: 13px; margin-top: 2px;">${user.email || 'E-mail não registado'}</p>
             </div>
             <div class="user-actions">
-              <span style="color: ${user.cargo === 'Administrador' ? 'var(--primary)' : '#64748b'}; font-weight: 600; font-size: 13px;">${user.cargo}</span>
+              <span style="color: ${user.cargo === 'Administrador' ? 'var(--primary)' : '#64748b'}; font-weight: 600; font-size: 13px;">${user.cargo || 'Usuário'}</span>
             </div>
           `;
           container.appendChild(div);
         });
       }).catch((error) => {
         console.error("Erro ao carregar utilizadores:", error);
-        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro de permissão ou falha ao carregar da nuvem. Verifique as regras do Firestore.</p>`;
+        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro ao carregar da nuvem: ${error.message}</p>`;
       });
     }
-
     function atualizarSufixoEmail() {
       const cargo = document.getElementById("inputCargo").value;
       const labelSufixo = document.getElementById("labelSufixo");
