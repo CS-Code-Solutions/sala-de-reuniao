@@ -183,20 +183,23 @@
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
           const emailUsuario = user.email.toLowerCase();
-          const nomeBase = emailUsuario.split('@')[0];
+          let nomeBase = emailUsuario.split('@')[0];
 
           try {
             const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
             if (doc.exists) {
               const dados = doc.data();
-              if (dados.apelido) document.getElementById("userNameDisplay").innerText = dados.apelido;
-              else document.getElementById("userNameDisplay").innerText = nomeBase;
-
+              if (dados.apelido && dados.apelido.trim() !== "") {
+                nomeBase = dados.apelido;
+              }
               if (dados.cargo === "Administrador") usuarioEhAdmin = true;
             }
           } catch(e) {}
 
           if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) usuarioEhAdmin = true;
+
+          document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
 
           if (usuarioEhAdmin) {
             document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
