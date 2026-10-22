@@ -224,17 +224,29 @@
           return;
         }
 
-        const permissao = await Notification.requestPermission();
-        if (permissao === "granted") {
-          salvarPreferenciaNotificacao();
-          new Notification("MeetingRoom", {
-            body: "Notificações no celular ativadas com sucesso!",
-            icon: "../ico.png"
-          });
-        } else {
-          mostrarAlerta("Permissão Negada", "Para receber avisos, autorize as notificações nas definições do navegador.", "🔒");
+        if (Notification.permission === "denied") {
+          checkbox.checked = false;
+          mostrarAlerta("Permissão Bloqueada", "As notificações estão bloqueadas nas definições do navegador. Toque no ícone de definições/cadeado na barra de endereço acima, vá em Permissões e redefina o acesso.", "🔒");
+          return;
+        }
+
+        try {
+          const permissao = await Notification.requestPermission();
+          if (permissao === "granted") {
+            salvarPreferenciaNotificacao();
+            new Notification("MeetingRoom", {
+              body: "Notificações no celular ativadas com sucesso!",
+              icon: "../ico.png"
+            });
+          } else {
+            checkbox.checked = false;
+            salvarPreferenciaNotificacao();
+            mostrarAlerta("Permissão Negada", "Para receber avisos, autorize as notificações nas definições do navegador.", "🔒");
+          }
+        } catch (e) {
           checkbox.checked = false;
           salvarPreferenciaNotificacao();
+          mostrarAlerta("Atenção", "Não foi possível solicitar a permissão automaticamente.", "⚠️");
         }
       } else {
         salvarPreferenciaNotificacao();
