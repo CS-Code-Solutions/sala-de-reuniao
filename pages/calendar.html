@@ -77,36 +77,20 @@
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
       
       .mobile-topbar-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: white;
-        padding: 12px 16px;
-        border-bottom: 1px solid #e2e8f0;
+        display: flex; justify-content: space-between; align-items: center;
+        background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
         margin: -16px -16px 20px -16px;
       }
       
       .mobile-bottom-nav {
-        display: flex;
-        position: fixed;
-        bottom: 0; left: 0; right: 0;
-        background: white;
-        border-top: 1px solid #e2e8f0;
-        padding: 10px 0;
-        justify-content: space-around;
-        align-items: center;
-        z-index: 1000;
-        box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+        background: white; border-top: 1px solid #e2e8f0; padding: 10px 0;
+        justify-content: space-around; align-items: center;
+        z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
       }
       .mob-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        text-decoration: none;
-        color: #64748b;
-        font-size: 11px;
-        font-weight: 600;
-        gap: 4px;
+        display: flex; flex-direction: column; align-items: center;
+        text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px;
       }
       .mob-nav-item.active { color: #2563eb; }
       .mob-nav-item span { font-size: 18px; }
@@ -124,7 +108,7 @@
       <a href="my-reservations.html">Minhas reservas</a>
       <a href="rooms.html">Salas</a>
       <a href="notifications.html">Notificações</a>
-      <a href="admin-users.html" id="adminMenu" style="display:none;">Usuários (Admin)</a>
+      <a href="admin-users.html" class="admin-only-item" style="display:none;">Usuários (Admin)</a>
     </nav>
     <div class="user-profile">
       <span id="userNameDisplay">Carregando...</span>
@@ -198,7 +182,7 @@
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
     <a href="rooms.html" class="mob-nav-item"><span>🚪</span> Salas</a>
     <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
-    <a href="admin-users.html" id="adminMenu" style="display:none;">Usuários (Admin)</a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
 
   <script type="module">
