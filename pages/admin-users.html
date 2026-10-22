@@ -19,13 +19,6 @@
     }
     .user-actions { display: flex; align-items: center; gap: 12px; }
     
-    .btn-edit {
-      padding: 6px 12px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;
-      border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s;
-    }
-    .btn-edit:hover { background: #dbeafe; }
-
-    /* Estilos do Modal Flutuante */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
@@ -76,7 +69,6 @@
     }
   </style>
 
-  <!-- Bibliotecas Firebase Compat -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -112,15 +104,14 @@
 
     <section class="schedule-grid-container">
       <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;">
-        <p style="color: #64748b; font-size: 14px;">A carregar utilizadores do Firestore...</p>
+        <p style="color: #64748b; font-size: 14px;">A carregar utilizadores...</p>
       </div>
     </section>
   </main>
 
-  <!-- MODAL DE ADICIONAR / EDITAR UTILIZADOR -->
   <div class="modal-overlay" id="modalUsuario">
     <div class="modal-card">
-      <h3 class="modal-title" id="modalTitulo">Novo Utilizador</h3>
+      <h3 class="modal-title">Novo Utilizador</h3>
 
       <div class="form-group">
         <label>Nome Completo</label>
@@ -189,7 +180,7 @@
       db.collection("usuarios").get().then((querySnapshot) => {
         container.innerHTML = "";
         if (querySnapshot.empty) {
-          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado ainda.</p>`;
+          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado na nuvem.</p>`;
           return;
         }
 
@@ -210,7 +201,7 @@
         });
       }).catch((error) => {
         console.error("Erro ao carregar utilizadores:", error);
-        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro ao carregar utilizadores da nuvem.</p>`;
+        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro de permissão ou falha ao carregar da nuvem. Verifique as regras do Firestore.</p>`;
       });
     }
 
@@ -225,7 +216,6 @@
     }
 
     function abrirModalUsuario() {
-      document.getElementById("modalTitulo").innerText = "Novo Utilizador";
       document.getElementById("inputNome").value = "";
       document.getElementById("inputPrefixoEmail").value = "";
       document.getElementById("inputSenha").value = "";
@@ -245,22 +235,19 @@
       const senha = document.getElementById("inputSenha").value.trim();
 
       if (!nome || !prefixo || !senha) {
-        alert("Por favor, preencha todos os campos (Nome, E-mail e Senha).");
+        alert("Por favor, preencha todos os campos.");
         return;
       }
 
       const sufixo = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
       const emailCompleto = prefixo + sufixo;
 
-      // Inicializa uma segunda instância do app Firebase em segundo plano para não deslogar o Admin atual
       const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
       const secondaryAuth = secondaryApp.auth();
 
       secondaryAuth.createUserWithEmailAndPassword(emailCompleto, senha)
         .then((userCredential) => {
           const uid = userCredential.user.uid;
-          
-          // Salva os dados do utilizador no Firestore
           return db.collection("usuarios").doc(uid).set({
             nome: nome,
             email: emailCompleto,
@@ -269,9 +256,8 @@
           });
         })
         .then(() => {
-          // Destroi a app secundária
           secondaryApp.delete();
-          alert(`Utilizador "${nome}" (${emailCompleto}) criado com sucesso no Firebase e Firestore!`);
+          alert(`Utilizador "${nome}" criado com sucesso!`);
           fecharModalUsuario();
           carregarUsuariosDoFirestore();
         })
