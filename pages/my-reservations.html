@@ -13,6 +13,17 @@
     .page-header h1 { font-size: 24px; color: #1e293b; margin-bottom: 4px; }
     .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
     
+    .reservation-card {
+      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      border-left: 5px solid #2563eb;
+    }
+    .btn-delete {
+      background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px;
+      font-weight: 600; font-size: 12px; cursor: pointer;
+    }
+    .btn-delete:hover { background: #fecaca; }
+
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
@@ -40,6 +51,10 @@
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -63,14 +78,18 @@
   <main class="main-content page-wrapper">
     <div class="mobile-topbar-bar">
       <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #2563eb;">Perfil</span>
     </div>
 
     <header class="page-header">
       <h1>Minhas Reservas</h1>
+      <p style="color: #64748b; font-size: 14px;">Consulte e gerencie as reuniões marcadas por si.</p>
     </header>
 
     <section class="schedule-grid-container">
-      <div id="listaMinhasReservas" class="time-slots"></div>
+      <div id="listaMinhasReservas" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;">
+        <p style="color: #64748b; font-size: 14px;">A carregar as suas reservas...</p>
+      </div>
     </section>
   </main>
 
@@ -82,10 +101,108 @@
     <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
 
+  <script>
+    let usuarioEhAdmin = false;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+        authDomain: "reuniao-d1b29.firebaseapp.com",
+        projectId: "reuniao-d1b29",
+        storageBucket: "reuniao-d1b29.firebasestorage.app",
+        messagingSenderId: "887897617950",
+        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          const emailUsuario = user.email.toLowerCase();
+          const nomeBase = emailUsuario.split('@')[0];
+          
+          document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
+
+          try {
+            const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
+            if (doc.exists && doc.data().cargo === "Administrador") {
+              usuarioEhAdmin = true;
+            }
+          } catch(e) {}
+          
+          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
+            usuarioEhAdmin = true;
+          }
+
+          if (usuarioEhAdmin) {
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
+          }
+
+          carregarMinhasReservas(user.uid, nomeBase);
+        } else {
+          window.location.href = "../index.html";
+        }
+      });
+    });
+
+    function carregarMinhasReservas(userId, nomeBase) {
+      const container = document.getElementById("listaMinhasReservas");
+      container.innerHTML = "<p style='color: #64748b;'>A procurar reservas...</p>";
+
+      // Procura reservas feitas pelo utilizador atual (ou filtrando pelo ID ou pelo nome do responsável)
+      firebase.firestore().collection("reservas")
+        .get()
+        .then((snapshot) => {
+          container.innerHTML = "";
+          let minhasReservas = [];
+
+          snapshot.forEach(doc => {
+            const res = doc.data();
+            // Se o userId coincidir ou se o responsável corresponder ao nome do utilizador
+            if (res.userId === userId || (res.responsavel && res.responsavel.toLowerCase() === nomeBase.toLowerCase()) || usuarioEhAdmin) {
+              minhasReservas.push({ id: doc.id, ...res });
+            }
+          });
+
+          if (minhasReservas.length === 0) {
+            container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Ainda não tem nenhuma reserva registada.</p>`;
+            return;
+          }
+
+          minhasReservas.forEach(reserva => {
+            const div = document.createElement("div");
+            div.className = "reservation-card";
+            div.innerHTML = `
+              <div>
+                <span style="font-size: 11px; font-weight: 700; color: #2563eb;">📍 ${reserva.sala || 'Sala 01'} &nbsp;•&nbsp; 📅 ${reserva.data} &nbsp;•&nbsp; ⏰ ${reserva.horarioInicio} - ${reserva.horarioFim || ''}</span>
+                <h4 style="font-size: 16px; color: #1e293b; margin: 4px 0;">${reserva.titulo}</h4>
+                <p style="font-size: 13px; color: #64748b;">Responsável: ${reserva.responsavel || nomeBase}</p>
+              </div>
+              <button class="btn-delete" onclick="cancelarMinhaReserva('${reserva.id}')">🗑️ Cancelar</button>
+            `;
+            container.appendChild(div);
+          });
+        })
+        .catch(err => {
+          container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar as suas reservas: ${err.message}</p>`;
+        });
+    }
+
+    function cancelarMinhaReserva(id) {
+      if (confirm("Tem certeza que deseja cancelar e excluir esta reserva?")) {
+        firebase.firestore().collection("reservas").doc(id).delete().then(() => {
+          alert("Reserva cancelada com sucesso!");
+          location.reload();
+        }).catch(err => {
+          alert("Erro ao cancelar: " + err.message);
+        });
+      }
+    }
+  </script>
+
   <script type="module">
     import { verificarAutenticacao } from "../js/auth.js";
     verificarAutenticacao();
   </script>
-  <script src="../js/reservations.js"></script>
 </body>
 </html>
