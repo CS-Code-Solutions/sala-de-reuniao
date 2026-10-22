@@ -228,7 +228,7 @@
       document.getElementById("modalUsuario").style.display = "none";
     }
 
-    function salvarUtilizadorNoFirebase() {
+        function salvarUtilizadorNoFirebase() {
       const nome = document.getElementById("inputNome").value.trim();
       const prefixo = document.getElementById("inputPrefixoEmail").value.trim().toLowerCase();
       const cargo = document.getElementById("inputCargo").value;
@@ -242,12 +242,12 @@
       const sufixo = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
       const emailCompleto = prefixo + sufixo;
 
-      const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
-      const secondaryAuth = secondaryApp.auth();
-
-      secondaryAuth.createUserWithEmailAndPassword(emailCompleto, senha)
+      // Criação direta e segura utilizando a auth principal
+      firebase.auth().createUserWithEmailAndPassword(emailCompleto, senha)
         .then((userCredential) => {
           const uid = userCredential.user.uid;
+          
+          // Grava os dados na coleção usuarios do Firestore
           return db.collection("usuarios").doc(uid).set({
             nome: nome,
             email: emailCompleto,
@@ -256,13 +256,11 @@
           });
         })
         .then(() => {
-          secondaryApp.delete();
-          alert(`Utilizador "${nome}" criado com sucesso!`);
+          alert(`Utilizador "${nome}" (${emailCompleto}) criado com sucesso!`);
           fecharModalUsuario();
           carregarUsuariosDoFirestore();
         })
         .catch((error) => {
-          secondaryApp.delete();
           console.error("Erro ao criar utilizador:", error);
           alert("Erro ao criar utilizador: " + error.message);
         });
