@@ -5,22 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Entrar</title>
   <link rel="stylesheet" href="../css/global.css">
+  <link rel="icon" href="ico.png" type="image/png">
   <style>
     body { justify-content: center; align-items: center; background: #f1f5f9; display: flex; height: 100vh; }
-    .login-card { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-    .login-card h2 { margin-bottom: 24px; text-align: center; }
-    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .login-card { background: white; padding: 40px; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: center; }
+    .login-logo { max-width: 140px; height: auto; margin-bottom: 24px; }
+    .form-group { margin-bottom: 16px; display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .form-group input { padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; }
     .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; margin-top: 10px; }
   </style>
 
-  <!-- Firebase App & Auth Compat SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <div class="login-card">
-    <h2>📅 MeetingRoom</h2>
+    <!-- Utiliza a imagem login.png no topo da caixa -->
+    <img src="login.png" alt="Logo MeetingRoom" class="login-logo">
+    
     <div class="form-group">
       <label>E-mail</label>
       <input type="email" id="emailLogin" placeholder="teste@reuniao.com" required>
@@ -33,7 +35,6 @@
   </div>
 
   <script>
-    // Configuração exata do seu painel do Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
       authDomain: "reuniao-d1b29.firebaseapp.com",
@@ -43,7 +44,6 @@
       appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
     };
 
-    // Inicializa o Firebase
     firebase.initializeApp(firebaseConfig);
 
     function fazerLogin() {
