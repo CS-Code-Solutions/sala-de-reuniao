@@ -37,10 +37,18 @@
     .slot-row.reserved { background: #eff6ff; border-color: #bfdbfe; border-left: 5px solid #2563eb; }
     .slot-row.available { background: #f0fdf4; border-color: #bbf7d0; border-left: 5px solid #22c55e; cursor: pointer; }
     
+    /* Grelhas de Semana e Mês */
+    .grid-semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+    .card-dia-semana { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; min-height: 120px; display: flex; flex-direction: column; gap: 6px; }
+    
+    .grid-mes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .card-dia-mes { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; min-height: 80px; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-dia-mes.outro-mes { opacity: 0.4; background: #ffffff; }
+
     .btn-action-slot { padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; }
     .btn-reserve { background: #22c55e; color: white; }
     .btn-reserve:hover { background: #16a34a; }
-    .btn-delete-admin { background: #fee2e2; color: #dc2626; }
+    .btn-delete-admin { background: #fee2e2; color: #dc2626; padding: 4px 8px; font-size: 11px; }
     .btn-delete-admin:hover { background: #fecaca; }
 
     /* MODAL DE NOVA RESERVA */
@@ -209,7 +217,6 @@
 
       atualizarCabecalhoData();
 
-      // Carrega os dados de imediato e valida o admin em background
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
           const emailUsuario = user.email.toLowerCase();
@@ -280,35 +287,21 @@
         .get()
         .then((snapshot) => {
           container.innerHTML = "";
-          let reservasFiltradas = [];
-
-          let dataInicioObj = new Date(dataAtualObj);
-          let dataFimObj = new Date(dataAtualObj);
-
-          if (tipoVisaoAtual === 'semana') {
-            dataFimObj.setDate(dataFimObj.getDate() + 7);
-          } else if (tipoVisaoAtual === 'mes') {
-            dataFimObj.setMonth(dataFimObj.getMonth() + 1);
-          }
-
+          let reservasMapa = {};
+          
           snapshot.forEach(doc => {
             const res = doc.data();
-            const dataResObj = new Date(res.data + "T00:00:00");
-
-            if (tipoVisaoAtual === 'dia') {
-              if (res.data === dataStr) {
-                reservasFiltradas.push({ id: doc.id, ...res });
-              }
-            } else {
-              if (dataResObj >= dataInicioObj && dataResObj <= dataFimObj) {
-                reservasFiltradas.push({ id: doc.id, ...res });
-              }
-            }
+            if (!reservasMapa[res.data]) reservasMapa[res.data] = [];
+            reservasMapa[res.data].push({ id: doc.id, ...res });
           });
 
+          // 1. VISÃO POR DIA (Grelha de horários)
           if (tipoVisaoAtual === 'dia') {
+            const reservasDia = reservasMapa[dataStr] || {};
             const reservasMapeadas = {};
-            reservasFiltradas.forEach(r => reservasMapeadas[r.horarioInicio] = r);
+            if (Array.isArray(reservasDia)) {
+              reservasDia.forEach(r => reservasMapeadas[r.horarioInicio] = r);
+            }
 
             horariosPadrao.forEach(hora => {
               const reserva = reservasMapeadas[hora];
@@ -339,28 +332,76 @@
               }
               container.appendChild(div);
             });
-          } else {
-            if (reservasFiltradas.length === 0) {
-              container.innerHTML = `<p style="color: #64748b; padding: 12px;">Nenhuma reserva encontrada para este período.</p>`;
-              return;
-            }
+          } 
+          // 2. VISÃO POR SEMANA (Grelha de 7 dias)
+          else if (tipoVisaoAtual === 'semana') {
+            const gridDiv = document.createElement("div");
+            gridDiv.className = "grid-semana";
 
-            reservasFiltradas.forEach(reserva => {
-              const div = document.createElement("div");
-              div.className = "slot-row reserved";
-              div.innerHTML = `
-                <div>
-                  <span style="font-size: 11px; font-weight: 700; color: #64748b;">📅 Data: ${reserva.data} | ⏰ ${reserva.horarioInicio} - ${reserva.horarioFim}</span>
-                  <h4 style="font-size: 15px; color: #1e293b; margin: 2px 0;">${reserva.titulo}</h4>
-                  <p style="font-size: 12px; color: #64748b;">Responsável: ${reserva.responsavel || 'Equipa'}</p>
-                </div>
-                <div>
-                  ${usuarioEhAdmin ? `<button class="btn-action-slot btn-delete-admin" onclick="excluirReserva('${reserva.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
-                </div>
-              `;
-              container.appendChild(div);
-            });
+            let inicioSemana = new Date(dataAtualObj);
+            inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay()); // Começa no domingo
+
+            for (let i = 0; i < 7; i++) {
+              let diaAtual = new Date(inicioSemana);
+              diaAtual.setDate(diaAtual.getDate() + i);
+              let diaStr = diaAtual.toISOString().split('T')[0];
+              let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
+
+              const card = document.createElement("div");
+              card.className = "card-dia-semana";
+              
+              let htmlR = `<strong style="font-size: 12px; color: #1e293b; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px;">${nomeDia}</strong>`;
+              
+              if (reservasMapa[diaStr]) {
+                reservasMapa[diaStr].forEach(r => {
+                  htmlR += `
+                    <div style="background: #eff6ff; padding: 4px 6px; border-radius: 4px; font-size: 11px;">
+                      <b>${r.horarioInicio}</b> - ${r.titulo}
+                      ${usuarioEhAdmin ? `<br><button class="btn-action-slot btn-delete-admin" onclick="excluirReserva('${r.id}')">🗑️ Excluir</button>` : ''}
+                    </div>
+                  `;
+                });
+              } else {
+                htmlR += `<span style="font-size: 11px; color: #94a3b8; font-style: italic;">Sem reuniões</span>`;
+              }
+              card.innerHTML = htmlR;
+              gridDiv.appendChild(card);
+            }
+            container.appendChild(gridDiv);
+          } 
+          // 3. VISÃO POR MÊS (Grelha de dias do mês)
+          else if (tipoVisaoAtual === 'mes') {
+            const gridDiv = document.createElement("div");
+            gridDiv.className = "grid-mes";
+
+            let ano = dataAtualObj.getFullYear();
+            let mes = dataAtualObj.getMonth();
+            let primeiroDiaMes = new Date(ano, mes, 1);
+            let ultimoDiaMes = new Date(ano, mes + 1, 0);
+
+            let inicioGrid = new Date(primeiroDiaMes);
+            inicioGrid.setDate(inicioGrid.getDate() - inicioGrid.getDay()); // Alinhado ao domingo
+
+            for (let i = 0; i < 42; i++) { // 6 semanas
+              let diaAtual = new Date(inicioGrid);
+              diaAtual.setDate(diaAtual.getDate() + i);
+              let diaStr = diaAtual.toISOString().split('T')[0];
+              let eMesAtual = diaAtual.getMonth() === mes;
+
+              const card = document.createElement("div");
+              card.className = `card-dia-mes ${eMesAtual ? '' : 'outro-mes'}`;
+
+              let htmlM = `<span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>`;
+              
+              if (reservasMapa[diaStr]) {
+                htmlM += `<div style="background: #2563eb; color: white; border-radius: 4px; padding: 2px 4px; font-size: 10px; text-align: center; margin-top: 4px;">${reservasMapa[diaStr].length} reunião(ões)</div>`;
+              }
+              card.innerHTML = htmlM;
+              gridDiv.appendChild(card);
+            }
+            container.appendChild(gridDiv);
           }
+
         })
         .catch(err => {
           container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar reservas: ${err.message}</p>`;
