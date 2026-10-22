@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<link rel="icon" href="../ico.png" type="image/png">
+  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Gestão de Utilizadores</title>
@@ -11,6 +11,7 @@
     .page-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
     .page-header h1 { font-size: 24px; color: #1e293b; }
+    .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
     
     .user-card {
       background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
@@ -36,7 +37,6 @@
         background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
         margin: -16px -16px 20px -16px;
       }
-      .mob-logo { font-weight: bold; color: #1e293b; display: flex; align-items: center; gap: 8px; }
 
       .mobile-bottom-nav {
         display: flex; position: fixed; bottom: 0; left: 0; right: 0;
@@ -56,10 +56,8 @@
 <body>
 
   <aside class="sidebar">
-    <div class="logo-area">
-      <h2 style="color: var(--primary); display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 20px;">📅</span> MeetingRoom
-      </h2>
+    <div class="logo-area" style="padding: 20px 24px;">
+      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo">
     </div>
     <nav class="nav-links">
       <a href="calendar.html">Agenda</a>
@@ -76,7 +74,7 @@
 
   <main class="main-content page-wrapper">
     <div class="mobile-topbar-bar">
-      <div class="mob-logo"><span>📅</span> MeetingRoom</div>
+      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
     </div>
 
     <header class="page-header">
@@ -85,9 +83,7 @@
     </header>
 
     <section class="schedule-grid-container">
-      <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;">
-        <!-- Os utilizadores serão renderizados dinamicamente pelo script abaixo -->
-      </div>
+      <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </section>
   </main>
 
@@ -99,7 +95,6 @@
   </nav>
 
   <script>
-    // Lista inicial de utilizadores na memória (para demonstração dinâmica)
     let listaUsuarios = [
       { id: 1, nome: "Ana Costa", email: "ana@empresa.com", cargo: "Administrador" },
       { id: 2, nome: "Bruno Lima", email: "bruno@empresa.com", cargo: "Usuário" }
@@ -134,21 +129,12 @@
     function adicionarNovoUsuario() {
       const nome = prompt("Digite o nome completo do novo utilizador:");
       if (!nome) return;
-
       const email = prompt("Digite o e-mail do utilizador:");
       if (!email) return;
-
       const cargo = prompt("Defina o cargo (Ex: Administrador ou Usuário):", "Usuário");
       if (!cargo) return;
 
-      const novo = {
-        id: Date.now(),
-        nome: nome,
-        email: email,
-        cargo: cargo
-      };
-
-      listaUsuarios.push(novo);
+      listaUsuarios.push({ id: Date.now(), nome, email, cargo });
       renderizarUsuarios();
       alert(`Utilizador "${nome}" adicionado com sucesso!`);
     }
@@ -159,17 +145,14 @@
 
       const novoNome = prompt("Editar Nome:", user.nome);
       if (novoNome === null) return;
-
       const novoEmail = prompt("Editar E-mail:", user.email);
       if (novoEmail === null) return;
-
       const novoCargo = prompt("Editar Cargo (Administrador / Usuário):", user.cargo);
       if (novoCargo === null) return;
 
       user.nome = novoNome;
       user.email = novoEmail;
       user.cargo = novoCargo;
-
       renderizarUsuarios();
       alert("Utilizador atualizado com sucesso!");
     }
