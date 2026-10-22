@@ -209,19 +209,23 @@
     const db = firebase.firestore();
     let listaUsuariosGlobal = [];
 
-    firebase.auth().onAuthStateChanged((user) => {
+    firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
-        db.collection("usuarios").doc(user.uid).get().then(doc => {
-          if(doc.exists && doc.data().apelido) {
-            document.getElementById("userNameDisplay").innerText = doc.data().apelido;
-          } else {
-            document.getElementById("userNameDisplay").innerText = user.email.split('@')[0];
+        let nomeExibicao = user.email.split('@')[0];
+
+        try {
+          const doc = await db.collection("usuarios").doc(user.uid).get();
+          if (doc.exists && doc.data().apelido && doc.data().apelido.trim() !== "") {
+            nomeExibicao = doc.data().apelido;
           }
-        }).catch(() => {
-          document.getElementById("userNameDisplay").innerText = user.email.split('@')[0];
-        });
+        } catch(e) {}
+
+        document.getElementById("userNameDisplay").innerText = nomeExibicao;
+        document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeExibicao;
 
         carregarUsuariosDoFirestore();
+      } else {
+        window.location.href = "../index.html";
       }
     });
 
