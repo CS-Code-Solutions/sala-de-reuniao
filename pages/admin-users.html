@@ -50,6 +50,13 @@
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
+    /* MODAL DE ALERTA E CONFIRMAÇÃO ELEGANTE */
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-ok:hover { background: #1d4ed8; }
+    .btn-modal-danger { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-danger:hover { background: #b91c1c; }
+
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
@@ -105,6 +112,7 @@
     </section>
   </main>
 
+  <!-- MODAL DE CRIAR/EDITAR UTILIZADOR -->
   <div class="modal-overlay" id="modalUsuario">
     <div class="modal-card">
       <h3 class="modal-title" id="modalTitleText">Novo Utilizador</h3>
@@ -148,6 +156,30 @@
     </div>
   </div>
 
+  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+  <div class="modal-overlay" id="modalConfirmacaoExclusao">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;">⚠️</div>
+      <h3 class="modal-title">Remover Utilizador</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="textoConfirmacaoExclusao">Tem certeza que deseja remover as permissões de acesso?</p>
+      <input type="hidden" id="idUtilizadorParaExcluir">
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
+        <button class="btn-modal-danger" onclick="executarExclusaoUtilizador()">Sim, Remover</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE ALERTA PERSONALIZADO -->
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;" id="modalAlertaIcone">🎉</div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Sucesso</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
+
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
@@ -174,7 +206,6 @@
 
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // Carrega o nome logado para a barra lateral
         db.collection("usuarios").doc(user.uid).get().then(doc => {
           if(doc.exists && doc.data().apelido) {
             document.getElementById("userNameDisplay").innerText = doc.data().apelido;
@@ -188,6 +219,18 @@
         carregarUsuariosDoFirestore();
       }
     });
+
+    function mostrarAlerta(titulo, texto, icone = "🎉") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      document.getElementById("modalAlertaIcone").innerText = icone;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+      carregarUsuariosDoFirestore();
+    }
 
     function carregarUsuariosDoFirestore() {
       const container = document.getElementById("listaUtilizadores");
@@ -217,7 +260,7 @@
             </div>
             <div class="action-btns">
               <button class="btn-icon" onclick="prepararEdicao('${doc.id}')" title="Editar Utilizador">✏️</button>
-              <button class="btn-icon delete" onclick="excluirUtilizador('${doc.id}', '${user.nome}')" title="Excluir">🗑️</button>
+              <button class="btn-icon delete" onclick="confirmarExclusaoUtilizador('${doc.id}', '${user.nome || 'Utilizador'}')" title="Excluir">🗑️</button>
             </div>
           `;
           container.appendChild(div);
@@ -273,23 +316,28 @@
       const apelido = document.getElementById("inputApelido").value.trim() || nome.split(' ')[0];
       const cargo = document.getElementById("inputCargo").value;
       
-      if (!nome) return alert("Preencha o nome.");
+      if (!nome) {
+        mostrarAlerta("Atenção", "Preencha o nome.", "⚠️");
+        return;
+      }
 
       if (editId) {
-        // Atualiza no Firestore incluindo o apelido
         db.collection("usuarios").doc(editId).update({
           nome: nome,
           apelido: apelido,
           cargo: cargo
         }).then(() => {
           fecharModalUsuario();
-          carregarUsuariosDoFirestore();
-        }).catch(err => alert("Erro ao atualizar: " + err.message));
+          mostrarAlerta("Sucesso", "Utilizador atualizado com sucesso!", "🎉");
+        }).catch(err => mostrarAlerta("Erro", "Erro ao atualizar: " + err.message, "❌"));
         
       } else {
         const prefixo = document.getElementById("inputPrefixoEmail").value.trim().toLowerCase();
         const senha = document.getElementById("inputSenha").value.trim();
-        if (!prefixo || !senha) return alert("Preencha todos os campos.");
+        if (!prefixo || !senha) {
+          mostrarAlerta("Atenção", "Preencha todos os campos.", "⚠️");
+          return;
+        }
         
         const sufixo = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
         const emailCompleto = prefixo + sufixo;
@@ -306,17 +354,32 @@
           })
           .then(() => {
             fecharModalUsuario();
-            carregarUsuariosDoFirestore();
-          }).catch(err => alert("Erro ao criar: " + err.message));
+            mostrarAlerta("Sucesso", "Utilizador criado com sucesso!", "🎉");
+          }).catch(err => mostrarAlerta("Erro", "Erro ao criar: " + err.message, "❌"));
       }
     }
 
-    function excluirUtilizador(uid, nome) {
-      if(confirm(`Tem certeza que deseja remover as permissões de acesso de ${nome}?`)) {
-        db.collection("usuarios").doc(uid).delete().then(() => {
-          carregarUsuariosDoFirestore();
-        }).catch(err => alert("Erro ao excluir: " + err.message));
-      }
+    function confirmarExclusaoUtilizador(uid, nome) {
+      document.getElementById("idUtilizadorParaExcluir").value = uid;
+      document.getElementById("textoConfirmacaoExclusao").innerText = `Tem certeza que deseja remover as permissões de acesso de ${nome}?`;
+      document.getElementById("modalConfirmacaoExclusao").style.display = "flex";
+    }
+
+    function fecharModalConfirmacao() {
+      document.getElementById("modalConfirmacaoExclusao").style.display = "none";
+    }
+
+    function executarExclusaoUtilizador() {
+      const uid = document.getElementById("idUtilizadorParaExcluir").value;
+      if (!uid) return;
+
+      db.collection("usuarios").doc(uid).delete().then(() => {
+        fecharModalConfirmacao();
+        mostrarAlerta("Sucesso", "Utilizador removido com sucesso!", "🗑️");
+      }).catch(err => {
+        fecharModalConfirmacao();
+        mostrarAlerta("Erro", "Erro ao excluir: " + err.message, "❌");
+      });
     }
   </script>
 
