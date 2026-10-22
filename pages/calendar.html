@@ -37,7 +37,6 @@
     .slot-row.reserved { background: #eff6ff; border-color: #bfdbfe; border-left: 5px solid #2563eb; }
     .slot-row.available { background: #f0fdf4; border-color: #bbf7d0; border-left: 5px solid #22c55e; cursor: pointer; }
     
-    /* Grelhas Otimizadas e Responsivas */
     .grid-semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; overflow-x: auto; }
     .card-dia-semana { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px; min-height: 140px; display: flex; flex-direction: column; gap: 6px; }
     
@@ -204,6 +203,7 @@
 
   <script>
     let usuarioEhAdmin = false;
+    let apelidoUsuarioGlobal = "Utilizador";
     let dataAtualObj = new Date();
     let tipoVisaoAtual = 'dia';
 
@@ -223,21 +223,27 @@
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
           const emailUsuario = user.email.toLowerCase();
-          const nomeBase = emailUsuario.split('@')[0];
-          
-          document.getElementById("userNameDisplay").innerText = nomeBase;
-          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
+          apelidoUsuarioGlobal = emailUsuario.split('@')[0];
 
           try {
             const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
-            if (doc.exists && doc.data().cargo === "Administrador") {
-              usuarioEhAdmin = true;
+            if (doc.exists) {
+              const dados = doc.data();
+              if (dados.apelido && dados.apelido.trim() !== "") {
+                apelidoUsuarioGlobal = dados.apelido;
+              }
+              if (dados.cargo === "Administrador") {
+                usuarioEhAdmin = true;
+              }
             }
           } catch(e) {}
 
           if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
             usuarioEhAdmin = true;
           }
+
+          document.getElementById("userNameDisplay").innerText = apelidoUsuarioGlobal;
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + apelidoUsuarioGlobal;
 
           if (usuarioEhAdmin) {
             document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
@@ -276,7 +282,6 @@
       carregarAgenda();
     }
 
-    // Função para saltar diretamente para a visão de dia ao clicar num dia do mês/semana
     function selecionarDiaEspecifico(dataStr) {
       dataAtualObj = new Date(dataStr + "T00:00:00");
       tipoVisaoAtual = 'dia';
@@ -310,7 +315,6 @@
             reservasMapa[res.data].push({ id: doc.id, ...res });
           });
 
-          // 1. VISÃO POR DIA
           if (tipoVisaoAtual === 'dia') {
             const reservasDia = reservasMapa[dataStr] || [];
             const reservasMapeadas = {};
@@ -346,7 +350,6 @@
               container.appendChild(div);
             });
           } 
-          // 2. VISÃO POR SEMANA
           else if (tipoVisaoAtual === 'semana') {
             const gridDiv = document.createElement("div");
             gridDiv.className = "grid-semana";
@@ -384,11 +387,9 @@
             }
             container.appendChild(gridDiv);
           } 
-          // 3. VISÃO POR MÊS (Com clique direto para abrir o dia)
           else if (tipoVisaoAtual === 'mes') {
             const wrapper = document.createElement("div");
             
-            // Cabeçalho dos dias da semana
             const headerDias = document.createElement("div");
             headerDias.className = "grid-mes-header";
             ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].forEach(d => {
@@ -464,7 +465,6 @@
       }
 
       const user = firebase.auth().currentUser;
-      const responsavelNome = user ? user.email.split('@')[0] : "Utilizador";
       const userId = user ? user.uid : "";
 
       firebase.firestore().collection("reservas").add({
@@ -473,7 +473,7 @@
         horarioFim: fim,
         sala: sala,
         data: window.dataSelecionadaGlobal,
-        responsavel: responsavelNome,
+        responsavel: apelidoUsuarioGlobal, // Usa o apelido configurado
         userId: userId,
         criadoEm: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
