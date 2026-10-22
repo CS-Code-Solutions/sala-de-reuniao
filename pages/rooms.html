@@ -44,6 +44,11 @@
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
+    /* MODAL DE ALERTA ELEGANTE */
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-ok:hover { background: #1d4ed8; }
+
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
@@ -142,6 +147,16 @@
     </div>
   </div>
 
+  <!-- MODAL DE ALERTA PERSONALIZADO -->
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;" id="modalAlertaIcone">✨</div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Aviso</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
+
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
@@ -194,6 +209,17 @@
         }
       });
     });
+
+    function mostrarAlerta(titulo, texto, icone = "✨") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      document.getElementById("modalAlertaIcone").innerText = icone;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+    }
 
     function carregarSalas() {
       const container = document.getElementById("listaSalasContainer");
@@ -321,7 +347,7 @@
       let imagem = document.getElementById("inputImagemBase64").value.trim();
 
       if (!nome) {
-        alert("Preencha o nome da sala.");
+        mostrarAlerta("Atenção", "Preencha o nome da sala.", "⚠️");
         return;
       }
 
@@ -342,15 +368,15 @@
       if (id) {
         db.collection("salas").doc(id).update(dadosSala).then(() => {
           fecharModalSala();
-          alert("Sala atualizada com sucesso!");
+          mostrarAlerta("Sucesso", "Sala atualizada com sucesso!", "🎉");
           carregarSalas();
-        }).catch(err => alert("Erro ao atualizar: " + err.message));
+        }).catch(err => mostrarAlerta("Erro", "Erro ao atualizar: " + err.message, "❌"));
       } else {
         db.collection("salas").add(dadosSala).then(() => {
           fecharModalSala();
-          alert("Sala criada com sucesso!");
+          mostrarAlerta("Sucesso", "Sala criada com sucesso!", "🎉");
           carregarSalas();
-        }).catch(err => alert("Erro ao criar: " + err.message));
+        }).catch(err => mostrarAlerta("Erro", "Erro ao criar: " + err.message, "❌"));
       }
     }
   </script>
