@@ -34,8 +34,8 @@
     .btn-icon:hover { background: #f8fafc; }
     .btn-icon.delete:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
     
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
     
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
@@ -126,6 +126,11 @@
       <div class="form-group">
         <label>Apelido (Nome curto para exibições e reservas)</label>
         <input type="text" id="inputApelido" placeholder="Ex: João">
+      </div>
+
+      <div class="form-group">
+        <label>Número de WhatsApp (DDI + DDD + Número, ex: 5511999999999)</label>
+        <input type="text" id="inputWhatsapp" placeholder="Ex: 5511999999999">
       </div>
 
       <div class="form-group">
@@ -255,7 +260,7 @@
           div.innerHTML = `
             <div style="flex: 1;">
               <strong style="color: #1e293b; font-size: 16px;">${user.nome || 'Sem nome'}</strong> <span style="color: #64748b; font-size: 13px;">(Apelido: <b>${user.apelido || 'N/D'}</b>)</span>
-              <p style="color: #64748b; font-size: 13px; margin: 4px 0;">${user.email || 'E-mail não registado'}</p>
+              <p style="color: #64748b; font-size: 13px; margin: 4px 0;">${user.email || 'E-mail não registado'} • 📱 WhatsApp: ${user.whatsapp || 'Não cadastrado'}</p>
               <span class="badge ${isAd ? 'admin' : 'user'}">${user.cargo || 'Usuário'}</span>
             </div>
             <div class="action-btns">
@@ -282,6 +287,7 @@
       document.getElementById("editUserId").value = "";
       document.getElementById("inputNome").value = "";
       document.getElementById("inputApelido").value = "";
+      document.getElementById("inputWhatsapp").value = "";
       document.getElementById("inputPrefixoEmail").value = "";
       document.getElementById("inputSenha").value = "";
       document.getElementById("inputCargo").value = "Usuário";
@@ -299,6 +305,7 @@
       document.getElementById("editUserId").value = uid;
       document.getElementById("inputNome").value = user.nome || "";
       document.getElementById("inputApelido").value = user.apelido || "";
+      document.getElementById("inputWhatsapp").value = user.whatsapp || "";
       document.getElementById("inputCargo").value = user.cargo || "Usuário";
       
       document.getElementById("emailGroup").style.display = "none";
@@ -314,6 +321,7 @@
       const editId = document.getElementById("editUserId").value;
       const nome = document.getElementById("inputNome").value.trim();
       const apelido = document.getElementById("inputApelido").value.trim() || nome.split(' ')[0];
+      const whatsapp = document.getElementById("inputWhatsapp").value.trim();
       const cargo = document.getElementById("inputCargo").value;
       
       if (!nome) {
@@ -325,6 +333,7 @@
         db.collection("usuarios").doc(editId).update({
           nome: nome,
           apelido: apelido,
+          whatsapp: whatsapp,
           cargo: cargo
         }).then(() => {
           fecharModalUsuario();
@@ -335,7 +344,7 @@
         const prefixo = document.getElementById("inputPrefixoEmail").value.trim().toLowerCase();
         const senha = document.getElementById("inputSenha").value.trim();
         if (!prefixo || !senha) {
-          mostrarAlerta("Atenção", "Preencha todos os campos.", "⚠️");
+          mostrarAlerta("Atenção", "Preencha todos os campos obrigatórios.", "⚠️");
           return;
         }
         
@@ -347,6 +356,7 @@
             return db.collection("usuarios").doc(userCredential.user.uid).set({
               nome: nome,
               apelido: apelido,
+              whatsapp: whatsapp,
               email: emailCompleto,
               cargo: cargo,
               criadoEm: firebase.firestore.FieldValue.serverTimestamp()
