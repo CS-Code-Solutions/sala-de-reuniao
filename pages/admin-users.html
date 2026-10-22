@@ -75,6 +75,11 @@
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
+
+  <!-- Bibliotecas Firebase Compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -87,7 +92,7 @@
       <a href="my-reservations.html">Minhas reservas</a>
       <a href="rooms.html">Salas</a>
       <a href="notifications.html">Notificações</a>
-      <a href="admin-users.html" class="active" id="adminMenu">Usuários (Admin)</a>
+      <a href="admin-users.html" class="active" id="adminMenu" style="display:none;">Usuários (Admin)</a>
     </nav>
     <div class="user-profile">
       <span id="userNameDisplay">Carregando...</span>
@@ -106,7 +111,9 @@
     </header>
 
     <section class="schedule-grid-container">
-      <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;"></div>
+      <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;">
+        <p style="color: #64748b; font-size: 14px;">A carregar utilizadores do Firestore...</p>
+      </div>
     </section>
   </main>
 
@@ -143,7 +150,7 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalUsuario()">Cancelar</button>
-        <button class="btn-save" onclick="salvarUtilizador()">Guardar Utilizador</button>
+        <button class="btn-save" onclick="salvarUtilizadorNoFirebase()">Guardar Utilizador</button>
       </div>
     </div>
   </div>
@@ -156,34 +163,54 @@
   </nav>
 
   <script>
-    let listaUsuarios = [
-      { id: 1, nome: "Ana Costa", email: "ana.admin@viecelli.com", cargo: "Administrador" },
-      { id: 2, nome: "Bruno Lima", email: "bruno.lima@viecelli.com", cargo: "Usuário" }
-    ];
+    const firebaseConfig = {
+      apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+      authDomain: "reuniao-d1b29.firebaseapp.com",
+      projectId: "reuniao-d1b29",
+      storageBucket: "reuniao-d1b29.firebasestorage.app",
+      messagingSenderId: "887897617950",
+      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+
+    const db = firebase.firestore();
 
     document.addEventListener("DOMContentLoaded", () => {
-      renderizarUsuarios();
+      carregarUsuariosDoFirestore();
     });
 
-    function renderizarUsuarios() {
+    function carregarUsuariosDoFirestore() {
       const container = document.getElementById("listaUtilizadores");
       if (!container) return;
 
-      container.innerHTML = "";
-      listaUsuarios.forEach(user => {
-        const div = document.createElement("div");
-        div.className = "user-card";
-        div.innerHTML = `
-          <div>
-            <strong style="color: #1e293b; font-size: 15px;">${user.nome}</strong>
-            <p style="color: #64748b; font-size: 13px; margin-top: 2px;">${user.email}</p>
-          </div>
-          <div class="user-actions">
-            <span style="color: ${user.cargo === 'Administrador' ? 'var(--primary)' : '#64748b'}; font-weight: 600; font-size: 13px;">${user.cargo}</span>
-            <button class="btn-edit" onclick="editarUsuario(${user.id})">✏️ Editar</button>
-          </div>
-        `;
-        container.appendChild(div);
+      db.collection("usuarios").get().then((querySnapshot) => {
+        container.innerHTML = "";
+        if (querySnapshot.empty) {
+          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado ainda.</p>`;
+          return;
+        }
+
+        querySnapshot.forEach((doc) => {
+          const user = doc.data();
+          const div = document.createElement("div");
+          div.className = "user-card";
+          div.innerHTML = `
+            <div>
+              <strong style="color: #1e293b; font-size: 15px;">${user.nome}</strong>
+              <p style="color: #64748b; font-size: 13px; margin-top: 2px;">${user.email}</p>
+            </div>
+            <div class="user-actions">
+              <span style="color: ${user.cargo === 'Administrador' ? 'var(--primary)' : '#64748b'}; font-weight: 600; font-size: 13px;">${user.cargo}</span>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      }).catch((error) => {
+        console.error("Erro ao carregar utilizadores:", error);
+        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro ao carregar utilizadores da nuvem.</p>`;
       });
     }
 
@@ -211,50 +238,48 @@
       document.getElementById("modalUsuario").style.display = "none";
     }
 
-    function salvarUtilizador() {
+    function salvarUtilizadorNoFirebase() {
       const nome = document.getElementById("inputNome").value.trim();
-      const prefixo = document.getElementById("inputPrefixoEmail").value.trim();
+      const prefixo = document.getElementById("inputPrefixoEmail").value.trim().toLowerCase();
       const cargo = document.getElementById("inputCargo").value;
       const senha = document.getElementById("inputSenha").value.trim();
 
-      if (!nome || !prefixo) {
-        alert("Por favor, preencha o nome e o prefixo do e-mail.");
+      if (!nome || !prefixo || !senha) {
+        alert("Por favor, preencha todos os campos (Nome, E-mail e Senha).");
         return;
       }
 
-      // Constrói o e-mail completo com base no sufixo automático
       const sufixo = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
       const emailCompleto = prefixo + sufixo;
 
-      const novoUsuario = {
-        id: Date.now(),
-        nome: nome,
-        email: emailCompleto,
-        cargo: cargo
-      };
+      // Inicializa uma segunda instância do app Firebase em segundo plano para não deslogar o Admin atual
+      const secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp" + Date.now());
+      const secondaryAuth = secondaryApp.auth();
 
-      listaUsuarios.push(novoUsuario);
-      renderizarUsuarios();
-      fecharModalUsuario();
-      alert(`Utilizador "${nome}" (${emailCompleto}) criado com sucesso!`);
-    }
-
-    function editarUsuario(id) {
-      const user = listaUsuarios.find(u => u.id === id);
-      if (!user) return;
-
-      // Extrai o prefixo do e-mail removendo o domínio
-      let prefixoAtual = user.email.split('@')[0];
-      if (prefixoAtual.endsWith('.admin')) {
-        prefixoAtual = prefixoAtual.replace('.admin', '');
-      }
-
-      const novoNome = prompt("Editar Nome:", user.nome);
-      if (novoNome === null) return;
-
-      user.nome = novoNome;
-      renderizarUsuarios();
-      alert("Utilizador atualizado com sucesso!");
+      secondaryAuth.createUserWithEmailAndPassword(emailCompleto, senha)
+        .then((userCredential) => {
+          const uid = userCredential.user.uid;
+          
+          // Salva os dados do utilizador no Firestore
+          return db.collection("usuarios").doc(uid).set({
+            nome: nome,
+            email: emailCompleto,
+            cargo: cargo,
+            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        })
+        .then(() => {
+          // Destroi a app secundária
+          secondaryApp.delete();
+          alert(`Utilizador "${nome}" (${emailCompleto}) criado com sucesso no Firebase e Firestore!`);
+          fecharModalUsuario();
+          carregarUsuariosDoFirestore();
+        })
+        .catch((error) => {
+          secondaryApp.delete();
+          console.error("Erro ao criar utilizador:", error);
+          alert("Erro ao criar utilizador: " + error.message);
+        });
     }
   </script>
 
