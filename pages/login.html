@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Entrar</title>
-  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="css/global.css">
   <link rel="icon" href="ico.png" type="image/png">
   <style>
     body { justify-content: center; align-items: center; background: #f1f5f9; display: flex; height: 100vh; }
@@ -20,8 +20,7 @@
 </head>
 <body>
   <div class="login-card">
-    <!-- Utiliza a imagem login.png no topo da caixa -->
-    <img src="cabe.png" alt="Logo MeetingRoom" class="login-logo">
+    <img src="login.png" alt="Logo MeetingRoom" class="login-logo">
     
     <div class="form-group">
       <label>E-mail</label>
@@ -57,7 +56,7 @@
 
       firebase.auth().signInWithEmailAndPassword(email, senha)
         .then(() => {
-          window.location.href = "calendar.html";
+          window.location.href = "pages/calendar.html";
         })
         .catch((error) => {
           console.error("Erro no login:", error);
