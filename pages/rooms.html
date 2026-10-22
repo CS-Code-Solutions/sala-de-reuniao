@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<link rel="icon" href="../ico.png" type="image/png">
+  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Salas de Reunião</title>
@@ -11,6 +11,7 @@
     .page-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
     .page-header h1 { font-size: 24px; color: #1e293b; }
+    .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
     
     .room-card {
       background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;
@@ -37,7 +38,6 @@
         background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
         margin: -16px -16px 20px -16px;
       }
-      .mob-logo { font-weight: bold; color: #1e293b; display: flex; align-items: center; gap: 8px; }
 
       .mobile-bottom-nav {
         display: flex; position: fixed; bottom: 0; left: 0; right: 0;
@@ -57,10 +57,8 @@
 <body>
 
   <aside class="sidebar">
-    <div class="logo-area">
-      <h2 style="color: var(--primary); display: flex; align-items: center; gap: 8px;">
-        <span style="font-size: 20px;">📅</span> MeetingRoom
-      </h2>
+    <div class="logo-area" style="padding: 20px 24px;">
+      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo">
     </div>
     <nav class="nav-links">
       <a href="calendar.html">Agenda</a>
@@ -77,7 +75,7 @@
 
   <main class="main-content page-wrapper">
     <div class="mobile-topbar-bar">
-      <div class="mob-logo"><span>📅</span> MeetingRoom</div>
+      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
     </div>
 
     <header class="page-header">
@@ -88,7 +86,6 @@
     <section class="schedule-grid-container">
       <div class="time-slots" style="display: flex; flex-direction: column; gap: 16px;">
         
-        <!-- Sala 01 -->
         <div class="room-card" style="border-left: 5px solid var(--primary);">
           <div class="room-info-group">
             <strong style="font-size: 16px; color: #1e293b;">Sala de Reuniões 01</strong>
@@ -100,7 +97,6 @@
           </div>
         </div>
 
-        <!-- Sala 02 -->
         <div class="room-card" style="border-left: 5px solid #cbd5e1;">
           <div class="room-info-group">
             <strong style="font-size: 16px; color: #1e293b;">Sala de Reuniões 02</strong>
@@ -126,16 +122,13 @@
   <script>
     function editarSala(nomeAtual, capacidadeAtual, equipamentosAtuais) {
       const novoNome = prompt("Editar Nome da Sala:", nomeAtual);
-      if (novoNome === null) return; // Se cancelar
-      
+      if (novoNome === null) return;
       const novaCapacidade = prompt("Editar Capacidade (pessoas):", capacidadeAtual);
       if (novaCapacidade === null) return;
-
       const novosEquipamentos = prompt("Editar Equipamentos:", equipamentosAtuais);
       if (novosEquipamentos === null) return;
 
       alert(`Sala "${novoNome}" atualizada com sucesso!\nCapacidade: ${novaCapacidade}\nEquipamentos: ${novosEquipamentos}`);
-      // Aqui integrará com o Firestore no futuro para persistir os dados da sala
     }
 
     function abrirNovaSala() {
