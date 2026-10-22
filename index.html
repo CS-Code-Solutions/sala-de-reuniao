@@ -10,7 +10,6 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      /* Fundo direto usando o caminho relativo exato da raiz */
       background-color: #0f172a;
       background-image: url('fundo.jpg');
       background-repeat: no-repeat;
@@ -30,6 +29,14 @@
       max-width: 400px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       text-align: center;
+      /* Borda inicial sutil e transição suave */
+      border: 2px solid #e2e8f0;
+      transition: all 0.3s ease-in-out;
+    }
+    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima */
+    .login-card:hover {
+      border-color: #d4af37;
+      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.35);
     }
     .login-logo {
       max-width: 180px;
@@ -57,6 +64,7 @@
       border-radius: 8px;
       font-size: 14px;
       outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     .form-group input:focus {
       border-color: #2563eb;
@@ -73,6 +81,7 @@
       font-size: 15px;
       cursor: pointer;
       margin-top: 10px;
+      transition: background 0.2s;
     }
     .btn-login:hover {
       background: #1d4ed8;
@@ -84,8 +93,7 @@
 </head>
 <body>
   <div class="login-card">
-    <!-- Logótipo puxando explicitamente da raiz -->
-    <img src="./login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
+    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
     <h2 id="fallback-title" style="display:none; color: #1e293b; margin-bottom: 24px; font-size: 22px;">MeetingRoom</h2>
     
     <div class="form-group">
@@ -124,7 +132,6 @@
 
       firebase.auth().signInWithEmailAndPassword(email, senha)
         .then(() => {
-          // Redirecionamento correto e sem duplicação para a pasta pages
           window.location.href = "pages/calendar.html";
         })
         .catch((error) => {
