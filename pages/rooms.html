@@ -35,7 +35,7 @@
 
     /* MODAL */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
@@ -104,6 +104,7 @@
     <div class="modal-card">
       <h3 class="modal-title" id="modalSalaTitulo">Editar Sala</h3>
       <input type="hidden" id="editSalaId">
+      <input type="hidden" id="inputImagemBase64">
       
       <div class="form-group">
         <label>Nome da Sala</label>
@@ -130,8 +131,8 @@
       </div>
 
       <div class="form-group">
-        <label>URL da Imagem</label>
-        <input type="text" id="inputImagemSala" placeholder="https://...">
+        <label>Imagem da Sala (Dispositivo)</label>
+        <input type="file" id="inputFileSala" accept="image/*" onchange="converterImagemParaBase64(event)">
       </div>
 
       <div class="modal-actions">
@@ -203,7 +204,6 @@
         listaSalasGlobal = [];
 
         if (snapshot.empty) {
-          // Se não houver salas cadastradas no Firestore, cria as duas padrão para teste
           criarSalasPadrao();
           return;
         }
@@ -270,6 +270,17 @@
       });
     }
 
+    function converterImagemParaBase64(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("inputImagemBase64").value = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
     function abrirModalSala() {
       document.getElementById("modalSalaTitulo").innerText = "Nova Sala";
       document.getElementById("editSalaId").value = "";
@@ -277,7 +288,8 @@
       document.getElementById("inputCapacidade").value = "";
       document.getElementById("inputEquipamentos").value = "";
       document.getElementById("inputStatusSala").value = "Ativa";
-      document.getElementById("inputImagemSala").value = "";
+      document.getElementById("inputFileSala").value = "";
+      document.getElementById("inputImagemBase64").value = "";
       document.getElementById("modalSala").style.display = "flex";
     }
 
@@ -291,7 +303,8 @@
       document.getElementById("inputCapacidade").value = sala.capacidade || "";
       document.getElementById("inputEquipamentos").value = sala.equipamentos || "";
       document.getElementById("inputStatusSala").value = sala.status || "Ativa";
-      document.getElementById("inputImagemSala").value = sala.imagem || "";
+      document.getElementById("inputFileSala").value = "";
+      document.getElementById("inputImagemBase64").value = sala.imagem || "";
       document.getElementById("modalSala").style.display = "flex";
     }
 
@@ -305,11 +318,15 @@
       const capacidade = document.getElementById("inputCapacidade").value;
       const equipamentos = document.getElementById("inputEquipamentos").value.trim();
       const status = document.getElementById("inputStatusSala").value;
-      const imagem = document.getElementById("inputImagemSala").value.trim();
+      let imagem = document.getElementById("inputImagemBase64").value.trim();
 
       if (!nome) {
         alert("Preencha o nome da sala.");
         return;
+      }
+
+      if (!imagem) {
+        imagem = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
       }
 
       const dadosSala = {
@@ -317,7 +334,7 @@
         capacidade: capacidade ? parseInt(capacidade) : 8,
         equipamentos: equipamentos,
         status: status,
-        imagem: imagem || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
+        imagem: imagem
       };
 
       const db = firebase.firestore();
