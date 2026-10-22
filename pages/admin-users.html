@@ -109,10 +109,17 @@
     <div class="modal-card">
       <h3 class="modal-title" id="modalTitleText">Novo Utilizador</h3>
       <input type="hidden" id="editUserId">
+      
       <div class="form-group">
         <label>Nome Completo</label>
         <input type="text" id="inputNome" placeholder="Ex: João Silva">
       </div>
+
+      <div class="form-group">
+        <label>Apelido (Nome curto para exibições e reservas)</label>
+        <input type="text" id="inputApelido" placeholder="Ex: João">
+      </div>
+
       <div class="form-group">
         <label>Tipo de Perfil (Cargo)</label>
         <select id="inputCargo" onchange="atualizarSufixoEmail()">
@@ -120,6 +127,7 @@
           <option value="Administrador">Administrador</option>
         </select>
       </div>
+
       <div class="form-group" id="emailGroup">
         <label>E-mail Corporativo</label>
         <div class="email-input-group">
@@ -127,10 +135,12 @@
           <span class="email-suffix" id="labelSufixo">@viecelli.com</span>
         </div>
       </div>
+
       <div class="form-group" id="senhaGroup">
         <label>Senha Inicial</label>
         <input type="password" id="inputSenha" placeholder="••••••••">
       </div>
+
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalUsuario()">Cancelar</button>
         <button class="btn-save" onclick="salvarUtilizadorNoFirebase()">Guardar</button>
@@ -163,7 +173,20 @@
     let listaUsuariosGlobal = [];
 
     firebase.auth().onAuthStateChanged((user) => {
-      if (user) carregarUsuariosDoFirestore();
+      if (user) {
+        // Carrega o nome logado para a barra lateral
+        db.collection("usuarios").doc(user.uid).get().then(doc => {
+          if(doc.exists && doc.data().apelido) {
+            document.getElementById("userNameDisplay").innerText = doc.data().apelido;
+          } else {
+            document.getElementById("userNameDisplay").innerText = user.email.split('@')[0];
+          }
+        }).catch(() => {
+          document.getElementById("userNameDisplay").innerText = user.email.split('@')[0];
+        });
+
+        carregarUsuariosDoFirestore();
+      }
     });
 
     function carregarUsuariosDoFirestore() {
@@ -188,12 +211,12 @@
           div.className = "user-card";
           div.innerHTML = `
             <div style="flex: 1;">
-              <strong style="color: #1e293b; font-size: 16px;">${user.nome || 'Sem nome'}</strong>
+              <strong style="color: #1e293b; font-size: 16px;">${user.nome || 'Sem nome'}</strong> <span style="color: #64748b; font-size: 13px;">(Apelido: <b>${user.apelido || 'N/D'}</b>)</span>
               <p style="color: #64748b; font-size: 13px; margin: 4px 0;">${user.email || 'E-mail não registado'}</p>
               <span class="badge ${isAd ? 'admin' : 'user'}">${user.cargo || 'Usuário'}</span>
             </div>
             <div class="action-btns">
-              <button class="btn-icon" onclick="prepararEdicao('${doc.id}')" title="Editar Nome/Cargo">✏️</button>
+              <button class="btn-icon" onclick="prepararEdicao('${doc.id}')" title="Editar Utilizador">✏️</button>
               <button class="btn-icon delete" onclick="excluirUtilizador('${doc.id}', '${user.nome}')" title="Excluir">🗑️</button>
             </div>
           `;
@@ -215,6 +238,7 @@
       document.getElementById("modalTitleText").innerText = "Novo Utilizador";
       document.getElementById("editUserId").value = "";
       document.getElementById("inputNome").value = "";
+      document.getElementById("inputApelido").value = "";
       document.getElementById("inputPrefixoEmail").value = "";
       document.getElementById("inputSenha").value = "";
       document.getElementById("inputCargo").value = "Usuário";
@@ -230,10 +254,10 @@
       
       document.getElementById("modalTitleText").innerText = "Editar Utilizador";
       document.getElementById("editUserId").value = uid;
-      document.getElementById("inputNome").value = user.nome;
-      document.getElementById("inputCargo").value = user.cargo;
+      document.getElementById("inputNome").value = user.nome || "";
+      document.getElementById("inputApelido").value = user.apelido || "";
+      document.getElementById("inputCargo").value = user.cargo || "Usuário";
       
-      // Esconde email e senha na edição (segurança do Firebase não permite alterar senha diretamente aqui facilmente)
       document.getElementById("emailGroup").style.display = "none";
       document.getElementById("senhaGroup").style.display = "none";
       document.getElementById("modalUsuario").style.display = "flex";
@@ -246,14 +270,16 @@
     function salvarUtilizadorNoFirebase() {
       const editId = document.getElementById("editUserId").value;
       const nome = document.getElementById("inputNome").value.trim();
+      const apelido = document.getElementById("inputApelido").value.trim() || nome.split(' ')[0];
       const cargo = document.getElementById("inputCargo").value;
       
       if (!nome) return alert("Preencha o nome.");
 
       if (editId) {
-        // Atualiza os dados no Firestore
+        // Atualiza no Firestore incluindo o apelido
         db.collection("usuarios").doc(editId).update({
           nome: nome,
+          apelido: apelido,
           cargo: cargo
         }).then(() => {
           fecharModalUsuario();
@@ -261,7 +287,6 @@
         }).catch(err => alert("Erro ao atualizar: " + err.message));
         
       } else {
-        // Cria novo utilizador
         const prefixo = document.getElementById("inputPrefixoEmail").value.trim().toLowerCase();
         const senha = document.getElementById("inputSenha").value.trim();
         if (!prefixo || !senha) return alert("Preencha todos os campos.");
@@ -273,6 +298,7 @@
           .then((userCredential) => {
             return db.collection("usuarios").doc(userCredential.user.uid).set({
               nome: nome,
+              apelido: apelido,
               email: emailCompleto,
               cargo: cargo,
               criadoEm: firebase.firestore.FieldValue.serverTimestamp()
