@@ -25,19 +25,42 @@
     }
     .btn-edit:hover { background: #dbeafe; }
 
+    /* Estilos do Modal Flutuante */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px);
+      z-index: 2000; justify-content: center; align-items: center; padding: 16px;
+    }
+    .modal-card {
+      background: white; width: 100%; max-width: 450px; border-radius: 16px;
+      padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
+    .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    
+    .email-input-group { display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff; }
+    .email-input-group input { border: none; flex: 1; padding: 10px 12px; outline: none; }
+    .email-suffix { background: #f1f5f9; padding: 10px 12px; font-size: 13px; font-weight: 600; color: #64748b; border-left: 1px solid #cbd5e1; }
+
+    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save:hover { background: #1d4ed8; }
+
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
     @media (max-width: 1024px) {
       .sidebar { display: none; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      
       .mobile-topbar-bar {
         display: flex; justify-content: space-between; align-items: center;
         background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
         margin: -16px -16px 20px -16px;
       }
-
       .mobile-bottom-nav {
         display: flex; position: fixed; bottom: 0; left: 0; right: 0;
         background: white; border-top: 1px solid #e2e8f0; padding: 10px 0;
@@ -79,13 +102,51 @@
 
     <header class="page-header">
       <h1>Gerenciamento de Utilizadores</h1>
-      <button onclick="adicionarNovoUsuario()" style="padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Novo Utilizador</button>
+      <button onclick="abrirModalUsuario()" style="padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Novo Utilizador</button>
     </header>
 
     <section class="schedule-grid-container">
       <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;"></div>
     </section>
   </main>
+
+  <!-- MODAL DE ADICIONAR / EDITAR UTILIZADOR -->
+  <div class="modal-overlay" id="modalUsuario">
+    <div class="modal-card">
+      <h3 class="modal-title" id="modalTitulo">Novo Utilizador</h3>
+
+      <div class="form-group">
+        <label>Nome Completo</label>
+        <input type="text" id="inputNome" placeholder="Ex: João Silva">
+      </div>
+
+      <div class="form-group">
+        <label>Tipo de Perfil (Cargo)</label>
+        <select id="inputCargo" onchange="atualizarSufixoEmail()">
+          <option value="Usuário">Usuário Comum</option>
+          <option value="Administrador">Administrador</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>E-mail Corporativo</label>
+        <div class="email-input-group">
+          <input type="text" id="inputPrefixoEmail" placeholder="joao.silva">
+          <span class="email-suffix" id="labelSufixo">@viecelli.com</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Senha Inicial</label>
+        <input type="password" id="inputSenha" placeholder="••••••••">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharModalUsuario()">Cancelar</button>
+        <button class="btn-save" onclick="salvarUtilizador()">Guardar Utilizador</button>
+      </div>
+    </div>
+  </div>
 
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
@@ -96,8 +157,8 @@
 
   <script>
     let listaUsuarios = [
-      { id: 1, nome: "Ana Costa", email: "ana@empresa.com", cargo: "Administrador" },
-      { id: 2, nome: "Bruno Lima", email: "bruno@empresa.com", cargo: "Usuário" }
+      { id: 1, nome: "Ana Costa", email: "ana.admin@viecelli.com", cargo: "Administrador" },
+      { id: 2, nome: "Bruno Lima", email: "bruno.lima@viecelli.com", cargo: "Usuário" }
     ];
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -126,33 +187,72 @@
       });
     }
 
-    function adicionarNovoUsuario() {
-      const nome = prompt("Digite o nome completo do novo utilizador:");
-      if (!nome) return;
-      const email = prompt("Digite o e-mail do utilizador:");
-      if (!email) return;
-      const cargo = prompt("Defina o cargo (Ex: Administrador ou Usuário):", "Usuário");
-      if (!cargo) return;
+    function atualizarSufixoEmail() {
+      const cargo = document.getElementById("inputCargo").value;
+      const labelSufixo = document.getElementById("labelSufixo");
+      if (cargo === "Administrador") {
+        labelSufixo.innerText = ".admin@viecelli.com";
+      } else {
+        labelSufixo.innerText = "@viecelli.com";
+      }
+    }
 
-      listaUsuarios.push({ id: Date.now(), nome, email, cargo });
+    function abrirModalUsuario() {
+      document.getElementById("modalTitulo").innerText = "Novo Utilizador";
+      document.getElementById("inputNome").value = "";
+      document.getElementById("inputPrefixoEmail").value = "";
+      document.getElementById("inputSenha").value = "";
+      document.getElementById("inputCargo").value = "Usuário";
+      atualizarSufixoEmail();
+      document.getElementById("modalUsuario").style.display = "flex";
+    }
+
+    function fecharModalUsuario() {
+      document.getElementById("modalUsuario").style.display = "none";
+    }
+
+    function salvarUtilizador() {
+      const nome = document.getElementById("inputNome").value.trim();
+      const prefixo = document.getElementById("inputPrefixoEmail").value.trim();
+      const cargo = document.getElementById("inputCargo").value;
+      const senha = document.getElementById("inputSenha").value.trim();
+
+      if (!nome || !prefixo) {
+        alert("Por favor, preencha o nome e o prefixo do e-mail.");
+        return;
+      }
+
+      // Constrói o e-mail completo com base no sufixo automático
+      const sufixo = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
+      const emailCompleto = prefixo + sufixo;
+
+      const novoUsuario = {
+        id: Date.now(),
+        nome: nome,
+        email: emailCompleto,
+        cargo: cargo
+      };
+
+      listaUsuarios.push(novoUsuario);
       renderizarUsuarios();
-      alert(`Utilizador "${nome}" adicionado com sucesso!`);
+      fecharModalUsuario();
+      alert(`Utilizador "${nome}" (${emailCompleto}) criado com sucesso!`);
     }
 
     function editarUsuario(id) {
       const user = listaUsuarios.find(u => u.id === id);
       if (!user) return;
 
+      // Extrai o prefixo do e-mail removendo o domínio
+      let prefixoAtual = user.email.split('@')[0];
+      if (prefixoAtual.endsWith('.admin')) {
+        prefixoAtual = prefixoAtual.replace('.admin', '');
+      }
+
       const novoNome = prompt("Editar Nome:", user.nome);
       if (novoNome === null) return;
-      const novoEmail = prompt("Editar E-mail:", user.email);
-      if (novoEmail === null) return;
-      const novoCargo = prompt("Editar Cargo (Administrador / Usuário):", user.cargo);
-      if (novoCargo === null) return;
 
       user.nome = novoNome;
-      user.email = novoEmail;
-      user.cargo = novoCargo;
       renderizarUsuarios();
       alert("Utilizador atualizado com sucesso!");
     }
