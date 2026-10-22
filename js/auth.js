@@ -17,9 +17,11 @@ const db = getFirestore(app);
 
 export function verificarAutenticacao() {
   onAuthStateChanged(auth, async (user) => {
-    const isLoginPage = window.location.pathname.endsWith("login.html") || 
-                        window.location.pathname.endsWith("index.html") || 
-                        window.location.pathname === "/";
+    const pathAtual = window.location.pathname;
+    const isLoginPage = pathAtual.endsWith("login.html") || 
+                        pathAtual.endsWith("index.html") || 
+                        pathAtual === "/" ||
+                        pathAtual.endsWith("/sala-de-reuniao/"); // Ajuste para a raiz do GitHub Pages
 
     if (user) {
       const emailUsuario = user.email.toLowerCase();
@@ -31,7 +33,7 @@ export function verificarAutenticacao() {
       if (userNameDisplay) userNameDisplay.innerText = nomeBase;
       if (userAvatarMobile) userAvatarMobile.innerText = "Olá, " + nomeBase;
 
-      // Consulta direta ao Firestore para verificar se o utilizador é Administrador na base de dados
+      // 1. Consulta o Firestore para verificar se é Administrador
       let ehAdmin = false;
       try {
         const userDocRef = doc(db, "usuarios", user.uid);
@@ -47,7 +49,7 @@ export function verificarAutenticacao() {
         console.error("Erro ao verificar cargo no Firestore:", e);
       }
 
-      // Fallback de segurança temporário caso o documento ainda não tenha sido sincronizado
+      // 2. Fallback de segurança por e-mail (garante acesso imediato a contas admin/teste)
       if (!ehAdmin && (emailUsuario.includes("admin") || emailUsuario.includes("teste"))) {
         ehAdmin = true;
       }
@@ -59,14 +61,13 @@ export function verificarAutenticacao() {
         if (adminMenu) {
           adminMenu.style.display = "block";
         } else {
-          // Cria o link dinamicamente se não estiver presente na página
           const navLinks = document.querySelector(".nav-links");
-          if (navLinks) {
+          if (navLinks && !document.getElementById("adminMenu")) {
             const novoLink = document.createElement("a");
-            novoLink.href = "admin-users.html";
+            novoLink.href = pathAtual.includes("/pages/") ? "admin-users.html" : "pages/admin-users.html";
             novoLink.id = "adminMenu";
             novoLink.innerText = "Usuários (Admin)";
-            if (window.location.pathname.includes("admin-users.html")) {
+            if (pathAtual.includes("admin-users.html")) {
               novoLink.className = "active";
             }
             navLinks.appendChild(novoLink);
@@ -75,19 +76,20 @@ export function verificarAutenticacao() {
       } else {
         if (adminMenu) adminMenu.style.display = "none";
         
-        if (window.location.pathname.includes("admin-users.html")) {
+        if (pathAtual.includes("admin-users.html")) {
           alert("Acesso negado. Apenas administradores podem aceder a esta página.");
-          window.location.href = "calendar.html";
+          window.location.href = pathAtual.includes("/pages/") ? "calendar.html" : "pages/calendar.html";
         }
       }
 
       if (isLoginPage) {
-        window.location.href = "pages/calendar.html";
+        window.location.href = pathAtual.includes("/pages/") ? "calendar.html" : "pages/calendar.html";
       }
 
     } else {
       if (!isLoginPage) {
-        window.location.href = "../index.html"; 
+        // Redireciona para o index correto dependendo de onde o utilizador está
+        window.location.href = pathAtual.includes("/pages/") ? "../index.html" : "index.html"; 
       }
     }
   });
@@ -95,7 +97,8 @@ export function verificarAutenticacao() {
 
 window.fazerLogoutReal = function() {
   signOut(auth).then(() => {
-    window.location.href = "../index.html";
+    const pathAtual = window.location.pathname;
+    window.location.href = pathAtual.includes("/pages/") ? "../index.html" : "index.html";
   }).catch((error) => {
     console.error("Erro ao fazer logout", error);
   });
