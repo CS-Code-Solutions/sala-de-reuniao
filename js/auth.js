@@ -21,7 +21,7 @@ export function verificarAutenticacao() {
     const isLoginPage = pathAtual.endsWith("login.html") || 
                         pathAtual.endsWith("index.html") || 
                         pathAtual === "/" ||
-                        pathAtual.endsWith("/sala-de-reuniao/"); // Ajuste para a raiz do GitHub Pages
+                        pathAtual.endsWith("/sala-de-reuniao/");
 
     if (user) {
       const emailUsuario = user.email.toLowerCase();
@@ -33,51 +33,35 @@ export function verificarAutenticacao() {
       if (userNameDisplay) userNameDisplay.innerText = nomeBase;
       if (userAvatarMobile) userAvatarMobile.innerText = "Olá, " + nomeBase;
 
-      // 1. Consulta o Firestore para verificar se é Administrador
       let ehAdmin = false;
       try {
         const userDocRef = doc(db, "usuarios", user.uid);
         const userDoc = await getDoc(userDocRef);
-        
-        if (userDoc.exists()) {
-          const dadosUser = userDoc.data();
-          if (dadosUser.cargo === "Administrador") {
-            ehAdmin = true;
-          }
+        if (userDoc.exists() && userDoc.data().cargo === "Administrador") {
+          ehAdmin = true;
         }
       } catch (e) {
         console.error("Erro ao verificar cargo no Firestore:", e);
       }
 
-      // 2. Fallback de segurança por e-mail (garante acesso imediato a contas admin/teste)
       if (!ehAdmin && (emailUsuario.includes("admin") || emailUsuario.includes("teste"))) {
         ehAdmin = true;
       }
 
-      // Gestão de exibição do menu de administração
-      let adminMenu = document.getElementById("adminMenu");
+      // Procura todas as instâncias do menu admin (mobile e desktop)
+      const adminItems = document.querySelectorAll(".admin-only-item");
       
       if (ehAdmin) {
-        if (adminMenu) {
-          adminMenu.style.display = "block";
-        } else {
-          const navLinks = document.querySelector(".nav-links");
-          if (navLinks && !document.getElementById("adminMenu")) {
-            const novoLink = document.createElement("a");
-            novoLink.href = pathAtual.includes("/pages/") ? "admin-users.html" : "pages/admin-users.html";
-            novoLink.id = "adminMenu";
-            novoLink.innerText = "Usuários (Admin)";
-            if (pathAtual.includes("admin-users.html")) {
-              novoLink.className = "active";
-            }
-            navLinks.appendChild(novoLink);
-          }
-        }
+        adminItems.forEach(item => {
+          item.style.display = ""; // Remove o display:none e respeita o CSS padrão
+        });
       } else {
-        if (adminMenu) adminMenu.style.display = "none";
+        adminItems.forEach(item => {
+          item.style.display = "none";
+        });
         
         if (pathAtual.includes("admin-users.html")) {
-          alert("Acesso negado. Apenas administradores podem aceder a esta página.");
+          alert("Acesso negado. Apenas administradores podem aceder.");
           window.location.href = pathAtual.includes("/pages/") ? "calendar.html" : "pages/calendar.html";
         }
       }
@@ -88,7 +72,6 @@ export function verificarAutenticacao() {
 
     } else {
       if (!isLoginPage) {
-        // Redireciona para o index correto dependendo de onde o utilizador está
         window.location.href = pathAtual.includes("/pages/") ? "../index.html" : "index.html"; 
       }
     }
