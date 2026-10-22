@@ -113,7 +113,7 @@
             <p>Avisos em tempo real.</p>
           </div>
           <label class="switch">
-            <input type="checkbox" id="toggleCelular" onchange="salvarPreferenciaNotificacao()">
+            <input type="checkbox" id="toggleCelular" onchange="tratarToggleCelular(this)">
             <span class="slider"></span>
           </label>
         </div>
@@ -216,6 +216,31 @@
       document.getElementById("modalAlerta").style.display = "none";
     }
 
+    async function tratarToggleCelular(checkbox) {
+      if (checkbox.checked) {
+        if (!("Notification" in window)) {
+          mostrarAlerta("Atenção", "Este navegador não suporta notificações no celular.", "⚠️");
+          checkbox.checked = false;
+          return;
+        }
+
+        const permissao = await Notification.requestPermission();
+        if (permissao === "granted") {
+          salvarPreferenciaNotificacao();
+          new Notification("MeetingRoom", {
+            body: "Notificações no celular ativadas com sucesso!",
+            icon: "../ico.png"
+          });
+        } else {
+          mostrarAlerta("Permissão Negada", "Para receber avisos, autorize as notificações nas definições do navegador.", "🔒");
+          checkbox.checked = false;
+          salvarPreferenciaNotificacao();
+        }
+      } else {
+        salvarPreferenciaNotificacao();
+      }
+    }
+
     function salvarPreferenciaNotificacao() {
       if (!usuarioAtualId) return;
 
@@ -228,7 +253,6 @@
       firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
         notificacoes: notificacoes
       }).then(() => {
-        // Feedback subtil ou modal elegante
         console.log("Preferências de notificação atualizadas.");
       }).catch(err => {
         console.error("Erro ao guardar preferências:", err);
