@@ -8,9 +8,22 @@
   <link rel="stylesheet" href="../css/components.css">
   <style>
     .page-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
-    .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 24px; color: #1e293b; margin-bottom: 4px; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-header h1 { font-size: 24px; color: #1e293b; }
     
+    .room-card {
+      background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .room-info-group { display: flex; flex-direction: column; gap: 4px; }
+    .room-actions { display: flex; gap: 8px; }
+    
+    .btn-edit {
+      padding: 8px 16px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe;
+      border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s;
+    }
+    .btn-edit:hover { background: #dbeafe; }
+
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
@@ -68,25 +81,34 @@
 
     <header class="page-header">
       <h1>Salas Disponíveis</h1>
+      <button onclick="abrirNovaSala()" style="padding: 10px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
     </header>
 
     <section class="schedule-grid-container">
       <div class="time-slots" style="display: flex; flex-direction: column; gap: 16px;">
         
-        <div class="slot-item" style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; border-left: 5px solid var(--primary); display: flex; justify-content: space-between; align-items: center;">
-          <div>
+        <!-- Sala 01 -->
+        <div class="room-card" style="border-left: 5px solid var(--primary);">
+          <div class="room-info-group">
             <strong style="font-size: 16px; color: #1e293b;">Sala de Reuniões 01</strong>
-            <p style="color: #64748b; font-size: 13px; margin-top: 4px;">👥 Capacidade: 8 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Videoconferência, Quadro</p>
+            <p style="color: #64748b; font-size: 13px;">👥 Capacidade: 8 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Videoconferência, Quadro</p>
           </div>
-          <span style="color: #10b981; font-weight: 600;">Ativa</span>
+          <div class="room-actions">
+            <span style="color: #10b981; font-weight: 600; margin-right: 8px; font-size: 14px;">Ativa</span>
+            <button class="btn-edit" onclick="editarSala('Sala de Reuniões 01', '8', 'TV, Videoconferência, Quadro')">✏️ Editar</button>
+          </div>
         </div>
 
-        <div class="slot-item" style="background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; border-left: 5px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center;">
-          <div>
+        <!-- Sala 02 -->
+        <div class="room-card" style="border-left: 5px solid #cbd5e1;">
+          <div class="room-info-group">
             <strong style="font-size: 16px; color: #1e293b;">Sala de Reuniões 02</strong>
-            <p style="color: #64748b; font-size: 13px; margin-top: 4px;">👥 Capacidade: 6 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Quadro</p>
+            <p style="color: #64748b; font-size: 13px;">👥 Capacidade: 6 pessoas &nbsp;•&nbsp; 💻 Equipamentos: TV, Quadro</p>
           </div>
-          <span style="color: var(--text-muted); font-weight: 600;">Em breve</span>
+          <div class="room-actions">
+            <span style="color: var(--text-muted); font-weight: 600; margin-right: 8px; font-size: 14px;">Em breve</span>
+            <button class="btn-edit" onclick="editarSala('Sala de Reuniões 02', '6', 'TV, Quadro')">✏️ Editar</button>
+          </div>
         </div>
 
       </div>
@@ -99,6 +121,29 @@
     <a href="rooms.html" class="mob-nav-item active"><span>🚪</span> Salas</a>
     <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
   </nav>
+
+  <script>
+    function editarSala(nomeAtual, capacidadeAtual, equipamentosAtuais) {
+      const novoNome = prompt("Editar Nome da Sala:", nomeAtual);
+      if (novoNome === null) return; // Se cancelar
+      
+      const novaCapacidade = prompt("Editar Capacidade (pessoas):", capacidadeAtual);
+      if (novaCapacidade === null) return;
+
+      const novosEquipamentos = prompt("Editar Equipamentos:", equipamentosAtuais);
+      if (novosEquipamentos === null) return;
+
+      alert(`Sala "${novoNome}" atualizada com sucesso!\nCapacidade: ${novaCapacidade}\nEquipamentos: ${novosEquipamentos}`);
+      // Aqui integrará com o Firestore no futuro para persistir os dados da sala
+    }
+
+    function abrirNovaSala() {
+      const nome = prompt("Nome da nova sala:");
+      if (nome) {
+        alert(`Sala "${nome}" criada com sucesso!`);
+      }
+    }
+  </script>
 
   <script type="module">
     import { verificarAutenticacao } from "../js/auth.js";
