@@ -4,14 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Entrar</title>
-  <link rel="stylesheet" href="css/global.css">
   <link rel="icon" href="ico.png" type="image/png">
   <style>
     body {
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      /* Aplica a imagem fundo.jpg perfeitamente centralizada e cobrindo todo o ecrã */
+      /* Fundo direto usando o caminho relativo exato da raiz */
       background-color: #0f172a;
       background-image: url('fundo.jpg');
       background-repeat: no-repeat;
@@ -85,8 +84,8 @@
 </head>
 <body>
   <div class="login-card">
-    <!-- Logótipo da raiz -->
-    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
+    <!-- Logótipo puxando explicitamente da raiz -->
+    <img src="./login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
     <h2 id="fallback-title" style="display:none; color: #1e293b; margin-bottom: 24px; font-size: 22px;">MeetingRoom</h2>
     
     <div class="form-group">
@@ -125,6 +124,7 @@
 
       firebase.auth().signInWithEmailAndPassword(email, senha)
         .then(() => {
+          // Redirecionamento correto e sem duplicação para a pasta pages
           window.location.href = "pages/calendar.html";
         })
         .catch((error) => {
