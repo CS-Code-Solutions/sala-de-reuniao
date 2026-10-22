@@ -43,7 +43,7 @@
     .btn-delete-admin { background: #fee2e2; color: #dc2626; }
     .btn-delete-admin:hover { background: #fecaca; }
 
-    /* MODAL FLUTUANTE DE NOVA RESERVA */
+    /* ESTILOS DO MODAL FLUTUANTE DE NOVA RESERVA */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
     .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
@@ -74,7 +74,7 @@
       .sidebar { display: none; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
       .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin: -16px -16px 20px -16px; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: -4px 12px rgba(0,0,0,0.05); }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2563eb; }
       .mob-nav-item span { font-size: 18px; }
@@ -117,7 +117,15 @@
       </div>
       <div class="cal-controls">
         <div class="date-nav">
+          <button onclick="mudarData(-1)">&lt;</button>
           <span id="dataAtualExibicao">Carregando...</span>
+          <button onclick="mudarData(1)">&gt;</button>
+        </div>
+        <!-- Botões de visualização recuperados -->
+        <div class="view-toggles" id="viewTogglesGroup">
+          <button class="active" onclick="alterarVisao('dia', this)">Dia</button>
+          <button onclick="alterarVisao('semana', this)">Semana</button>
+          <button onclick="alterarVisao('mes', this)">Mês</button>
         </div>
         <select class="room-select" id="salaSelect" onchange="carregarAgendaDoDia()">
           <option value="Sala 01">Sala de Reuniões 01</option>
@@ -133,7 +141,7 @@
           <span id="dataHeaderExibicao">-</span>
         </div>
         <div class="schedule-list" id="gridHorarios">
-          <p style="color: #64748b; font-size: 14px;">A carregar horários...</p>
+          <p style="color: #64748b; font-size: 14px;">A carregar agenda...</p>
         </div>
       </div>
 
@@ -189,7 +197,8 @@
 
   <script>
     let usuarioEhAdmin = false;
-    const dataHojeStr = new Date().toISOString().split('T')[0];
+    let dataAtualObj = new Date();
+    let tipoVisaoAtual = 'dia';
 
     document.addEventListener("DOMContentLoaded", () => {
       const firebaseConfig = {
@@ -202,8 +211,7 @@
       };
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-      document.getElementById("dataAtualExibicao").innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
-      document.getElementById("dataHeaderExibicao").innerText = document.getElementById("dataAtualExibicao").innerText;
+      atualizarCabecalhoData();
 
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
@@ -221,20 +229,55 @@
       });
     });
 
+    function atualizarCabecalhoData() {
+      const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+      const textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
+      document.getElementById("dataAtualExibicao").innerText = textoFormatado;
+      document.getElementById("dataHeaderExibicao").innerText = textoFormatado;
+    }
+
+    function mudarData(direcao) {
+      if (tipoVisaoAtual === 'dia') {
+        dataAtualObj.setDate(dataAtualObj.getDate() + direcao);
+      } else if (tipoVisaoAtual === 'semana') {
+        dataAtualObj.setDate(dataAtualObj.getDate() + (direcao * 7));
+      } else if (tipoVisaoAtual === 'mes') {
+        dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
+      }
+      atualizarCabecalhoData();
+      carregarAgendaDoDia();
+    }
+
+    function resetarData() {
+      dataAtualObj = new Date();
+      atualizarCabecalhoData();
+      carregarAgendaDoDia();
+    }
+
+    function alterarVisao(visao, btnElement) {
+      tipoVisaoAtual = visao;
+      document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
+      btnElement.classList.add("active");
+      carregarAgendaDoDia();
+    }
+
     function carregarAgendaDoDia() {
       const sala = document.getElementById("salaSelect").value;
       const container = document.getElementById("gridHorarios");
       container.innerHTML = "<p style='color: #64748b;'>A sincronizar agenda...</p>";
 
       document.getElementById("salaHeaderTitulo").innerText = sala;
-      document.getElementById("sidebarNomeSala").innerText = sala;
+      const dataStr = dataAtualObj.toISOString().split('T')[0];
 
-      // Horários comerciais padrão
+      if (tipoVisaoAtual !== 'dia') {
+        container.innerHTML = `<p style="color: #64748b; padding: 20px;">Visualização por <b>${tipoVisaoAtual.toUpperCase()}</b> ativa. A carregar resumo de reservas...</p>`;
+      }
+
       const horariosPadrao = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
       firebase.firestore().collection("reservas")
         .where("sala", "==", sala)
-        .where("data", "==", dataHojeStr)
+        .where("data", "==", dataStr)
         .get()
         .then((snapshot) => {
           const reservasMapeadas = {};
@@ -242,55 +285,55 @@
             reservasMapeadas[doc.data().horarioInicio] = { id: doc.id, ...doc.data() };
           });
 
-          container.innerHTML = "";
-          horariosPadrao.forEach(hora => {
-            const reserva = reservasMapeadas[hora];
-            const div = document.createElement("div");
+          if (tipoVisaoAtual === 'dia') {
+            container.innerHTML = "";
+            horariosPadrao.forEach(hora => {
+              const reserva = reservasMapeadas[hora];
+              const div = document.createElement("div");
 
-            if (reserva) {
-              // Horário ocupado
-              div.className = "slot-row reserved";
-              div.innerHTML = `
-                <div>
-                  <span style="font-size: 12px; font-weight: 700; color: #2563eb;">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
-                  <h4 style="font-size: 15px; color: #1e293b; margin: 2px 0;">${reserva.titulo}</h4>
-                  <p style="font-size: 12px; color: #64748b;">Responsável: ${reserva.responsavel || 'Equipa'}</p>
-                </div>
-                <div>
-                  ${usuarioEhAdmin ? `<button class="btn-action-slot btn-delete-admin" onclick="excluirReserva('${reserva.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
-                </div>
-              `;
-            } else {
-              // Horário disponível
-              div.className = "slot-row available";
-              div.innerHTML = `
-                <div>
-                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
-                  <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Clique para agendar reunião neste horário.</p>
-                </div>
-                <button class="btn-action-slot btn-reserve">📅 Agendar</button>
-              `;
-              div.onclick = () => abrirModalReserva(hora);
-            }
-            container.appendChild(div);
-          });
+              if (reserva) {
+                div.className = "slot-row reserved";
+                div.innerHTML = `
+                  <div>
+                    <span style="font-size: 12px; font-weight: 700; color: #2563eb;">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
+                    <h4 style="font-size: 15px; color: #1e293b; margin: 2px 0;">${reserva.titulo}</h4>
+                    <p style="font-size: 12px; color: #64748b;">Responsável: ${reserva.responsavel || 'Equipa'}</p>
+                  </div>
+                  <div>
+                    ${usuarioEhAdmin ? `<button class="btn-action-slot btn-delete-admin" onclick="excluirReserva('${reserva.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
+                  </div>
+                `;
+              } else {
+                div.className = "slot-row available";
+                div.innerHTML = `
+                  <div>
+                    <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
+                    <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Clique para agendar reunião neste horário.</p>
+                  </div>
+                  <button class="btn-action-slot btn-reserve">📅 Agendar</button>
+                `;
+                div.onclick = () => abrirModalReserva(hora, dataStr);
+              }
+              container.appendChild(div);
+            });
+          }
         })
         .catch(err => {
           container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar reservas: ${err.message}</p>`;
         });
     }
 
-    function abrirModalReserva(horaInicio) {
+    function abrirModalReserva(horaInicio, dataStr) {
       document.getElementById("reservaHorarioInicio").value = horaInicio;
       document.getElementById("inputTituloReserva").value = "";
       document.getElementById("inputHoraInicio").value = horaInicio;
       
-      // Define hora fim padrão +1h
       const [h, m] = horaInicio.split(':');
       let horaFimNum = parseInt(h) + 1;
       let horaFimStr = (horaFimNum < 10 ? "0" : "") + horaFimNum + ":" + m;
       document.getElementById("inputHoraFim").value = horaFimStr;
 
+      window.dataSelecionadaGlobal = dataStr;
       document.getElementById("modalNovaReserva").style.display = "flex";
     }
 
@@ -313,7 +356,7 @@
         horarioInicio: inicio,
         horarioFim: fim,
         sala: sala,
-        data: dataHojeStr,
+        data: window.dataSelecionadaGlobal,
         responsavel: responsavelNome,
         criadoEm: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
