@@ -33,35 +33,23 @@
     
     .schedule-list { padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; }
     
-    .event-block { flex: 1; padding: 12px 16px; border-radius: 8px; border-left: 4px solid; display: flex; flex-direction: column; gap: 4px; }
-    .event-block.green { background-color: #f0fdf4; border-color: #22c55e; }
-    .event-block.blue { background-color: #eff6ff; border-color: #3b82f6; }
-    .event-block.purple { background-color: #faf5ff; border-color: #a855f7; }
+    .slot-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; gap: 12px; }
+    .slot-row.reserved { background: #eff6ff; border-color: #bfdbfe; border-left: 5px solid #2563eb; }
+    .slot-row.available { background: #f0fdf4; border-color: #bbf7d0; border-left: 5px solid #22c55e; cursor: pointer; }
     
-    .event-time { font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
-    .event-block.green .event-time { color: #16a34a; }
-    .event-block.blue .event-time { color: #2563eb; }
-    .event-block.purple .event-time { color: #9333ea; }
-    
-    .event-title { font-size: 15px; font-weight: 700; color: #1e293b; }
-    .event-meta { font-size: 13px; color: #64748b; font-weight: 500; }
+    .btn-action-slot { padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; }
+    .btn-reserve { background: #22c55e; color: white; }
+    .btn-reserve:hover { background: #16a34a; }
+    .btn-delete-admin { background: #fee2e2; color: #dc2626; }
+    .btn-delete-admin:hover { background: #fecaca; }
 
-    /* BOTÃO DE EXCLUIR EXCLUSIVO PARA ADMIN NOS BLOCOS */
-    .btn-admin-delete-event {
-      background: #fee2e2; color: #dc2626; border: none; padding: 4px 10px; border-radius: 6px;
-      font-size: 11px; font-weight: 700; cursor: pointer; margin-top: 6px; align-self: flex-start;
-      display: inline-flex; align-items: center; gap: 4px;
-    }
-    .btn-admin-delete-event:hover { background: #fecaca; }
-
-    /* ESTILOS DO MODAL FLUTUANTE DE NOVA RESERVA */
+    /* MODAL FLUTUANTE DE NOVA RESERVA */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; animation: fadeIn 0.2s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
     .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
-    .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    .form-group input { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
     .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
@@ -76,14 +64,6 @@
     .room-details p { font-size: 12px; color: #64748b; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
     
     .upcoming-list { display: flex; flex-direction: column; gap: 16px; }
-    .upcoming-item { display: flex; gap: 12px; align-items: flex-start; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; }
-    .dot.blue { background-color: #3b82f6; }
-    .dot.purple { background-color: #a855f7; }
-    .up-info { display: flex; flex-direction: column; gap: 2px; }
-    .up-time { font-size: 13px; font-weight: 700; color: #334155; }
-    .up-title { font-size: 13px; color: #475569; }
-    .up-meta { font-size: 12px; color: #94a3b8; }
     .btn-link { color: #2563eb; font-size: 13px; font-weight: 600; text-decoration: none; display: inline-block; margin-top: 16px; }
 
     .mobile-topbar-bar { display: none; }
@@ -94,14 +74,13 @@
       .sidebar { display: none; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
       .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin: -16px -16px 20px -16px; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: -4px 12px rgba(0,0,0,0.05); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2563eb; }
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
 
-  <!-- Scripts do Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -138,19 +117,11 @@
       </div>
       <div class="cal-controls">
         <div class="date-nav">
-          <button onclick="mudarData(-1)">&lt;</button>
           <span id="dataAtualExibicao">Carregando...</span>
-          <button onclick="resetarData()">📅</button>
-          <button onclick="mudarData(1)">&gt;</button>
         </div>
-        <div class="view-toggles" id="viewTogglesGroup">
-          <button class="active" onclick="mudarVisualizacao('dia', this)">Dia</button>
-          <button onclick="mudarVisualizacao('semana', this)">Semana</button>
-          <button onclick="mudarVisualizacao('mes', this)">Mês</button>
-        </div>
-        <select class="room-select" id="salaSelect" onchange="carregarAgenda()">
-          <option value="1">Sala de Reuniões 01</option>
-          <option value="2">Sala de Reuniões 02</option>
+        <select class="room-select" id="salaSelect" onchange="carregarAgendaDoDia()">
+          <option value="Sala 01">Sala de Reuniões 01</option>
+          <option value="Sala 02">Sala de Reuniões 02</option>
         </select>
       </div>
     </header>
@@ -158,10 +129,12 @@
     <div class="cal-layout">
       <div class="cal-main">
         <div class="cal-main-header">
-          <span>Sala de Reuniões 01</span>
-          <span>Terça, 28 de outubro de 2025</span>
+          <span id="salaHeaderTitulo">Sala de Reuniões 01</span>
+          <span id="dataHeaderExibicao">-</span>
         </div>
-        <div class="schedule-list" id="gridHorarios"></div>
+        <div class="schedule-list" id="gridHorarios">
+          <p style="color: #64748b; font-size: 14px;">A carregar horários...</p>
+        </div>
       </div>
 
       <div class="cal-sidebar">
@@ -170,44 +143,38 @@
           <div class="room-info">
             <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
             <div class="room-details">
-              <h4>Sala de Reuniões 01</h4>
+              <h4 id="sidebarNomeSala">Sala de Reuniões 01</h4>
               <p>👥 Capacidade: 8 pessoas</p>
               <p>💻 Equipamentos: TV, Videoconferência...</p>
             </div>
           </div>
         </div>
-
-        <div class="side-card">
-          <h3>Próximas reservas</h3>
-          <div class="upcoming-list" id="listaProximas"></div>
-          <a href="my-reservations.html" class="btn-link">Ver todas →</a>
-        </div>
       </div>
     </div>
   </main>
 
-  <!-- MODAL FLUTUANTE ELEGANTE DE NOVA RESERVA -->
+  <!-- MODAL DE NOVA RESERVA -->
   <div class="modal-overlay" id="modalNovaReserva">
     <div class="modal-card">
       <h3 class="modal-title">Nova Reserva</h3>
-      <input type="hidden" id="reservaDataSelecionada">
+      <input type="hidden" id="reservaHorarioInicio">
       
       <div class="form-group">
-        <label>Nome da Reunião</label>
+        <label>Nome / Título da Reunião</label>
         <input type="text" id="inputTituloReserva" placeholder="Ex: Planeamento Estratégico">
       </div>
 
       <div class="form-group">
         <label>Horário de Início e Fim</label>
         <div style="display: flex; gap: 8px;">
-          <input type="time" id="inputHoraInicio" style="flex:1;">
+          <input type="time" id="inputHoraInicio" style="flex:1;" readonly>
           <input type="time" id="inputHoraFim" style="flex:1;">
         </div>
       </div>
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNovaReserva').style.display='none'">Cancelar</button>
-        <button class="btn-save" onclick="confirmarCriacaoReserva()">Confirmar Reserva</button>
+        <button class="btn-save" onclick="salvarNovaReservaFirebase()">Confirmar Reserva</button>
       </div>
     </div>
   </div>
@@ -221,7 +188,8 @@
   </nav>
 
   <script>
-    window.usuarioEhAdminGlobal = false;
+    let usuarioEhAdmin = false;
+    const dataHojeStr = new Date().toISOString().split('T')[0];
 
     document.addEventListener("DOMContentLoaded", () => {
       const firebaseConfig = {
@@ -234,38 +202,106 @@
       };
       if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
+      document.getElementById("dataAtualExibicao").innerText = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+      document.getElementById("dataHeaderExibicao").innerText = document.getElementById("dataAtualExibicao").innerText;
+
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
           try {
             const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
             if (doc.exists && doc.data().cargo === "Administrador") {
-              window.usuarioEhAdminGlobal = true;
+              usuarioEhAdmin = true;
             }
           } catch(e) {}
           if (user.email.toLowerCase().includes("admin") || user.email.toLowerCase().includes("teste")) {
-            window.usuarioEhAdminGlobal = true;
+            usuarioEhAdmin = true;
           }
+          carregarAgendaDoDia();
         }
       });
     });
 
-    // Substitui o prompt antigo por este modal flutuante elegante com início e fim
-    window.abrirModalNovaReservaCustom = function(dataStr, horaPadrao) {
-      document.getElementById("reservaDataSelecionada").value = dataStr;
-      document.getElementById("inputTituloReserva").value = "";
-      document.getElementById("inputHoraInicio").value = horaPadrao || "08:00";
-      document.getElementById("inputHoraFim").value = "09:00";
-      document.getElementById("modalNovaReserva").style.display = "flex";
-    };
+    function carregarAgendaDoDia() {
+      const sala = document.getElementById("salaSelect").value;
+      const container = document.getElementById("gridHorarios");
+      container.innerHTML = "<p style='color: #64748b;'>A sincronizar agenda...</p>";
 
-    window.confirmarCriacaoReserva = function() {
+      document.getElementById("salaHeaderTitulo").innerText = sala;
+      document.getElementById("sidebarNomeSala").innerText = sala;
+
+      // Horários comerciais padrão
+      const horariosPadrao = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+
+      firebase.firestore().collection("reservas")
+        .where("sala", "==", sala)
+        .where("data", "==", dataHojeStr)
+        .get()
+        .then((snapshot) => {
+          const reservasMapeadas = {};
+          snapshot.forEach(doc => {
+            reservasMapeadas[doc.data().horarioInicio] = { id: doc.id, ...doc.data() };
+          });
+
+          container.innerHTML = "";
+          horariosPadrao.forEach(hora => {
+            const reserva = reservasMapeadas[hora];
+            const div = document.createElement("div");
+
+            if (reserva) {
+              // Horário ocupado
+              div.className = "slot-row reserved";
+              div.innerHTML = `
+                <div>
+                  <span style="font-size: 12px; font-weight: 700; color: #2563eb;">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
+                  <h4 style="font-size: 15px; color: #1e293b; margin: 2px 0;">${reserva.titulo}</h4>
+                  <p style="font-size: 12px; color: #64748b;">Responsável: ${reserva.responsavel || 'Equipa'}</p>
+                </div>
+                <div>
+                  ${usuarioEhAdmin ? `<button class="btn-action-slot btn-delete-admin" onclick="excluirReserva('${reserva.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
+                </div>
+              `;
+            } else {
+              // Horário disponível
+              div.className = "slot-row available";
+              div.innerHTML = `
+                <div>
+                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
+                  <p style="font-size: 12px; color: #64748b; margin-top: 2px;">Clique para agendar reunião neste horário.</p>
+                </div>
+                <button class="btn-action-slot btn-reserve">📅 Agendar</button>
+              `;
+              div.onclick = () => abrirModalReserva(hora);
+            }
+            container.appendChild(div);
+          });
+        })
+        .catch(err => {
+          container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar reservas: ${err.message}</p>`;
+        });
+    }
+
+    function abrirModalReserva(horaInicio) {
+      document.getElementById("reservaHorarioInicio").value = horaInicio;
+      document.getElementById("inputTituloReserva").value = "";
+      document.getElementById("inputHoraInicio").value = horaInicio;
+      
+      // Define hora fim padrão +1h
+      const [h, m] = horaInicio.split(':');
+      let horaFimNum = parseInt(h) + 1;
+      let horaFimStr = (horaFimNum < 10 ? "0" : "") + horaFimNum + ":" + m;
+      document.getElementById("inputHoraFim").value = horaFimStr;
+
+      document.getElementById("modalNovaReserva").style.display = "flex";
+    }
+
+    function salvarNovaReservaFirebase() {
       const titulo = document.getElementById("inputTituloReserva").value.trim();
       const inicio = document.getElementById("inputHoraInicio").value;
       const fim = document.getElementById("inputHoraFim").value;
-      const data = document.getElementById("reservaDataSelecionada").value;
+      const sala = document.getElementById("salaSelect").value;
 
       if (!titulo) {
-        alert("Por favor, insira o nome da reunião.");
+        alert("Por favor, preencha o nome da reunião.");
         return;
       }
 
@@ -276,51 +312,34 @@
         titulo: titulo,
         horarioInicio: inicio,
         horarioFim: fim,
-        data: data,
+        sala: sala,
+        data: dataHojeStr,
         responsavel: responsavelNome,
-        tipo: "Reunião",
         criadoEm: firebase.firestore.FieldValue.serverTimestamp()
       }).then(() => {
         document.getElementById("modalNovaReserva").style.display = "none";
-        alert("Reserva efetuada com sucesso!");
-        window.location.reload();
+        alert("Reserva criada com sucesso!");
+        carregarAgendaDoDia();
       }).catch(err => {
-        alert("Erro ao efetuar reserva: " + err.message);
+        alert("Erro ao criar reserva: " + err.message);
       });
-    };
+    }
 
-    // Monitor inteligente que injeta o botão de excluir nos blocos criados pelo calendar.js
-    setInterval(() => {
-      if (!window.usuarioEhAdminGlobal) return;
-      const blocos = document.querySelectorAll(".event-block");
-      blocos.forEach(bloco => {
-        // Verifica se já tem o botão para não duplicar
-        if (!bloco.querySelector(".btn-admin-delete-event") && bloco.classList.contains("blue") || bloco.classList.contains("green") || bloco.classList.contains("purple")) {
-          // Apenas adiciona em blocos que sejam reuniões (ignorando os verdes de disponíveis, se necessário)
-          if (bloco.querySelector(".event-title")) {
-            const btn = document.createElement("button");
-            btn.className = "btn-admin-delete-event";
-            btn.innerHTML = "🗑️ Excluir Reserva (Admin)";
-            btn.onclick = (e) => {
-              e.stopPropagation();
-              // Como o ID pode estar guardado ou mapeado, solicitamos confirmação direta
-              if (confirm("Tem certeza que deseja excluir esta reserva?")) {
-                // Tenta apagar baseando-se no título ou recarrega
-                alert("Para exclusão direta, utilize o painel de reservas ou confirme na nuvem.");
-              }
-            };
-            // Se preferir vincular diretamente ao ID do Firestore guardado no elemento:
-            // (O calendar.js pode ser ajustado para guardar o ID no dataset do elemento)
-          }
-        }
-      });
-    }, 1000);
+    function excluirReserva(id) {
+      if (confirm("Tem certeza que deseja excluir esta reserva?")) {
+        firebase.firestore().collection("reservas").doc(id).delete().then(() => {
+          alert("Reserva excluída com sucesso!");
+          carregarAgendaDoDia();
+        }).catch(err => {
+          alert("Erro ao excluir: " + err.message);
+        });
+      }
+    }
   </script>
 
   <script type="module">
     import { verificarAutenticacao } from "../js/auth.js";
     verificarAutenticacao();
   </script>
-  <script src="../js/calendar.js"></script>
 </body>
 </html>
