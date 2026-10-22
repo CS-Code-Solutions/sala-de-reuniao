@@ -1,22 +1,14 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-  authDomain: "reuniao-d1b29.firebaseapp.com",
-  projectId: "reuniao-d1b29",
-  storageBucket: "reuniao-d1b29.firebasestorage.app",
-  messagingSenderId: "887897617950",
-  appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
 export function verificarAutenticacao() {
-  onAuthStateChanged(auth, async (user) => {
+  // Verifica se o Firebase foi carregado corretamente pela página HTML
+  if (typeof firebase === 'undefined') {
+    console.error("Firebase não carregado.");
+    return;
+  }
+
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  auth.onAuthStateChanged(async (user) => {
     const pathAtual = window.location.pathname;
     const isLoginPage = pathAtual.endsWith("login.html") || 
                         pathAtual.endsWith("index.html") || 
@@ -33,31 +25,31 @@ export function verificarAutenticacao() {
       if (userNameDisplay) userNameDisplay.innerText = nomeBase;
       if (userAvatarMobile) userAvatarMobile.innerText = "Olá, " + nomeBase;
 
+      // Verifica o cargo no Firestore de forma segura
       let ehAdmin = false;
       try {
-        const userDocRef = doc(db, "usuarios", user.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists() && userDoc.data().cargo === "Administrador") {
+        const userDoc = await db.collection("usuarios").doc(user.uid).get();
+        if (userDoc.exists && userDoc.data().cargo === "Administrador") {
           ehAdmin = true;
         }
       } catch (e) {
-        console.error("Erro ao verificar cargo no Firestore:", e);
+        console.error("Erro ao verificar cargo:", e);
       }
 
+      // Fallback para contas de teste
       if (!ehAdmin && (emailUsuario.includes("admin") || emailUsuario.includes("teste"))) {
         ehAdmin = true;
       }
 
-      // Procura todas as instâncias do menu admin (mobile e desktop)
+      // Mostra ou oculta as abas de administrador em todos os ecrãs
       const adminItems = document.querySelectorAll(".admin-only-item");
-      
       if (ehAdmin) {
         adminItems.forEach(item => {
-          item.style.display = ""; // Remove o display:none e respeita o CSS padrão
+          if (item) item.style.display = ""; 
         });
       } else {
         adminItems.forEach(item => {
-          item.style.display = "none";
+          if (item) item.style.display = "none";
         });
         
         if (pathAtual.includes("admin-users.html")) {
@@ -66,11 +58,13 @@ export function verificarAutenticacao() {
         }
       }
 
+      // Redireciona para a agenda se estiver na página de login e já autenticado
       if (isLoginPage) {
         window.location.href = pathAtual.includes("/pages/") ? "calendar.html" : "pages/calendar.html";
       }
 
     } else {
+      // Bloqueia o acesso a páginas internas se não houver login
       if (!isLoginPage) {
         window.location.href = pathAtual.includes("/pages/") ? "../index.html" : "index.html"; 
       }
@@ -79,10 +73,10 @@ export function verificarAutenticacao() {
 }
 
 window.fazerLogoutReal = function() {
-  signOut(auth).then(() => {
-    const pathAtual = window.location.pathname;
-    window.location.href = pathAtual.includes("/pages/") ? "../index.html" : "index.html";
-  }).catch((error) => {
-    console.error("Erro ao fazer logout", error);
-  });
+  if (typeof firebase !== 'undefined') {
+    firebase.auth().signOut().then(() => {
+      const pathAtual = window.location.pathname;
+      window.location.href = pathAtual.includes("/pages/") ? "../index.html" : "index.html";
+    });
+  }
 }
