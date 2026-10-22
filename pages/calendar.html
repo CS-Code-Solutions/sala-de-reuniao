@@ -53,7 +53,7 @@
     .btn-delete-admin { background: #fee2e2; color: #dc2626; padding: 4px 8px; font-size: 11px; border-radius: 4px; font-weight: 600; cursor: pointer; border: none; }
     .btn-delete-admin:hover { background: #fecaca; }
 
-    /* MODAL DE NOVA RESERVA */
+    /* MODAIS */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
     .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
@@ -64,10 +64,12 @@
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-    /* MODAL DE ALERTA ELEGANTE */
+    /* MODAL DE CONFIRMAÇÃO E ALERTA */
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
     .btn-modal-ok { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-modal-ok:hover { background: #1d4ed8; }
+    .btn-modal-danger { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-danger:hover { background: #b91c1c; }
 
     .cal-sidebar { display: flex; flex-direction: column; gap: 24px; }
     .side-card { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
@@ -194,6 +196,20 @@
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNovaReserva').style.display='none'">Cancelar</button>
         <button class="btn-save" onclick="salvarNovaReservaFirebase()">Confirmar Reserva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+  <div class="modal-overlay" id="modalConfirmacaoExclusao">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;">⚠️</div>
+      <h3 class="modal-title">Excluir Reserva</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5;">Tem certeza que deseja excluir esta reserva?</p>
+      <input type="hidden" id="idReservaParaExcluir">
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
+        <button class="btn-modal-danger" onclick="executarExclusaoReserva()">Sim, Excluir</button>
       </div>
     </div>
   </div>
@@ -360,7 +376,7 @@
                     <p style="font-size: 12px; color: #64748b;">Responsável: ${reserva.responsavel || 'Equipa'}</p>
                   </div>
                   <div>
-                    ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="excluirReserva('${reserva.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
+                    ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusao('${reserva.id}')">🗑️ Excluir</button>` : `<span style="font-size: 12px; color: #2563eb; font-weight: 600;">Reservado</span>`}
                   </div>
                 `;
               } else {
@@ -402,7 +418,7 @@
                   htmlR += `
                     <div style="background: #eff6ff; padding: 4px; border-radius: 4px; font-size: 10px;">
                       <b>${r.horarioInicio}</b> - ${r.titulo}
-                      ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" onclick="event.stopPropagation(); excluirReserva('${r.id}')">Excluir</button>` : ''}
+                      ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" onclick="event.stopPropagation(); confirmarExclusao('${r.id}')">Excluir</button>` : ''}
                     </div>
                   `;
                 });
@@ -511,14 +527,26 @@
       });
     }
 
-    function excluirReserva(id) {
-      if (confirm("Tem certeza que deseja excluir esta reserva?")) {
-        firebase.firestore().document(`reservas/${id}`).delete().then(() => {
-          mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
-        }).catch(err => {
-          mostrarAlerta("Erro", "Erro ao excluir: " + err.message, "❌");
-        });
-      }
+    function confirmarExclusao(id) {
+      document.getElementById("idReservaParaExcluir").value = id;
+      document.getElementById("modalConfirmacaoExclusao").style.display = "flex";
+    }
+
+    function fecharModalConfirmacao() {
+      document.getElementById("modalConfirmacaoExclusao").style.display = "none";
+    }
+
+    function executarExclusaoReserva() {
+      const id = document.getElementById("idReservaParaExcluir").value;
+      if (!id) return;
+
+      firebase.firestore().document(`reservas/${id}`).delete().then(() => {
+        fecharModalConfirmacao();
+        mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
+      }).catch(err => {
+        fecharModalConfirmacao();
+        mostrarAlerta("Erro", "Erro ao excluir: " + err.message, "❌");
+      });
     }
   </script>
 
