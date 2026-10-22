@@ -13,8 +13,26 @@
     .page-header h1 { font-size: 24px; color: #1e293b; }
     .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
     
-    .user-card { background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
-    .user-actions { display: flex; align-items: center; gap: 12px; }
+    .user-card {
+      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+      transition: all 0.2s;
+    }
+    .user-card:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px;
+    }
+    .badge.admin { background: #eff6ff; color: #2563eb; }
+    .badge.user { background: #f1f5f9; color: #64748b; }
+
+    .action-btns { display: flex; gap: 8px; }
+    .btn-icon {
+      background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px;
+      cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .btn-icon:hover { background: #f8fafc; }
+    .btn-icon.delete:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
     
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
@@ -31,7 +49,6 @@
     .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save:hover { background: #1d4ed8; }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -47,7 +64,6 @@
     }
   </style>
 
-  <!-- Scripts do Firebase incluídos na página para estabilidade -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -83,7 +99,7 @@
     </header>
 
     <section class="schedule-grid-container">
-      <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;">
+      <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 16px;">
         <p style="color: #64748b; font-size: 14px;">A carregar utilizadores...</p>
       </div>
     </section>
@@ -91,7 +107,8 @@
 
   <div class="modal-overlay" id="modalUsuario">
     <div class="modal-card">
-      <h3 class="modal-title">Novo Utilizador</h3>
+      <h3 class="modal-title" id="modalTitleText">Novo Utilizador</h3>
+      <input type="hidden" id="editUserId">
       <div class="form-group">
         <label>Nome Completo</label>
         <input type="text" id="inputNome" placeholder="Ex: João Silva">
@@ -103,20 +120,20 @@
           <option value="Administrador">Administrador</option>
         </select>
       </div>
-      <div class="form-group">
+      <div class="form-group" id="emailGroup">
         <label>E-mail Corporativo</label>
         <div class="email-input-group">
           <input type="text" id="inputPrefixoEmail" placeholder="joao.silva">
           <span class="email-suffix" id="labelSufixo">@viecelli.com</span>
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group" id="senhaGroup">
         <label>Senha Inicial</label>
         <input type="password" id="inputSenha" placeholder="••••••••">
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalUsuario()">Cancelar</button>
-        <button class="btn-save" onclick="salvarUtilizadorNoFirebase()">Guardar Utilizador</button>
+        <button class="btn-save" onclick="salvarUtilizadorNoFirebase()">Guardar</button>
       </div>
     </div>
   </div>
@@ -143,12 +160,10 @@
       firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
+    let listaUsuariosGlobal = [];
 
-    // Aguarda que a autenticação valide o utilizador antes de buscar os dados
     firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        carregarUsuariosDoFirestore();
-      }
+      if (user) carregarUsuariosDoFirestore();
     });
 
     function carregarUsuariosDoFirestore() {
@@ -157,47 +172,70 @@
 
       db.collection("usuarios").get().then((querySnapshot) => {
         container.innerHTML = "";
+        listaUsuariosGlobal = [];
+        
         if (querySnapshot.empty) {
-          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado na nuvem ainda. Clique em "+ Novo Utilizador" para adicionar.</p>`;
+          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado.</p>`;
           return;
         }
+        
         querySnapshot.forEach((doc) => {
           const user = doc.data();
+          listaUsuariosGlobal.push({ id: doc.id, ...user });
+          
+          const isAd = user.cargo === 'Administrador';
           const div = document.createElement("div");
           div.className = "user-card";
           div.innerHTML = `
-            <div>
-              <strong style="color: #1e293b; font-size: 15px;">${user.nome || 'Utilizador sem nome'}</strong>
-              <p style="color: #64748b; font-size: 13px; margin-top: 2px;">${user.email || 'E-mail não registado'}</p>
+            <div style="flex: 1;">
+              <strong style="color: #1e293b; font-size: 16px;">${user.nome || 'Sem nome'}</strong>
+              <p style="color: #64748b; font-size: 13px; margin: 4px 0;">${user.email || 'E-mail não registado'}</p>
+              <span class="badge ${isAd ? 'admin' : 'user'}">${user.cargo || 'Usuário'}</span>
             </div>
-            <div class="user-actions">
-              <span style="color: ${user.cargo === 'Administrador' ? 'var(--primary)' : '#64748b'}; font-weight: 600; font-size: 13px;">${user.cargo || 'Usuário'}</span>
+            <div class="action-btns">
+              <button class="btn-icon" onclick="prepararEdicao('${doc.id}')" title="Editar Nome/Cargo">✏️</button>
+              <button class="btn-icon delete" onclick="excluirUtilizador('${doc.id}', '${user.nome}')" title="Excluir">🗑️</button>
             </div>
           `;
           container.appendChild(div);
         });
       }).catch((error) => {
-        console.error("Erro ao carregar utilizadores:", error);
-        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro ao carregar da nuvem: ${error.message}</p>`;
+        console.error("Erro ao carregar:", error);
+        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro ao carregar dados.</p>`;
       });
     }
 
     function atualizarSufixoEmail() {
       const cargo = document.getElementById("inputCargo").value;
       const labelSufixo = document.getElementById("labelSufixo");
-      if (cargo === "Administrador") {
-        labelSufixo.innerText = ".admin@viecelli.com";
-      } else {
-        labelSufixo.innerText = "@viecelli.com";
-      }
+      labelSufixo.innerText = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
     }
 
     function abrirModalUsuario() {
+      document.getElementById("modalTitleText").innerText = "Novo Utilizador";
+      document.getElementById("editUserId").value = "";
       document.getElementById("inputNome").value = "";
       document.getElementById("inputPrefixoEmail").value = "";
       document.getElementById("inputSenha").value = "";
       document.getElementById("inputCargo").value = "Usuário";
+      document.getElementById("emailGroup").style.display = "flex";
+      document.getElementById("senhaGroup").style.display = "flex";
       atualizarSufixoEmail();
+      document.getElementById("modalUsuario").style.display = "flex";
+    }
+
+    function prepararEdicao(uid) {
+      const user = listaUsuariosGlobal.find(u => u.id === uid);
+      if(!user) return;
+      
+      document.getElementById("modalTitleText").innerText = "Editar Utilizador";
+      document.getElementById("editUserId").value = uid;
+      document.getElementById("inputNome").value = user.nome;
+      document.getElementById("inputCargo").value = user.cargo;
+      
+      // Esconde email e senha na edição (segurança do Firebase não permite alterar senha diretamente aqui facilmente)
+      document.getElementById("emailGroup").style.display = "none";
+      document.getElementById("senhaGroup").style.display = "none";
       document.getElementById("modalUsuario").style.display = "flex";
     }
 
@@ -206,38 +244,53 @@
     }
 
     function salvarUtilizadorNoFirebase() {
+      const editId = document.getElementById("editUserId").value;
       const nome = document.getElementById("inputNome").value.trim();
-      const prefixo = document.getElementById("inputPrefixoEmail").value.trim().toLowerCase();
       const cargo = document.getElementById("inputCargo").value;
-      const senha = document.getElementById("inputSenha").value.trim();
+      
+      if (!nome) return alert("Preencha o nome.");
 
-      if (!nome || !prefixo || !senha) {
-        alert("Por favor, preencha todos os campos.");
-        return;
-      }
-
-      const sufixo = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
-      const emailCompleto = prefixo + sufixo;
-
-      firebase.auth().createUserWithEmailAndPassword(emailCompleto, senha)
-        .then((userCredential) => {
-          const uid = userCredential.user.uid;
-          return db.collection("usuarios").doc(uid).set({
-            nome: nome,
-            email: emailCompleto,
-            cargo: cargo,
-            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-          });
-        })
-        .then(() => {
-          alert(`Utilizador "${nome}" criado com sucesso!`);
+      if (editId) {
+        // Atualiza os dados no Firestore
+        db.collection("usuarios").doc(editId).update({
+          nome: nome,
+          cargo: cargo
+        }).then(() => {
           fecharModalUsuario();
           carregarUsuariosDoFirestore();
-        })
-        .catch((error) => {
-          console.error("Erro ao criar utilizador:", error);
-          alert("Erro ao criar utilizador: " + error.message);
-        });
+        }).catch(err => alert("Erro ao atualizar: " + err.message));
+        
+      } else {
+        // Cria novo utilizador
+        const prefixo = document.getElementById("inputPrefixoEmail").value.trim().toLowerCase();
+        const senha = document.getElementById("inputSenha").value.trim();
+        if (!prefixo || !senha) return alert("Preencha todos os campos.");
+        
+        const sufixo = cargo === "Administrador" ? ".admin@viecelli.com" : "@viecelli.com";
+        const emailCompleto = prefixo + sufixo;
+
+        firebase.auth().createUserWithEmailAndPassword(emailCompleto, senha)
+          .then((userCredential) => {
+            return db.collection("usuarios").doc(userCredential.user.uid).set({
+              nome: nome,
+              email: emailCompleto,
+              cargo: cargo,
+              criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          })
+          .then(() => {
+            fecharModalUsuario();
+            carregarUsuariosDoFirestore();
+          }).catch(err => alert("Erro ao criar: " + err.message));
+      }
+    }
+
+    function excluirUtilizador(uid, nome) {
+      if(confirm(`Tem certeza que deseja remover as permissões de acesso de ${nome}?`)) {
+        db.collection("usuarios").doc(uid).delete().then(() => {
+          carregarUsuariosDoFirestore();
+        }).catch(err => alert("Erro ao excluir: " + err.message));
+      }
     }
   </script>
 
