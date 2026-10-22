@@ -32,8 +32,6 @@
     .cal-main-header { display: flex; justify-content: space-between; padding: 16px 24px; border-bottom: 1px solid #e2e8f0; font-size: 14px; font-weight: 600; color: #475569; }
     
     .schedule-list { padding: 16px 24px; display: flex; flex-direction: column; gap: 12px; }
-    .time-row { display: flex; gap: 16px; }
-    .time-label { width: 50px; font-size: 13px; color: #94a3b8; font-weight: 600; padding-top: 8px; text-align: right; }
     
     .event-block { flex: 1; padding: 12px 16px; border-radius: 8px; border-left: 4px solid; display: flex; flex-direction: column; gap: 4px; }
     .event-block.green { background-color: #f0fdf4; border-color: #22c55e; }
@@ -48,15 +46,10 @@
     .event-title { font-size: 15px; font-weight: 700; color: #1e293b; }
     .event-meta { font-size: 13px; color: #64748b; font-weight: 500; }
 
-    /* BOTÕES DE ADMIN NOS BLOCOS */
-    .admin-event-actions { display: flex; gap: 12px; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(0,0,0,0.06); }
-    .admin-event-actions button { background: none; border: none; font-size: 12px; font-weight: 600; cursor: pointer; padding: 0; }
-    .btn-admin-edit { color: #2563eb; }
-    .btn-admin-delete { color: #ef4444; }
-
-    /* ESTILOS DO MODAL DE EDIÇÃO DE RESERVAS */
+    /* ESTILOS DOS MODAIS FLUTUANTES ELEGANTES */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
@@ -92,29 +85,15 @@
       .cal-layout { grid-template-columns: 1fr; }
       .sidebar { display: none; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      
-      .mobile-topbar-bar {
-        display: flex; justify-content: space-between; align-items: center;
-        background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
-        margin: -16px -16px 20px -16px;
-      }
-      
-      .mobile-bottom-nav {
-        display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-        background: white; border-top: 1px solid #e2e8f0; padding: 10px 0;
-        justify-content: space-around; align-items: center;
-        z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
-      }
-      .mob-nav-item {
-        display: flex; flex-direction: column; align-items: center;
-        text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px;
-      }
+      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin: -16px -16px 20px -16px; }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2563eb; }
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
 
-  <!-- Scripts do Firebase para suporte -->
+  <!-- Scripts do Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -199,7 +178,33 @@
     </div>
   </main>
 
-  <!-- MODAL DE EDIÇÃO DE RESERVA PELO ADMIN -->
+  <!-- MODAL FLUTUANTE ELEGANTE DE NOVA RESERVA -->
+  <div class="modal-overlay" id="modalNovaReserva">
+    <div class="modal-card">
+      <h3 class="modal-title">Nova Reserva</h3>
+      <input type="hidden" id="reservaDataSelecionada">
+      
+      <div class="form-group">
+        <label>Nome da Reunião</label>
+        <input type="text" id="inputTituloReserva" placeholder="Ex: Planeamento Estratégico">
+      </div>
+
+      <div class="form-group">
+        <label>Horário de Início e Fim</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="time" id="inputHoraInicio" style="flex:1;">
+          <input type="time" id="inputHoraFim" style="flex:1;">
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="document.getElementById('modalNovaReserva').style.display='none'">Cancelar</button>
+        <button class="btn-save" onclick="confirmarCriacaoReserva()">Confirmar Reserva</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL FLUTUANTE ELEGANTE DE EDIÇÃO DE RESERVA (ADMIN) -->
   <div class="modal-overlay" id="modalEditarReserva">
     <div class="modal-card">
       <h3 class="modal-title">Editar Reserva (Admin)</h3>
@@ -207,15 +212,17 @@
       
       <div class="form-group">
         <label>Título da Reunião</label>
-        <input type="text" id="editTitulo" placeholder="Ex: Planeamento Estratégico">
+        <input type="text" id="editTitulo" placeholder="Ex: Alinhamento de Equipa">
       </div>
+
       <div class="form-group">
-        <label>Novo Horário (Início - Fim)</label>
+        <label>Horário (Início e Fim)</label>
         <div style="display: flex; gap: 8px;">
           <input type="time" id="editInicio" style="flex:1;">
           <input type="time" id="editFim" style="flex:1;">
         </div>
       </div>
+
       <div class="form-group">
         <label>Utilizador Responsável</label>
         <input type="text" id="editResponsavel" placeholder="Ex: Alex">
@@ -237,7 +244,6 @@
   </nav>
 
   <script>
-    // Funções globais de administração de reservas integradas na Agenda
     window.usuarioEhAdminGlobal = false;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -266,7 +272,47 @@
       });
     });
 
-    // Funções chamadas pelos botões de Admin nos blocos de agendamento
+    // Funções globais interceptadas para o calendario.js
+    window.abrirModalNovaReservaCustom = function(dataStr, horaPadrao) {
+      document.getElementById("reservaDataSelecionada").value = dataStr;
+      document.getElementById("inputTituloReserva").value = "";
+      document.getElementById("inputHoraInicio").value = horaPadrao || "08:00";
+      document.getElementById("inputHoraFim").value = "09:00";
+      document.getElementById("modalNovaReserva").style.display = "flex";
+    };
+
+    window.confirmarCriacaoReserva = function() {
+      const titulo = document.getElementById("inputTituloReserva").value.trim();
+      const inicio = document.getElementById("inputHoraInicio").value;
+      const fim = document.getElementById("inputHoraFim").value;
+      const data = document.getElementById("reservaDataSelecionada").value;
+
+      if (!titulo) {
+        alert("Por favor, insira o nome da reunião.");
+        return;
+      }
+
+      // Dispara a criação no Firestore ou atualiza a agenda
+      const user = firebase.auth().currentUser;
+      const responsavelNome = user ? user.email.split('@')[0] : "Utilizador";
+
+      firebase.firestore().collection("reservas").add({
+        titulo: titulo,
+        horarioInicio: inicio,
+        horarioFim: fim,
+        data: data,
+        responsavel: responsavelNome,
+        tipo: "Reunião",
+        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+      }).then(() => {
+        document.getElementById("modalNovaReserva").style.display = "none";
+        alert("Reserva efetuada com sucesso!");
+        window.location.reload();
+      }).catch(err => {
+        alert("Erro ao efetuar reserva: " + err.message);
+      });
+    };
+
     window.abrirModalEdicaoReserva = function(id, titulo, inicio, fim, responsavel) {
       document.getElementById("editReservaId").value = id;
       document.getElementById("editTitulo").value = titulo || "";
