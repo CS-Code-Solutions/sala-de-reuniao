@@ -4,14 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Entrar</title>
-  <link rel="stylesheet" href="css/global.css">
   <link rel="icon" href="ico.png" type="image/png">
   <style>
     body {
       margin: 0;
       padding: 16px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: url('fundo.jpg') no-repeat center center fixed;
+      background-color: #0f172a;
+      background-image: url('fundo.jpg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
       background-size: cover;
       display: flex;
       justify-content: center;
@@ -25,14 +28,24 @@
       border-radius: 16px;
       width: 100%;
       max-width: 360px;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       text-align: center;
       box-sizing: border-box;
+      /* Borda inicial sutil e transição suave */
+      border: 2px solid #e2e8f0;
+      transition: all 0.3s ease-in-out;
+    }
+    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima do cartão */
+    .login-card:hover {
+      border-color: #d4af37;
+      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.35);
     }
     .login-logo {
       max-width: 160px;
+      max-height: 70px;
+      width: auto;
       height: auto;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       object-fit: contain;
       user-select: none;
       -webkit-user-select: none;
@@ -53,20 +66,17 @@
     }
     .form-group input {
       padding: 11px 12px;
-      border: 2px solid #cbd5e1;
+      border: 1px solid #cbd5e1;
       border-radius: 8px;
       font-size: 14px;
       outline: none;
-      transition: all 0.2s ease-in-out;
+      transition: border-color 0.2s, box-shadow 0.2s;
       background: #f8fafc;
-    }
-    .form-group input:hover {
-      border-color: #94a3b8;
     }
     .form-group input:focus {
       background: #ffffff;
       border-color: #0d9488;
-      box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
     }
     .btn-login {
       width: 100%;
@@ -79,15 +89,10 @@
       font-size: 15px;
       cursor: pointer;
       margin-top: 8px;
-      transition: all 0.2s ease-in-out;
+      transition: background 0.2s;
     }
     .btn-login:hover {
       background: #0f766e;
-      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
-      transform: translateY(-1px);
-    }
-    .btn-login:active {
-      transform: translateY(0);
     }
     .login-footer {
       margin-top: 20px;
@@ -106,7 +111,8 @@
 </head>
 <body>
   <div class="login-card">
-    <img src="login.png" alt="Logo MeetingRoom" class="login-logo">
+    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
+    <h2 id="fallback-title" style="display:none; color: #1e293b; margin-bottom: 24px; font-size: 22px;">MeetingRoom</h2>
     
     <div class="form-group">
       <label>E-mail</label>
