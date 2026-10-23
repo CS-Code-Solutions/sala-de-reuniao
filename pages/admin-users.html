@@ -8,66 +8,29 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .page-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .page-header h1 { font-size: 24px; color: #1e293b; }
-    .brand-logo {
-      max-height: 55px; /* Logotipo ampliado e elegante */
-      width: 100%;
-      object-fit: contain;
+    :root {
+      --sidebar-bg: #0f172a;
+      --accent-color: #0d9488;
+      --accent-hover: #0f766e;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
     }
-    
-    .user-card {
-      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
-      transition: all 0.2s;
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
     }
-    .user-card:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
-    
-    .badge {
-      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px;
-    }
-    .badge.admin { background: #eff6ff; color: #2563eb; }
-    .badge.user { background: #f1f5f9; color: #64748b; }
 
-    .action-btns { display: flex; gap: 8px; }
-    .btn-icon {
-      background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 10px;
-      cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center;
-    }
-    .btn-icon:hover { background: #f8fafc; }
-    .btn-icon.delete:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
-    
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
-    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
-    .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
-    
-    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
-    .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
-    .form-group input, .form-group select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
-    
-    .email-input-group { display: flex; align-items: center; border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; background: #fff; }
-    .email-input-group input { border: none; flex: 1; padding: 10px 12px; outline: none; }
-    .email-suffix { background: #f1f5f9; padding: 10px 12px; font-size: 13px; font-weight: 600; color: #64748b; border-left: 1px solid #cbd5e1; }
-
-    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
-    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-    /* MODAL DE ALERTA E CONFIRMAÇÃO ELEGANTE */
-    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
-    .btn-modal-ok { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-ok:hover { background: #1d4ed8; }
-    .btn-modal-danger { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-danger:hover { background: #b91c1c; }
-
-    .mobile-topbar-bar { display: none; }
-    .mobile-bottom-nav { display: none; }
-
-    @media (max-width: 1024px) {
-.sidebar {
+    .sidebar {
       width: 260px;
-      background-color: #0f172a;
+      background-color: var(--sidebar-bg);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -78,13 +41,132 @@
       left: 0;
       z-index: 100;
     }
-      .brand-area {
+
+    .brand-area {
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 10px 12px 24px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
       margin-bottom: 12px;
+    }
+
+    .brand-logo {
+      max-height: 55px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: rgba(13, 148, 136, 0.25);
+      color: #2dd4bf;
+    }
+
+    .user-profile-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-text h4 {
+      font-size: 13px;
+      color: white;
+      margin: 0;
+    }
+
+    .user-info-text p {
+      font-size: 11px;
+      color: #94a3b8;
+      margin: 2px 0 0 0;
+    }
+
+    .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; }
+    
+    .user-card {
+      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
+      transition: all 0.2s;
+    }
+    .user-card:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    
+    .badge {
+      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px;
+    }
+    .badge.admin { background: #f0fdfa; color: var(--accent-color); border: 1px solid #ccfbf1; }
+    .badge.user { background: #f1f5f9; color: var(--text-muted); }
+
+    .action-btns { display: flex; gap: 8px; }
+    .btn-icon {
+      background: white; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px;
+      cursor: pointer; font-size: 14px; transition: 0.2s; display: flex; align-items: center; justify-content: center;
+    }
+    .btn-icon:hover { background: #f8fafc; }
+    .btn-icon.delete:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
+    
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    
+    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group select { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
+    
+    .email-input-group { display: flex; align-items: center; border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; background: #fff; }
+    .email-input-group input { border: none; flex: 1; padding: 10px 12px; outline: none; }
+    .email-suffix { background: #f1f5f9; padding: 10px 12px; font-size: 13px; font-weight: 600; color: var(--text-muted); border-left: 1px solid var(--border-color); }
+
+    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-ok:hover { background: var(--accent-hover); }
+    .btn-modal-danger { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-danger:hover { background: #b91c1c; }
+
+    .mobile-topbar-bar { display: none; }
+    .mobile-bottom-nav { display: none; }
+
+    @media (max-width: 1024px) {
+      .sidebar { display: none; }
+      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
+      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
+      .mob-nav-item.active { color: #2dd4bf; }
+      .mob-nav-item span { font-size: 18px; }
     }
   </style>
 
@@ -94,12 +176,11 @@
 </head>
 <body>
 
- <aside class="sidebar">
+  <aside class="sidebar">
     <div>
       <div class="brand-area">
         <img src="../cabe.png" alt="Logo" class="brand-logo">
       </div>
-
       <nav class="nav-links">
         <a href="calendar.html">📅 Agenda</a>
         <a href="my-reservations.html">📋 Minhas reservas</a>
@@ -107,10 +188,9 @@
         
         <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
         <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+        <a href="admin-users.html" class="active admin-only-item" style="display:none;">👤 Usuários</a>
       </nav>
     </div>
-
     <div class="user-profile-box">
       <div class="user-info-text">
         <h4 id="userNameDisplay">Carregando...</h4>
@@ -120,25 +200,24 @@
     </div>
   </aside>
 
-  <main class="main-content page-wrapper">
+  <main class="page-wrapper">
     <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
-      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #2563eb;">Perfil</span>
+      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 32px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #ffffff;">Perfil</span>
     </div>
 
     <header class="page-header">
       <h1>Gerenciamento de Utilizadores</h1>
-      <button onclick="abrirModalUsuario()" style="padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Novo Utilizador</button>
+      <button onclick="abrirModalUsuario()" style="padding: 10px 16px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Novo Utilizador</button>
     </header>
 
-    <section class="schedule-grid-container">
-      <div id="listaUtilizadores" class="time-slots" style="display: flex; flex-direction: column; gap: 16px;">
-        <p style="color: #64748b; font-size: 14px;">A carregar utilizadores...</p>
+    <section>
+      <div id="listaUtilizadores" style="display: flex; flex-direction: column; gap: 16px;">
+        <p style="color: var(--text-muted); font-size: 14px;">A carregar utilizadores...</p>
       </div>
     </section>
   </main>
 
-  <!-- MODAL DE CRIAR/EDITAR UTILIZADOR -->
   <div class="modal-overlay" id="modalUsuario">
     <div class="modal-card">
       <h3 class="modal-title" id="modalTitleText">Novo Utilizador</h3>
@@ -187,12 +266,11 @@
     </div>
   </div>
 
-  <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
   <div class="modal-overlay" id="modalConfirmacaoExclusao">
     <div class="modal-alert-card">
       <div style="font-size: 32px;">⚠️</div>
       <h3 class="modal-title">Remover Utilizador</h3>
-      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="textoConfirmacaoExclusao">Tem certeza que deseja remover as permissões de acesso?</p>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="textoConfirmacaoExclusao">Tem certeza que deseja remover as permissões de acesso?</p>
       <input type="hidden" id="idUtilizadorParaExcluir">
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
@@ -201,12 +279,11 @@
     </div>
   </div>
 
-  <!-- MODAL DE ALERTA PERSONALIZADO -->
   <div class="modal-overlay" id="modalAlerta">
     <div class="modal-alert-card">
       <div style="font-size: 32px;" id="modalAlertaIcone">🎉</div>
       <h3 class="modal-title" id="modalAlertaTitulo">Sucesso</h3>
-      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
       <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
     </div>
   </div>
@@ -238,6 +315,7 @@
     firebase.auth().onAuthStateChanged(async (user) => {
       if (user) {
         let nomeExibicao = user.email.split('@')[0];
+        let cargoTexto = "Utilizador";
         let usuarioEhAdmin = false;
 
         try {
@@ -249,19 +327,22 @@
             }
             if (dados.cargo === "Administrador") {
               usuarioEhAdmin = true;
+              cargoTexto = "Administrador";
             }
           }
         } catch(e) {}
 
         if (user.email.toLowerCase().includes("admin") || user.email.toLowerCase().includes("teste")) {
           usuarioEhAdmin = true;
+          cargoTexto = "Administrador";
         }
 
         document.getElementById("userNameDisplay").innerText = nomeExibicao;
+        document.getElementById("userRoleDisplay").innerText = cargoTexto;
         document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeExibicao;
 
         if (usuarioEhAdmin) {
-          document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
+          document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
         }
 
         carregarUsuariosDoFirestore();
@@ -291,7 +372,7 @@
         listaUsuariosGlobal = [];
         
         if (querySnapshot.empty) {
-          container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Nenhum utilizador registado.</p>`;
+          container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">Nenhum utilizador registado.</p>`;
           return;
         }
         
@@ -304,8 +385,8 @@
           div.className = "user-card";
           div.innerHTML = `
             <div style="flex: 1;">
-              <strong style="color: #1e293b; font-size: 16px;">${user.nome || 'Sem nome'}</strong> <span style="color: #64748b; font-size: 13px;">(Apelido: <b>${user.apelido || 'N/D'}</b>)</span>
-              <p style="color: #64748b; font-size: 13px; margin: 4px 0;">${user.email || 'E-mail não registado'} • 📱 WhatsApp: ${user.whatsapp || 'Não cadastrado'}</p>
+              <strong style="color: var(--text-main); font-size: 16px;">${user.nome || 'Sem nome'}</strong> <span style="color: var(--text-muted); font-size: 13px;">(Apelido: <b>${user.apelido || 'N/D'}</b>)</span>
+              <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0;">${user.email || 'E-mail não registado'} • 📱 WhatsApp: ${user.whatsapp || 'Não cadastrado'}</p>
               <span class="badge ${isAd ? 'admin' : 'user'}">${user.cargo || 'Usuário'}</span>
             </div>
             <div class="action-btns">
