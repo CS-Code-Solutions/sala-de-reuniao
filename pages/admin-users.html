@@ -161,7 +161,7 @@
     }
 
     .btn-primary {
-      background: var(--accent-color);
+      background: #2563eb;
       color: white;
       border: none;
       padding: 10px 16px;
@@ -173,7 +173,7 @@
     }
 
     .btn-primary:hover {
-      background: var(--accent-hover);
+      background: #1d4ed8;
     }
 
     .users-grid {
@@ -190,7 +190,7 @@
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
     }
 
     .user-card h3 {
@@ -204,6 +204,36 @@
       font-size: 13px;
       color: var(--text-muted);
       margin: 0;
+    }
+
+    .user-card-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+      border-top: 1px solid var(--border-color);
+      padding-top: 10px;
+    }
+
+    .btn-action-icon {
+      background: #f8fafc;
+      border: 1px solid var(--border-color);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .badge-role {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #e0f2fe;
+      color: #0369a1;
+      width: fit-content;
     }
 
     .mobile-topbar-bar { display: none; }
@@ -276,14 +306,13 @@
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
-    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
     <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
+    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
     <a href="admin-users.html" class="mob-nav-item active admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
 
   <script>
     let db;
-
     document.addEventListener("DOMContentLoaded", () => {
       const firebaseConfig = {
         apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
@@ -349,9 +378,13 @@
           const card = document.createElement("div");
           card.className = "user-card";
           card.innerHTML = `
-            <h3>${u.nome || 'Utilizador'}</h3>
+            <h3>${u.nome || u.apelido || 'Utilizador'}</h3>
             <p>📧 ${u.email || 'Sem e-mail'}</p>
-            <p>🏷️ Cargo: <b>${u.cargo || 'Utilizador'}</b></p>
+            <div><span class="badge-role">${u.cargo || 'Usuário'}</span></div>
+            <div class="user-card-actions">
+              <button class="btn-action-icon">✏️ Editar</button>
+              <button class="btn-action-icon" style="color: #dc2626;">🗑️ Excluir</button>
+            </div>
           `;
           container.appendChild(card);
         });
