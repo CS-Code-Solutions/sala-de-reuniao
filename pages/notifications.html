@@ -96,15 +96,26 @@
           <p>Escolha como deseja ser notificado sobre as suas reservas.</p>
         </div>
 
-        <div class="notif-item">
-          <div class="notif-info">
-            <h4>E-mail</h4>
-            <p>Confirmações e cancelamentos.</p>
+        <!-- E-MAIL COM CAMPO FLUTUANTE PARA E-MAIL REAL -->
+        <div class="notif-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="notif-info">
+              <h4>E-mail</h4>
+              <p>Confirmações e cancelamentos.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleEmail" onchange="toggleCampoEmailReal(this)">
+              <span class="slider"></span>
+            </label>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="toggleEmail" onchange="salvarPreferenciaNotificacao()">
-            <span class="slider"></span>
-          </label>
+          
+          <div id="grupoEmailReal" style="display: none; margin-top: 4px; flex-direction: column; gap: 6px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <label style="font-size: 12px; font-weight: 600; color: #475569;">E-mail real para receber os avisos:</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="email" id="inputEmailReal" placeholder="seu.email@real.com" style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; outline: none; background: white;">
+              <button onclick="salvarEmailReal()" style="padding: 8px 14px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Salvar</button>
+            </div>
+          </div>
         </div>
 
         <div class="notif-item">
@@ -182,9 +193,18 @@
 
               // Carrega preferências salvas se existirem
               if (dados.notificacoes) {
-                document.getElementById("toggleEmail").checked = !!dados.notificacoes.email;
+                const emailAtivo = !!dados.notificacoes.email;
+                document.getElementById("toggleEmail").checked = emailAtivo;
                 document.getElementById("toggleCelular").checked = !!dados.notificacoes.celular;
                 document.getElementById("toggleOutras").checked = !!dados.notificacoes.outras;
+
+                if (emailAtivo) {
+                  document.getElementById("grupoEmailReal").style.display = "flex";
+                }
+              }
+
+              if (dados.emailRealNotificacao) {
+                document.getElementById("inputEmailReal").value = dados.emailRealNotificacao;
               }
             }
           } catch(e) {}
@@ -216,6 +236,35 @@
       document.getElementById("modalAlerta").style.display = "none";
     }
 
+    function toggleCampoEmailReal(checkbox) {
+      const grupoEmail = document.getElementById("grupoEmailReal");
+      if (checkbox.checked) {
+        grupoEmail.style.display = "flex";
+      } else {
+        grupoEmail.style.display = "none";
+        salvarPreferenciaNotificacao();
+      }
+    }
+
+    function salvarEmailReal() {
+      const emailReal = document.getElementById("inputEmailReal").value.trim();
+      if (!emailReal || !emailReal.includes("@")) {
+        mostrarAlerta("Atenção", "Por favor, insira um e-mail válido.", "⚠️");
+        return;
+      }
+
+      if (!usuarioAtualId) return;
+
+      firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
+        emailRealNotificacao: emailReal,
+        "notificacoes.email": true
+      }).then(() => {
+        mostrarAlerta("Sucesso", "E-mail de notificação guardado com sucesso!", "🎉");
+      }).catch(err => {
+        mostrarAlerta("Erro", "Erro ao salvar e-mail: " + err.message, "❌");
+      });
+    }
+
     async function tratarToggleCelular(checkbox) {
       if (checkbox.checked) {
         if (!("Notification" in window)) {
@@ -226,7 +275,7 @@
 
         if (Notification.permission === "denied") {
           checkbox.checked = false;
-          mostrarAlerta("Permissão Bloqueada", "As notificações estão bloqueadas nas definições do navegador. Toque no ícone de definições/cadeado na barra de endereço acima, vá em Permissões e redefina o acesso.", "🔒");
+          mostrarAlerta("Permissão Bloqueada", "As notificações estão bloqueadas nas definições do navegador.", "🔒");
           return;
         }
 
