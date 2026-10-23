@@ -56,13 +56,15 @@
     .brand-area {
       display: flex;
       align-items: center;
-      padding: 0 12px 20px 12px;
+      justify-content: center;
+      padding: 10px 12px 24px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
     }
 
     .brand-logo {
-      max-height: 38px;
-      width: auto;
+      max-height: 55px;
+      width: 100%;
       object-fit: contain;
     }
 
@@ -70,7 +72,7 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      margin-top: 24px;
+      margin-top: 10px;
       flex: 1;
     }
 
@@ -95,28 +97,6 @@
     .nav-links a.active {
       background: rgba(13, 148, 136, 0.15);
       color: #2dd4bf;
-    }
-
-    .btn-sidebar-nova {
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 24px;
-      transition: background 0.2s;
-      text-decoration: none;
-    }
-
-    .btn-sidebar-nova:hover {
-      background: var(--accent-hover);
     }
 
     .user-profile-box {
@@ -368,8 +348,6 @@
         <img src="../cabe.png" alt="Logo" class="brand-logo">
       </div>
 
-      <button class="btn-sidebar-nova" onclick="abrirModalReservaRapida()">+ Nova reserva</button>
-
       <nav class="nav-links">
         <a href="calendar.html" class="active">📅 Agenda</a>
         <a href="my-reservations.html">📋 Minhas reservas</a>
@@ -392,7 +370,7 @@
 
   <main class="main-content calendar-wrapper">
     <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 28px;">
+      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 35px;">
       <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: var(--text-main);">Perfil</span>
     </div>
 
@@ -412,7 +390,7 @@
           <button onclick="alterarVisao('semana', this)">Semana</button>
           <button onclick="alterarVisao('mes', this)">Mês</button>
         </div>
-        <select class="room-select" id="salaSelect" onchange="carregarAgenda()">
+        <select class="room-select" id="salaSelect" onchange="mudarSalaSelecionada()">
           <option value="Sala 01">Sala de Reuniões 01</option>
           <option value="Sala 02">Sala de Reuniões 02</option>
         </select>
@@ -434,11 +412,11 @@
         <div class="side-card">
           <h3>Detalhes da sala</h3>
           <div class="room-info">
-            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
+            <img id="sidebarSalaImg" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
             <div class="room-details">
               <h4 id="sidebarNomeSala">Sala de Reuniões 01</h4>
-              <p>👥 Capacidade: 8 pessoas</p>
-              <p>💻 Equipamentos: TV, Videoconferência...</p>
+              <p id="sidebarCapacidade">👥 Capacidade: 8 pessoas</p>
+              <p id="sidebarEquipamentos">💻 Equipamentos: TV, Videoconferência...</p>
             </div>
           </div>
         </div>
@@ -575,12 +553,31 @@
           }
 
           ativarMonitoramentoTempoReal(user.uid);
-          carregarAgenda();
+          mudarSalaSelecionada();
         } else {
           window.location.href = "../index.html";
         }
       });
     });
+
+    function mudarSalaSelecionada() {
+      const sala = document.getElementById("salaSelect").value;
+      document.getElementById("sidebarNomeSala").innerText = sala;
+      document.getElementById("salaHeaderTitulo").innerText = sala;
+
+      // Atualiza dinamicamente as informações da sala na barra lateral
+      if (sala === "Sala 01") {
+        document.getElementById("sidebarCapacidade").innerText = "👥 Capacidade: 8 pessoas";
+        document.getElementById("sidebarEquipamentos").innerText = "💻 Equipamentos: TV, Videoconferência...";
+        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
+      } else if (sala === "Sala 02") {
+        document.getElementById("sidebarCapacidade").innerText = "👥 Capacidade: 12 pessoas";
+        document.getElementById("sidebarEquipamentos").innerText = "💻 Equipamentos: Projetor, Som, TV 4K";
+        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
+      }
+
+      carregarAgenda();
+    }
 
     function ativarMonitoramentoTempoReal(userId) {
       db.collection("usuarios").doc(userId).get().then(doc => {
@@ -685,7 +682,6 @@
       db.collection("reservas")
         .where("sala", "==", sala)
         .onSnapshot(async (snapshot) => {
-          // Evita renderizar se o container estiver vazio ou em transição indevida
           let fragmentoHTML = "";
           let reservasMapa = {};
           
@@ -835,11 +831,6 @@
 
       window.dataSelecionadaGlobal = dataStr;
       document.getElementById("modalNovaReserva").style.display = "flex";
-    }
-
-    function abrirModalReservaRapida() {
-      const hojeStr = new Date().toISOString().split('T')[0];
-      abrirModalReserva("09:00", hojeStr);
     }
 
     function abrirModalNegociacao(sala, data, horario, responsavel, whatsapp) {
