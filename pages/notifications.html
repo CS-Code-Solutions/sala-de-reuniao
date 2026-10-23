@@ -4,7 +4,7 @@
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeetingRoom - Notificações</title>
+  <title>MeetingRoom - Configurações de Notificações</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
@@ -161,57 +161,88 @@
       border: 1px solid var(--border-color);
       padding: 24px;
       box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-      max-width: 600px;
+      max-width: 500px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 20px;
     }
 
     .settings-card h3 {
-      font-size: 16px;
+      font-size: 18px;
       color: var(--text-main);
-      margin: 0;
+      margin: 0 0 4px 0;
       font-weight: 700;
     }
 
-    .form-group {
+    .setting-item {
       display: flex;
-      flex-direction: column;
-      gap: 6px;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-color);
+      gap: 16px;
     }
 
-    .form-group label {
-      font-size: 13px;
+    .setting-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .setting-info h4 {
+      font-size: 14px;
+      color: var(--text-main);
+      margin: 0 0 4px 0;
       font-weight: 600;
+    }
+
+    .setting-info p {
+      font-size: 12px;
       color: var(--text-muted);
+      margin: 0;
     }
 
-    .form-group input {
-      padding: 10px;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      font-size: 14px;
-      outline: none;
+    /* Toggle Switch Style */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 24px;
+      flex-shrink: 0;
     }
 
-    .form-group input:focus {
-      border-color: var(--accent-color);
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
     }
 
-    .btn-save {
-      background: var(--accent-color);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 14px;
+    .slider {
+      position: absolute;
       cursor: pointer;
-      transition: background 0.2s;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .3s;
+      border-radius: 24px;
     }
 
-    .btn-save:hover {
-      background: var(--accent-hover);
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2563eb;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(24px);
     }
 
     .mobile-topbar-bar { display: none; }
@@ -269,35 +300,61 @@
     </div>
 
     <div class="page-header">
-      <h1>Configuração de Notificações</h1>
+      <h1>Configurações de Notificações</h1>
       <p>Gerencie como recebe os avisos das reuniões.</p>
     </div>
 
     <div class="settings-card">
-      <h3>Preferências de Contacto</h3>
-      <div class="form-group">
-        <label>E-mail Real para Notificações</label>
-        <input type="email" id="inputEmailNotificacao" placeholder="seuemail@exemplo.com">
+      <div>
+        <h3>Receber notificações</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin: 0 0 16px 0;">Escolha como deseja ser notificado sobre as suas reservas.</p>
       </div>
-      <div class="form-group">
-        <label>Número de WhatsApp (com DDD)</label>
-        <input type="text" id="inputWhatsapp" placeholder="Ex: 5511988887777">
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>E-mail</h4>
+          <p>Confirmações e cancelamentos.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleEmail" checked onchange="salvarPreferencia()">
+          <span class="slider"></span>
+        </label>
       </div>
-      <button class="btn-save" onclick="salvarConfiguracoes()">Guardar Configurações</button>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Notificações no celular</h4>
+          <p>Avisos em tempo real.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleCelular" onchange="pedirPermissaoNotificacao(this)">
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <h4>Reservas de outras pessoas</h4>
+          <p>Alerta de novas marcações na mesma sala.</p>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggleOutras" onchange="salvarPreferencia()">
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
   </main>
 
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
-    <a href="notifications.html" class="mob-nav-item active"><span>🔔</span> Avisos</a>
     <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
+    <a href="notifications.html" class="mob-nav-item active"><span>🔔</span> Avisos</a>
     <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
 
   <script>
-    let db, usuarioAtualId = null;
-
+    let db, userIdAtual = null;
     document.addEventListener("DOMContentLoaded", () => {
       const firebaseConfig = {
         apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
@@ -312,7 +369,7 @@
 
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
-          usuarioAtualId = user.uid;
+          userIdAtual = user.uid;
           let apelido = user.email.split('@')[0];
           let cargoTexto = "Utilizador";
           let ehAdmin = false;
@@ -326,8 +383,11 @@
                 ehAdmin = true;
                 cargoTexto = "Administrador";
               }
-              if (dados.emailRealNotificacao) document.getElementById("inputEmailNotificacao").value = dados.emailRealNotificacao;
-              if (dados.whatsapp) document.getElementById("inputWhatsapp").value = dados.whatsapp;
+              if (dados.notificacoes) {
+                document.getElementById("toggleEmail").checked = dados.notificacoes.email ?? true;
+                document.getElementById("toggleCelular").checked = dados.notificacoes.celular ?? false;
+                document.getElementById("toggleOutras").checked = dados.notificacoes.outras ?? false;
+              }
             }
           } catch(e) {}
 
@@ -349,19 +409,34 @@
       });
     });
 
-    function salvarConfiguracoes() {
-      if (!usuarioAtualId) return;
-      const emailRealNotificacao = document.getElementById("inputEmailNotificacao").value.trim();
-      const whatsapp = document.getElementById("inputWhatsapp").value.trim();
+    function pedirPermissaoNotificacao(checkbox) {
+      if (checkbox.checked) {
+        if ("Notification" in window) {
+          Notification.requestPermission().then(permission => {
+            if (permission !== "granted") {
+              alert("Permissão para notificações foi negada no navegador.");
+              checkbox.checked = false;
+            }
+            salvarPreferencia();
+          });
+        } else {
+          alert("Este navegador não suporta notificações.");
+          checkbox.checked = false;
+        }
+      } else {
+        salvarPreferencia();
+      }
+    }
 
-      db.collection("usuarios").doc(usuarioAtualId).set({
-        emailRealNotificacao: emailRealNotificacao,
-        whatsapp: whatsapp
-      }, { merge: true }).then(() => {
-        alert("Configurações salvas com sucesso!");
-      }).catch(err => {
-        alert("Erro ao salvar: " + err.message);
-      });
+    function salvarPreferencia() {
+      if (!userIdAtual) return;
+      const email = document.getElementById("toggleEmail").checked;
+      const celular = document.getElementById("toggleCelular").checked;
+      const outras = document.getElementById("toggleOutras").checked;
+
+      db.collection("usuarios").doc(userIdAtual).set({
+        notificacoes: { email, celular, outras }
+      }, { merge: true }).catch(err => console.log("Erro ao salvar preferências:", err));
     }
   </script>
 
