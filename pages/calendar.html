@@ -304,9 +304,7 @@
             document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
           }
 
-          // Ativa o monitoramento em tempo real de notificações no telemóvel
           ativarMonitoramentoTempoReal(user.uid);
-
           carregarAgenda();
         } else {
           window.location.href = "../index.html";
@@ -314,7 +312,6 @@
       });
     });
 
-    // Função de monitorização de reservas em tempo real para notificações no celular
     function ativarMonitoramentoTempoReal(userId) {
       db.collection("usuarios").doc(userId).get().then(doc => {
         if (doc.exists && doc.data().notificacoes && doc.data().notificacoes.celular) {
@@ -349,7 +346,7 @@
       carregarAgenda();
     }
 
-        function atualizarCabecalhoData() {
+    function atualizarCabecalhoData() {
       const spanData = document.getElementById("dataAtualExibicao");
       const spanHeader = document.getElementById("dataHeaderExibicao");
       let textoFormatado = "";
@@ -370,14 +367,12 @@
       else if (tipoVisaoAtual === 'mes') {
         const options = { month: 'long', year: 'numeric' };
         textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
-        // Letra maiúscula na primeira letra do mês
         textoFormatado = textoFormatado.charAt(0).toUpperCase() + textoFormatado.slice(1);
       }
 
       spanData.innerText = textoFormatado;
       spanHeader.innerText = textoFormatado;
     }
-
 
     function mudarData(direcao) {
       if (tipoVisaoAtual === 'dia') {
@@ -433,11 +428,23 @@
 
           if (tipoVisaoAtual === 'dia') {
             const reservasDia = reservasMapa[dataStr] || [];
-            const reservasMapeadas = {};
-            reservasDia.forEach(r => reservasMapeadas[r.horarioInicio] = r);
+
+            // Função que deteta se a hora está compreendida no intervalo da reserva (ex: 11:00 até 15:00)
+            const encontrarReservaParaHorario = (horaSlot) => {
+              for (const r of reservasDia) {
+                if (r.horarioInicio && r.horarioFim) {
+                  if (horaSlot >= r.horarioInicio && horaSlot <= r.horarioFim) {
+                    return r;
+                  }
+                } else if (r.horarioInicio === horaSlot) {
+                  return r;
+                }
+              }
+              return null;
+            };
 
             for (const hora of horariosPadrao) {
-              const reserva = reservasMapeadas[hora];
+              const reserva = encontrarReservaParaHorario(hora);
               const div = document.createElement("div");
 
               if (reserva) {
