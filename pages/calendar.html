@@ -672,14 +672,15 @@
           };
 
           // Disparo direto garantido com o Service ID e Template ID corretos
-          emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams)
+                    emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams)
             .then(response => {
-              console.log('E-mail real disparado com sucesso!', response.status, response.text);
+              console.log('E-mail real enviado com sucesso!', response.status, response.text);
             })
             .catch(error => {
               console.error('Erro no envio do EmailJS:', error);
+              alert('Erro ao enviar e-mail: Verifique os IDs no painel do EmailJS.');
             });
-        }
+
 
         document.getElementById("modalNovaReserva").style.display = "none";
         mostrarAlerta("Sucesso", "Reserva criada e e-mail enviado com sucesso!", "🎉");
