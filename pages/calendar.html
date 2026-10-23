@@ -100,10 +100,14 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <!-- EMAILJS SDK -->
+  <!-- EMAILJS SDK v4 -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script type="text/javascript">
-    emailjs.init("xk4_RSn-EbswoOlr3"); // Chave Pública
+    (function(){
+       emailjs.init({
+         publicKey: "xk4_RSn-EbswoOlr3"
+       });
+    })();
   </script>
 </head>
 <body>
@@ -617,7 +621,7 @@
       document.getElementById("modalNegociacao").style.display = "flex";
     }
 
-        async function salvarNovaReservaFirebase() {
+    async function salvarNovaReservaFirebase() {
       const titulo = document.getElementById("inputTituloReserva").value.trim();
       const inicio = document.getElementById("inputHoraInicio").value;
       const fim = document.getElementById("inputHoraFim").value;
@@ -663,7 +667,6 @@
         } catch(e) {}
 
         if (emailDestino) {
-          // Parâmetros alinhados exatamente com o seu template do EmailJS
           const templateParams = {
             to_email: emailDestino,
             to_name: nomeDestino,
@@ -671,7 +674,7 @@
             message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!`
           };
 
-          // Disparo utilizando o Service ID e Template ID corretos extraídos do seu painel
+          // Disparo direto com o Service ID e Template ID corretos
           emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams)
             .then(response => {
               console.log('E-mail real disparado com sucesso!', response.status, response.text);
