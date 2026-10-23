@@ -237,17 +237,6 @@
             </select>
           </div>
         </div>
-
-        <div class="notif-item">
-          <div class="notif-info">
-            <h4>Reservas de outras pessoas</h4>
-            <p>Alerta de novas marcações na mesma sala.</p>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="toggleOutras" onchange="salvarPreferenciaNotificacao()">
-            <span class="slider"></span>
-          </label>
-        </div>
       </div>
     </section>
   </main>
@@ -306,7 +295,6 @@
               if (dados.notificacoes) {
                 const emailAtivo = !!dados.notificacoes.email;
                 document.getElementById("toggleEmail").checked = emailAtivo;
-                document.getElementById("toggleOutras").checked = !!dados.notificacoes.outras;
                 if (dados.notificacoes.tempoAntecedencia) {
                   document.getElementById("selectTempoAntecedencia").value = dados.notificacoes.tempoAntecedencia;
                 }
@@ -385,7 +373,6 @@
 
       const notificacoes = {
         email: document.getElementById("toggleEmail").checked,
-        outras: document.getElementById("toggleOutras").checked,
         tempoAntecedencia: parseInt(document.getElementById("selectTempoAntecedencia").value) || 10
       };
 
