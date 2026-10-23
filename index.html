@@ -20,21 +20,23 @@
       box-sizing: border-box;
     }
     .login-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(8px);
+      background: #ffffff;
       padding: 32px 28px;
       border-radius: 16px;
       width: 100%;
       max-width: 360px;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
       text-align: center;
       box-sizing: border-box;
     }
     .login-logo {
-      max-width: 150px;
+      max-width: 160px;
       height: auto;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       object-fit: contain;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-drag: none;
     }
     .form-group {
       margin-bottom: 14px;
@@ -50,33 +52,52 @@
       letter-spacing: 0.3px;
     }
     .form-group input {
-      padding: 10px 12px;
-      border: 1px solid #cbd5e1;
+      padding: 11px 12px;
+      border: 2px solid #cbd5e1;
       border-radius: 8px;
       font-size: 14px;
       outline: none;
-      transition: all 0.2s ease;
-      background: #ffffff;
+      transition: all 0.2s ease-in-out;
+      background: #f8fafc;
+    }
+    .form-group input:hover {
+      border-color: #94a3b8;
     }
     .form-group input:focus {
+      background: #ffffff;
       border-color: #0d9488;
-      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+      box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.2);
     }
     .btn-login {
       width: 100%;
-      padding: 11px;
+      padding: 12px;
       background: #0d9488;
       color: white;
       border: none;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 14px;
+      font-size: 15px;
       cursor: pointer;
       margin-top: 8px;
-      transition: background 0.2s ease;
+      transition: all 0.2s ease-in-out;
     }
     .btn-login:hover {
       background: #0f766e;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);
+      transform: translateY(-1px);
+    }
+    .btn-login:active {
+      transform: translateY(0);
+    }
+    .login-footer {
+      margin-top: 20px;
+      padding-top: 14px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .login-footer p {
+      font-size: 11px;
+      color: #64748b;
+      margin: 0;
     }
   </style>
 
@@ -85,7 +106,6 @@
 </head>
 <body>
   <div class="login-card">
-    <!-- Logótipo fixo exclusivamente como login.png -->
     <img src="login.png" alt="Logo MeetingRoom" class="login-logo">
     
     <div class="form-group">
@@ -97,6 +117,10 @@
       <input type="password" id="senhaLogin" placeholder="••••••••" required>
     </div>
     <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+
+    <div class="login-footer">
+      <p>&copy; 2026 Viecelli | Powered by <strong>CS Code Solutions</strong></p>
+    </div>
   </div>
 
   <script>
