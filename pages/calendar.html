@@ -4,7 +4,7 @@
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SalaÁgil - Agenda</title>
+  <title>MeetingRoom - Agenda</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
@@ -45,35 +45,14 @@
     .brand-area {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 0 12px 24px 12px;
+      padding: 0 12px 20px 12px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .brand-icon {
-      width: 36px;
-      height: 36px;
-      background: var(--accent-color);
-      color: white;
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      font-size: 16px;
-    }
-
-    .brand-text h2 {
-      font-size: 16px;
-      color: white;
-      margin: 0;
-      font-weight: 700;
-    }
-
-    .brand-text p {
-      font-size: 11px;
-      color: #94a3b8;
-      margin: 2px 0 0 0;
+    .brand-logo {
+      max-height: 38px;
+      width: auto;
+      object-fit: contain;
     }
 
     .nav-links {
@@ -377,11 +356,7 @@
   <aside class="sidebar">
     <div>
       <div class="brand-area">
-        <div class="brand-icon">S</div>
-        <div class="brand-text">
-          <h2>SalaÁgil</h2>
-          <p>Reserva de salas</p>
-        </div>
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
       </div>
 
       <button class="btn-sidebar-nova" onclick="abrirModalReservaRapida()">+ Nova reserva</button>
@@ -390,7 +365,8 @@
         <a href="calendar.html" class="active">📅 Agenda</a>
         <a href="my-reservations.html">📋 Minhas reservas</a>
         <a href="notifications.html">🔔 Notificações</a>
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;">Administração</div>
+        
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
         <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
         <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
       </nav>
@@ -407,7 +383,7 @@
 
   <main class="main-content calendar-wrapper">
     <div class="mobile-topbar-bar">
-      <span style="font-weight: bold; color: var(--accent-color);">SalaÁgil</span>
+      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 28px;">
       <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: var(--text-main);">Perfil</span>
     </div>
 
@@ -532,6 +508,7 @@
     <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
     <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
     <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
 
   <script>
@@ -969,7 +946,6 @@
           };
 
           try {
-            // Passando a chave pública diretamente como 4º parâmetro para forçar o mapeamento e evitar o erro 404
             await window.emailjs.send(
               'service_d30n93a',
               'template_3uxpjzk',
@@ -995,7 +971,7 @@
         } else {
           mostrarAlerta(
             "Reserva criada; e-mail não enviado",
-            `A reserva foi salva, mas o envio de e-mail falhou: ${motivoFalhaEmail}. Verifique no painel do EmailJS se o serviço e o template estão publicados e ativos.`,
+            `A reserva foi salva, mas o envio de e-mail falhou: ${motivoFalhaEmail}.`,
             "⚠️"
           );
         }
