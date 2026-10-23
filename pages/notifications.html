@@ -138,7 +138,6 @@
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
     .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-ok:hover { background: var(--accent-hover); }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -197,8 +196,8 @@
     <section>
       <div class="notification-card">
         <div class="notif-header">
-          <h2>Receber notificações</h2>
-          <p>Escolha como deseja ser notificado sobre as suas reservas.</p>
+          <h2>Preferências de Avisos</h2>
+          <p>Configure como deseja receber os alertas das reuniões.</p>
         </div>
 
         <div class="notif-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
@@ -222,15 +221,21 @@
           </div>
         </div>
 
-        <div class="notif-item">
+        <div class="notif-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
           <div class="notif-info">
-            <h4>Notificações no celular</h4>
-            <p>Avisos em tempo real.</p>
+            <h4>Aviso de reunião próxima na tela</h4>
+            <p>Disparar alerta flutuante antes da reunião começar.</p>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="toggleCelular" onchange="tratarToggleCelular(this)">
-            <span class="slider"></span>
-          </label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Avisar com antecedência de:</label>
+            <select id="selectTempoAntecedencia" onchange="salvarPreferenciaNotificacao()" style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white; outline: none;">
+              <option value="5">5 minutos</option>
+              <option value="10" selected>10 minutos</option>
+              <option value="15">15 minutos</option>
+              <option value="30">30 minutos</option>
+              <option value="60">1 hora</option>
+            </select>
+          </div>
         </div>
 
         <div class="notif-item">
@@ -301,8 +306,10 @@
               if (dados.notificacoes) {
                 const emailAtivo = !!dados.notificacoes.email;
                 document.getElementById("toggleEmail").checked = emailAtivo;
-                document.getElementById("toggleCelular").checked = !!dados.notificacoes.celular;
                 document.getElementById("toggleOutras").checked = !!dados.notificacoes.outras;
+                if (dados.notificacoes.tempoAntecedencia) {
+                  document.getElementById("selectTempoAntecedencia").value = dados.notificacoes.tempoAntecedencia;
+                }
 
                 if (emailAtivo) {
                   document.getElementById("grupoEmailReal").style.display = "flex";
@@ -373,63 +380,13 @@
       });
     }
 
-    async function tratarToggleCelular(checkbox) {
-      if (checkbox.checked) {
-        if (!("Notification" in window)) {
-          mostrarAlerta("Atenção", "Este navegador não suporta notificações no celular.", "⚠️");
-          checkbox.checked = false;
-          return;
-        }
-
-        if (Notification.permission === "granted") {
-          salvarPreferenciaNotificacao();
-          new Notification("MeetingRoom", {
-            body: "Notificações no celular ativadas com sucesso!",
-            icon: "../ico.png"
-          });
-          return;
-        }
-
-        if (Notification.permission === "denied") {
-          checkbox.checked = false;
-          mostrarAlerta("Permissão Bloqueada", "As notificações estão bloqueadas nas definições do navegador. Permita nas configurações do site (cadeado na barra de endereços).", "🔒");
-          return;
-        }
-
-        try {
-          const permissao = await Notification.requestPermission();
-          if (permissao === "granted") {
-            salvarPreferenciaNotificacao();
-            new Notification("MeetingRoom", {
-              body: "Notificações no celular ativadas com sucesso!",
-              icon: "../ico.png"
-            });
-          } else {
-            checkbox.checked = false;
-            salvarPreferenciaNotificacao();
-            mostrarAlerta("Permissão Negada", "Para receber avisos, autorize as notificações nas definições do navegador.", "🔒");
-          }
-        } catch (e) {
-          if (Notification.permission === "granted") {
-            salvarPreferenciaNotificacao();
-          } else {
-            checkbox.checked = false;
-            salvarPreferenciaNotificacao();
-            mostrarAlerta("Atenção", "Por favor, verifique se as notificações estão permitidas no ícone de cadeado ao lado do endereço do site.", "⚠️");
-          }
-        }
-      } else {
-        salvarPreferenciaNotificacao();
-      }
-    }
-
     function salvarPreferenciaNotificacao() {
       if (!usuarioAtualId) return;
 
       const notificacoes = {
         email: document.getElementById("toggleEmail").checked,
-        celular: document.getElementById("toggleCelular").checked,
-        outras: document.getElementById("toggleOutras").checked
+        outras: document.getElementById("toggleOutras").checked,
+        tempoAntecedencia: parseInt(document.getElementById("selectTempoAntecedencia").value) || 10
       };
 
       firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
