@@ -649,7 +649,6 @@
       } else if (tipoVisaoAtual === 'semana') {
         dataAtualObj.setDate(dataAtualObj.getDate() + (direcao * 7));
       } else if (tipoVisaoAtual === 'mes') {
-        // Ao saltar mês, ajusta diretamente o mês no objeto de data
         dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
       }
       atualizarCabecalhoData();
@@ -660,8 +659,6 @@
       tipoVisaoAtual = visao;
       document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
       btnElement.classList.add("active");
-      
-      // Atualiza o cabeçalho de navegação instantaneamente conforme a visão selecionada
       atualizarCabecalhoData();
       carregarAgenda();
     }
@@ -694,33 +691,23 @@
           
           snapshot.forEach(doc => {
             const res = doc.data();
-            if (!reservasMapa[res.data]) reservasMapa[res.data] = [];
-            reservasMapa[res.data].push({ id: doc.id, ...res });
+            if (res.data === dataStr) {
+              if (!reservasMapa[res.horarioInicio]) {
+                reservasMapa[res.horarioInicio] = [];
+              }
+              reservasMapa[res.horarioInicio].push({ id: doc.id, ...res });
+            }
           });
 
           if (tipoVisaoAtual === 'dia') {
-            const reservasDia = reservasMapa[dataStr] || [];
-
-            const encontrarReservaParaHorario = (horaSlot) => {
-              for (const r of reservasDia) {
-                if (r.horarioInicio && r.horarioFim) {
-                  if (horaSlot >= r.horarioInicio && horaSlot <= r.horarioFim) {
-                    return r;
-                  }
-                } else if (r.horarioInicio === horaSlot) {
-                  return r;
-                }
-              }
-              return null;
-            };
-
             for (const hora of horariosPadrao) {
-              const reserva = encontrarReservaParaHorario(hora);
               const div = document.createElement("div");
+              const listaReservasSlot = reservasMapa[hora] || [];
 
-              if (reserva) {
+              if (listaReservasSlot.length > 0) {
                 div.className = "slot-row reserved";
-                
+                const reserva = listaReservasSlot[0];
+
                 let whatsappResponsavel = "";
                 if (reserva.userId) {
                   try {
@@ -776,8 +763,13 @@
               
               let htmlR = `<strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>`;
               
-              if (reservasMapa[diaStr]) {
-                reservasMapa[diaStr].forEach(r => {
+              let reservasDoDia = [];
+              snapshot.forEach(doc => {
+                if (doc.data().data === diaStr) reservasDoDia.push({ id: doc.id, ...doc.data() });
+              });
+
+              if (reservasDoDia.length > 0) {
+                reservasDoDia.forEach(r => {
                   htmlR += `
                     <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
                       <b>${r.horarioInicio}</b> - ${r.titulo}
@@ -829,8 +821,13 @@
 
               let htmlM = `<span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>`;
               
-              if (reservasMapa[diaStr]) {
-                htmlM += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${reservasMapa[diaStr].length} reunião(ões)</div>`;
+              let countReservasDia = 0;
+              snapshot.forEach(doc => {
+                if (doc.data().data === diaStr) countReservasDia++;
+              });
+
+              if (countReservasDia > 0) {
+                htmlM += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${countReservasDia} reunião(ões)</div>`;
               }
               card.innerHTML = htmlM;
               gridDiv.appendChild(card);
