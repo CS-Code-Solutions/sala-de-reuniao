@@ -100,15 +100,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <!-- EMAILJS SDK v4 -->
+  <!-- EMAILJS SDK -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script type="text/javascript">
-    (function(){
-       emailjs.init({
-         publicKey: "xk4_RSn-EbswoOlr3"
-       });
-    })();
-  </script>
 </head>
 <body>
 
@@ -674,8 +667,8 @@
             message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!`
           };
 
-          // Disparo direto com o Service ID e Template ID corretos
-          emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams)
+          // Disparo explícito passando a Public Key diretamente para garantir autenticação e evitar erros
+          emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams, 'xk4_RSn-EbswoOlr3')
             .then(response => {
               console.log('E-mail real disparado com sucesso!', response.status, response.text);
             })
