@@ -609,7 +609,6 @@
 
     function fecharModalAlerta() {
       document.getElementById("modalAlerta").style.display = "none";
-      carregarAgenda();
     }
 
     function atualizarCabecalhoData() {
@@ -673,7 +672,7 @@
     function carregarAgenda() {
       const sala = document.getElementById("salaSelect").value;
       const container = document.getElementById("gridHorarios");
-      container.innerHTML = "<p style='color: var(--text-muted);'>A sincronizar agenda...</p>";
+      container.innerHTML = "<p style='color: var(--text-muted);'>A sincronizar agenda em tempo real...</p>";
       document.getElementById("salaHeaderTitulo").innerText = sala;
 
       const dataStr = dataAtualObj.toISOString().split('T')[0];
@@ -681,8 +680,7 @@
 
       db.collection("reservas")
         .where("sala", "==", sala)
-        .get()
-        .then(async (snapshot) => {
+        .onSnapshot(async (snapshot) => {
           container.innerHTML = "";
           let reservasMapa = {};
           
@@ -833,9 +831,8 @@
             container.appendChild(wrapper);
           }
 
-        })
-        .catch(err => {
-          container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar reservas: ${err.message}</p>`;
+        }, (err) => {
+          container.innerHTML = `<p style="color: #ef4444;">Erro ao sincronizar reservas: ${err.message}</p>`;
         });
     }
 
