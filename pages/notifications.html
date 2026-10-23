@@ -264,7 +264,7 @@
       });
     }
 
-    async function tratarToggleCelular(checkbox) {
+        async function tratarToggleCelular(checkbox) {
       if (checkbox.checked) {
         if (!("Notification" in window)) {
           mostrarAlerta("Atenção", "Este navegador não suporta notificações no celular.", "⚠️");
@@ -272,9 +272,19 @@
           return;
         }
 
+        // Se já estiver permitido nas definições do navegador (como mostra o seu print), ativa direto!
+        if (Notification.permission === "granted") {
+          salvarPreferenciaNotificacao();
+          new Notification("MeetingRoom", {
+            body: "Notificações no celular ativadas com sucesso!",
+            icon: "../ico.png"
+          });
+          return;
+        }
+
         if (Notification.permission === "denied") {
           checkbox.checked = false;
-          mostrarAlerta("Permissão Bloqueada", "As notificações estão bloqueadas nas definições do navegador.", "🔒");
+          mostrarAlerta("Permissão Bloqueada", "As notificações estão bloqueadas nas definições do navegador. Permita nas configurações do site (cadeado na barra de endereços).", "🔒");
           return;
         }
 
@@ -292,9 +302,14 @@
             mostrarAlerta("Permissão Negada", "Para receber avisos, autorize as notificações nas definições do navegador.", "🔒");
           }
         } catch (e) {
-          checkbox.checked = false;
-          salvarPreferenciaNotificacao();
-          mostrarAlerta("Atenção", "Não foi possível solicitar a permissão automaticamente.", "⚠️");
+          // Se o navegador barrar a requisição automática mas estiver permitido no ícone de cadeado, assume como ativo
+          if (Notification.permission === "granted") {
+            salvarPreferenciaNotificacao();
+          } else {
+            checkbox.checked = false;
+            salvarPreferenciaNotificacao();
+            mostrarAlerta("Atenção", "Por favor, verifique se as notificações estão permitidas no ícone de cadeado ao lado do endereço do site.", "⚠️");
+          }
         }
       } else {
         salvarPreferenciaNotificacao();
