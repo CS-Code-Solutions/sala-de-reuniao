@@ -24,38 +24,38 @@
     }
     .login-card {
       background: #ffffff;
-      padding: 32px 28px;
-      border-radius: 16px;
+      padding: 36px 32px;
+      border-radius: 20px;
       width: 100%;
-      max-width: 360px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      max-width: 380px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
       text-align: center;
       box-sizing: border-box;
       /* Borda inicial sutil e transição suave */
       border: 2px solid #e2e8f0;
       transition: all 0.3s ease-in-out;
     }
-    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima do cartão */
+    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima */
     .login-card:hover {
       border-color: #d4af37;
-      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.35);
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.35);
     }
     .login-logo {
       max-width: 160px;
-      max-height: 70px;
+      max-height: 75px;
       width: auto;
       height: auto;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
       object-fit: contain;
       user-select: none;
       -webkit-user-select: none;
       -webkit-user-drag: none;
     }
     .form-group {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 6px;
       text-align: left;
     }
     .form-group label {
@@ -65,13 +65,16 @@
       letter-spacing: 0.3px;
     }
     .form-group input {
-      padding: 11px 12px;
+      padding: 12px 14px;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
       background: #f8fafc;
+    }
+    .form-group input:hover {
+      border-color: #94a3b8;
     }
     .form-group input:focus {
       background: #ffffff;
@@ -84,19 +87,22 @@
       background: #0d9488;
       color: white;
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 600;
       font-size: 15px;
       cursor: pointer;
       margin-top: 8px;
-      transition: background 0.2s;
+      transition: background 0.2s, transform 0.1s;
     }
     .btn-login:hover {
       background: #0f766e;
     }
+    .btn-login:active {
+      transform: scale(0.98);
+    }
     .login-footer {
-      margin-top: 20px;
-      padding-top: 14px;
+      margin-top: 24px;
+      padding-top: 16px;
       border-top: 1px solid #f1f5f9;
     }
     .login-footer p {
