@@ -293,6 +293,45 @@
     .btn-delete-admin { background: #fee2e2; color: #dc2626; padding: 4px 8px; font-size: 11px; border-radius: 4px; font-weight: 600; cursor: pointer; border: none; }
     .btn-delete-admin:hover { background: #fecaca; }
 
+    /* Sistema de Alerta Flutuante (Toast) */
+    #floatingToastContainer {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 380px;
+      width: 100%;
+      pointer-events: none;
+    }
+    .toast-alert {
+      background: #ffffff;
+      border-left: 5px solid var(--accent-color);
+      border-top: 1px solid var(--border-color);
+      border-right: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
+      pointer-events: auto;
+      animation: slideInRight 0.3s ease-out forwards;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .toast-alert.warning { border-left-color: #d97706; background: #fffbeb; }
+    .toast-alert.danger { border-left-color: #dc2626; background: #fef2f2; }
+    @keyframes slideInRight {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; transform: translateY(-10px); }
+    }
+
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
     .modal-card { background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
@@ -303,9 +342,7 @@
     .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save:hover { background: var(--accent-hover); }
     .btn-whatsapp { flex: 1; padding: 10px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
-    .btn-whatsapp:hover { background: #15803d; }
 
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
     .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
@@ -340,6 +377,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+
+  <!-- Contentor para os Avisos Flutuantes Automáticos -->
+  <div id="floatingToastContainer"></div>
 
   <aside class="sidebar">
     <div>
@@ -503,6 +543,8 @@
     let dataAtualObj = new Date();
     let tipoVisaoAtual = 'dia';
     let db;
+    let tempoAntecedenciaMinutos = 10;
+    let usuarioIdGlobal = null;
 
     document.addEventListener("DOMContentLoaded", () => {
       const firebaseConfig = {
@@ -520,6 +562,7 @@
 
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
+          usuarioIdGlobal = user.uid;
           const emailUsuario = user.email.toLowerCase();
           apelidoUsuarioGlobal = emailUsuario.split('@')[0];
           let cargoTexto = "Utilizador";
@@ -534,6 +577,9 @@
               if (dados.cargo === "Administrador") {
                 usuarioEhAdmin = true;
                 cargoTexto = "Administrador";
+              }
+              if (dados.notificacoes && dados.notificacoes.tempoAntecedencia) {
+                tempoAntecedenciaMinutos = dados.notificacoes.tempoAntecedencia;
               }
             }
           } catch(e) {}
@@ -551,13 +597,72 @@
             document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
           }
 
-          ativarMonitoramentoTempoReal(user.uid);
+          verificarAvisosLoginEProximidade();
           mudarSalaSelecionada();
         } else {
           window.location.href = "../index.html";
         }
       });
     });
+
+    // Função para disparar Alertas Flutuantes Automáticos (Toast que some sozinho)
+    function mostrarToastFlutuante(titulo, mensagem, tipo = "info") {
+      const container = document.getElementById("floatingToastContainer");
+      if (!container) return;
+
+      const toast = document.createElement("div");
+      toast.className = `toast-alert ${tipo}`;
+      
+      let icone = "📢";
+      if (tipo === "warning") icone = "⏰";
+      if (tipo === "danger") icone = "⚠️";
+
+      toast.innerHTML = `
+        <div style="font-size: 20px;">${icone}</div>
+        <div style="flex: 1;">
+          <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0 0 2px 0;">${titulo}</h4>
+          <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;">${mensagem}</p>
+        </div>
+      `;
+
+      container.appendChild(toast);
+
+      // O toast desaparece automaticamente após 6 segundos sem precisar de botão
+      setTimeout(() => {
+        toast.style.animation = "fadeOut 0.3s ease-out forwards";
+        setTimeout(() => toast.remove(), 300);
+      }, 6000);
+    }
+
+    // Verifica cancelamentos feitos por admin ao logar e reuniões próximas
+    async function verificarAvisosLoginEProximidade() {
+      const hojeStr = new Date().toISOString().split('T')[0];
+
+      db.collection("reservas").where("data", "==", hojeStr).get().then(snapshot => {
+        const agora = new Date();
+        
+        snapshot.forEach(doc => {
+          const r = doc.data();
+          // Se for do utilizador atual
+          if (r.userId === usuarioIdGlobal || r.responsavel === apelidoUsuarioGlobal) {
+            if (r.canceladoPorAdmin) {
+              mostrarToastFlutuante("Reunião Cancelada", `A sua reserva "${r.titulo}" na ${r.sala} (${r.horarioInicio}) foi cancelada pela administração.`, "danger");
+            } else if (r.horarioInicio) {
+              const [hora, min] = r.horarioInicio.split(':').map(Number);
+              const dataReuniao = new Date();
+              dataReuniao.setHours(hora, min, 0, 0);
+
+              const diferencaMinutos = (dataReuniao - agora) / (1000 * 60);
+
+              // Se a reunião está próxima dentro do tempo configurado e ainda não passou
+              if (diferencaMinutos >= 0 && diferencaMinutos <= tempoAntecedenciaMinutos) {
+                mostrarToastFlutuante("Reunião Próxima", `A reunião "${r.titulo}" (${r.sala}) começa às ${r.horarioInicio} (em ${Math.round(diferencaMinutos)} min).`, "warning");
+              }
+            }
+          }
+        });
+      }).catch(err => console.log("Erro ao verificar avisos:", err));
+    }
 
     function mudarSalaSelecionada() {
       const sala = document.getElementById("salaSelect").value;
@@ -575,28 +680,6 @@
       }
 
       carregarAgenda();
-    }
-
-    function ativarMonitoramentoTempoReal(userId) {
-      db.collection("usuarios").doc(userId).get().then(doc => {
-        if (doc.exists && doc.data().notificacoes && doc.data().notificacoes.celular) {
-          db.collection("reservas").onSnapshot(snapshot => {
-            snapshot.docChanges().forEach(change => {
-              if (change.type === "added") {
-                const novaReserva = change.doc.data();
-                if (novaReserva.userId !== userId) {
-                  if (Notification.permission === "granted") {
-                    new Notification("Nova Reunião Agendada! 📅", {
-                      body: `${novaReserva.responsavel || 'Alguém'} reservou a ${novaReserva.sala} para o dia ${novaReserva.data} às ${novaReserva.horarioInicio}.`,
-                      icon: "../ico.png"
-                    });
-                  }
-                }
-              }
-            });
-          });
-        }
-      }).catch(err => console.log("Erro ao carregar notificações:", err));
     }
 
     function mostrarAlerta(titulo, texto, icone = "🎉") {
@@ -880,6 +963,7 @@
           data: window.dataSelecionadaGlobal,
           responsavel: apelidoUsuarioGlobal,
           userId: userId,
+          canceladoPorAdmin: false,
           criadoEm: firebase.firestore.FieldValue.serverTimestamp()
         });
 
@@ -966,12 +1050,25 @@
       const id = document.getElementById("idReservaParaExcluir").value;
       if (!id) return;
 
-      db.collection("reservas").doc(id).delete().then(() => {
+      // Se o admin exclui, podemos marcar como canceladoPorAdmin para alertar o dono na entrada, ou simplesmente deletar.
+      // Aqui atualizamos com canceladoPorAdmin = true antes de deletar ou deletamos diretamente. 
+      // Para o dono receber o aviso de cancelamento imediato ao logar, atualizamos o documento com flag de cancelado:
+      db.collection("reservas").doc(id).update({
+        canceladoPorAdmin: true
+      }).then(() => {
+        return db.collection("reservas").doc(id).delete();
+      }).then(() => {
         fecharModalConfirmacao();
-        mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
+        mostrarAlerta("Sucesso", "Reserva excluída e utilizador notificado!", "🗑️");
       }).catch(err => {
-        fecharModalConfirmacao();
-        mostrarAlerta("Erro", "Erro ao excluir: " + err.message, "❌");
+        // Se a reserva já foi removida ou falhou update, tenta deletar direto
+        db.collection("reservas").doc(id).delete().then(() => {
+          fecharModalConfirmacao();
+          mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
+        }).catch(e2 => {
+          fecharModalConfirmacao();
+          mostrarAlerta("Erro", "Erro ao excluir: " + e2.message, "❌");
+        });
       });
     }
   </script>
