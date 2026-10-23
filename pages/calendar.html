@@ -882,102 +882,105 @@
     }
 
     async function salvarNovaReservaFirebase() {
-      const titulo = document.getElementById("inputTituloReserva").value.trim();
-      const inicio = document.getElementById("inputHoraInicio").value;
-      const fim = document.getElementById("inputHoraFim").value;
-      const sala = document.getElementById("salaSelect").value;
+  const titulo = document.getElementById("inputTituloReserva").value.trim();
+  const inicio = document.getElementById("inputHoraInicio").value;
+  const fim = document.getElementById("inputHoraFim").value;
+  const sala = document.getElementById("salaSelect").value;
 
-      if (!titulo) {
-        mostrarAlerta("Atenção", "Por favor, preencha o nome da reunião.", "⚠️");
-        return;
+  if (!titulo) {
+    mostrarAlerta("Atenção", "Por favor, preencha o nome da reunião.", "⚠️");
+    return;
+  }
+
+  const user = firebase.auth().currentUser;
+  const userId = user ? user.uid : "";
+  const emailAuth = user ? user.email : "";
+
+  try {
+    // 1. Gravar no Firestore
+    await db.collection("reservas").add({
+      titulo: titulo,
+      horarioInicio: inicio,
+      horarioFim: fim,
+      sala: sala,
+      data: window.dataSelecionadaGlobal,
+      responsavel: apelidoUsuarioGlobal,
+      userId: userId,
+      criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    let emailDestino = emailAuth;
+    let nomeDestino = apelidoUsuarioGlobal;
+
+    // 2. Verificar se o utilizador definiu um e-mail real nas configurações de notificações
+    try {
+      if (userId) {
+        const userDoc = await db.collection("usuarios").doc(userId).get();
+        if (userDoc.exists) {
+          const dados = userDoc.data() || {};
+          if (typeof dados.emailRealNotificacao === "string" && dados.emailRealNotificacao.trim() !== "") {
+            emailDestino = dados.emailRealNotificacao.trim();
+          }
+          if (typeof dados.apelido === "string" && dados.apelido.trim() !== "") {
+            nomeDestino = dados.apelido.trim();
+          }
+        }
       }
+    } catch (profileErr) {
+      console.error("Erro ao carregar dados do perfil:", profileErr);
+    }
 
-      const user = firebase.auth().currentUser;
-      const userId = user ? user.uid : "";
-      const emailAuth = user ? user.email : "";
+    let emailEnviado = false;
+    let motivoFalhaEmail = "";
+
+    if (!emailDestino || !String(emailDestino).includes("@")) {
+      motivoFalhaEmail = "Nenhum e-mail de destino válido encontrado.";
+    } else if (!window.emailjs || typeof window.emailjs.send !== "function") {
+      motivoFalhaEmail = "A biblioteca EmailJS não foi carregada.";
+    } else {
+      // Parâmetros alinhados exatamente com o seu template do EmailJS (template_3uxpjzk)
+      const templateParams = {
+        to_email: emailDestino,       // Vai preencher o campo 'To Email' do EmailJS
+        to_name: nomeDestino,         // Vai preencher {{to_name}}
+        name: titulo,                 // Vai preencher {{name}}
+        message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!` // Vai preencher {{message}}
+      };
 
       try {
-        await db.collection("reservas").add({
-          titulo: titulo,
-          horarioInicio: inicio,
-          horarioFim: fim,
-          sala: sala,
-          data: window.dataSelecionadaGlobal,
-          responsavel: apelidoUsuarioGlobal,
-          userId: userId,
-          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-        let emailDestino = emailAuth;
-        let nomeDestino = apelidoUsuarioGlobal;
-
-        try {
-          if (userId) {
-            const userDoc = await db.collection("usuarios").doc(userId).get();
-            if (userDoc.exists) {
-              const dados = userDoc.data() || {};
-              if (typeof dados.emailRealNotificacao === "string" && dados.emailRealNotificacao.trim() !== "") {
-                emailDestino = dados.emailRealNotificacao.trim();
-              }
-              if (typeof dados.apelido === "string" && dados.apelido.trim() !== "") {
-                nomeDestino = dados.apelido.trim();
-              }
-            }
-          }
-        } catch (profileErr) {
-          console.error("Erro ao carregar dados do perfil:", profileErr);
-        }
-
-        let emailEnviado = false;
-        let motivoFalhaEmail = "";
-
-        if (!emailDestino || !String(emailDestino).includes("@")) {
-          motivoFalhaEmail = "Nenhum e-mail de destino válido encontrado.";
-        } else if (!window.emailjs || typeof window.emailjs.send !== "function") {
-          motivoFalhaEmail = "A biblioteca EmailJS não foi carregada.";
-        } else {
-          const templateParams = {
-            to_email: emailDestino,
-            to_name: nomeDestino,
-            name: titulo,
-            message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!`
-          };
-
-          try {
-            await window.emailjs.send(
-              'service_d30n93a',
-              'template_3uxpjzk',
-              templateParams,
-              'xk4_RSn-EbswoOlr3'
-            );
-            emailEnviado = true;
-          } catch (emailErr) {
-            motivoFalhaEmail = emailErr && emailErr.text 
-              ? emailErr.text 
-              : (emailErr && emailErr.message ? emailErr.message : String(emailErr));
-          }
-        }
-
-        document.getElementById("modalNovaReserva").style.display = "none";
-
-        if (emailEnviado) {
-          mostrarAlerta(
-            "Reserva confirmada",
-            `Reserva criada com sucesso. E-mail enviado para ${emailDestino}.`,
-            "🎉"
-          );
-        } else {
-          mostrarAlerta(
-            "Reserva criada; e-mail não enviado",
-            `A reserva foi salva, mas o envio de e-mail falhou: ${motivoFalhaEmail}.`,
-            "⚠️"
-          );
-        }
-
-      } catch (err) {
-        mostrarAlerta("Erro", "Erro ao criar reserva: " + err.message, "❌");
+        await window.emailjs.send(
+          'service_d30n93a',
+          'template_3uxpjzk',
+          templateParams,
+          'xk4_RSn-EbswoOlr3'
+        );
+        emailEnviado = true;
+      } catch (emailErr) {
+        motivoFalhaEmail = emailErr && emailErr.text 
+          ? emailErr.text 
+          : (emailErr && emailErr.message ? emailErr.message : String(emailErr));
       }
     }
+
+    document.getElementById("modalNovaReserva").style.display = "none";
+
+    if (emailEnviado) {
+      mostrarAlerta(
+        "Reserva confirmada",
+        `Reserva criada com sucesso. E-mail enviado para ${emailDestino}.`,
+        "🎉"
+      );
+    } else {
+      mostrarAlerta(
+        "Reserva criada; e-mail não enviado",
+        `A reserva foi salva, mas o envio de e-mail falhou: ${motivoFalhaEmail}.`,
+        "⚠️"
+      );
+    }
+
+  } catch (err) {
+    mostrarAlerta("Erro", "Erro ao criar reserva: " + err.message, "❌");
+  }
+}
 
     function confirmarExclusao(id) {
       document.getElementById("idReservaParaExcluir").value = id;
