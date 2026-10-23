@@ -8,57 +8,155 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .page-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
+    :root {
+      --sidebar-bg: #0f172a;
+      --accent-color: #0d9488;
+      --accent-hover: #0f766e;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px 24px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+    }
+
+    .brand-logo {
+      max-height: 55px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: rgba(13, 148, 136, 0.25);
+      color: #2dd4bf;
+    }
+
+    .user-profile-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-text h4 {
+      font-size: 13px;
+      color: white;
+      margin: 0;
+    }
+
+    .user-info-text p {
+      font-size: 11px;
+      color: #94a3b8;
+      margin: 2px 0 0 0;
+    }
+
+    .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .page-header h1 { font-size: 24px; color: #1e293b; }
-    .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; }
     
     .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
-    .room-card-item { background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; display: flex; flex-direction: column; gap: 16px; border-left: 5px solid #2563eb; }
+    .room-card-item { background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; display: flex; flex-direction: column; gap: 16px; border-left: 5px solid var(--accent-color); }
     .room-card-item.inativa { border-left-color: #94a3b8; opacity: 0.7; }
     .room-card-item.embreve { border-left-color: #d97706; }
 
     .room-info-box { display: flex; gap: 16px; }
-    .room-card-img { width: 100px; height: 80px; border-radius: 8px; object-fit: cover; background: #e2e8f0; }
-    .room-details h3 { font-size: 16px; color: #1e293b; margin-bottom: 4px; }
-    .room-details p { font-size: 13px; color: #64748b; margin-bottom: 2px; }
+    .room-card-img { width: 100px; height: 80px; border-radius: 8px; object-fit: cover; background: var(--border-color); }
+    .room-details h3 { font-size: 16px; color: var(--text-main); margin-bottom: 4px; }
+    .room-details p { font-size: 13px; color: var(--text-muted); margin-bottom: 2px; }
 
     .room-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; }
     
     .badge-status { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
     .badge-status.ativa { background: #dcfce7; color: #15803d; }
-    .badge-status.inativa { background: #f1f5f9; color: #64748b; }
+    .badge-status.inativa { background: #f1f5f9; color: var(--text-muted); }
     .badge-status.embreve { background: #fef3c7; color: #b45309; }
 
-    .btn-edit-room { background: #f1f5f9; border: 1px solid #cbd5e1; color: #334155; padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
+    .btn-edit-room { background: #f1f5f9; border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
     .btn-edit-room:hover { background: #e2e8f0; }
 
-    /* MODAL */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; }
-    .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
-    .form-group label { font-size: 13px; font-weight: 600; color: #475569; }
-    .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
     .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
-    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save { flex: 1; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-    /* MODAL DE ALERTA ELEGANTE */
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
-    .btn-modal-ok { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-ok:hover { background: #1d4ed8; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-ok:hover { background: var(--accent-hover); }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
     @media (max-width: 1024px) {
       .sidebar { display: none; }
-      .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin: -16px -16px 20px -16px; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; padding: 10px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.05); }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px; }
-      .mob-nav-item.active { color: #2563eb; }
+      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
+      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
+      .mob-nav-item.active { color: #2dd4bf; }
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
@@ -70,41 +168,47 @@
 <body>
 
   <aside class="sidebar">
-    <div class="logo-area" style="padding: 20px 24px;">
-      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo">
+    <div>
+      <div class="brand-area">
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
+      </div>
+      <nav class="nav-links">
+        <a href="calendar.html">📅 Agenda</a>
+        <a href="my-reservations.html">📋 Minhas reservas</a>
+        <a href="notifications.html">🔔 Notificações</a>
+        
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
+        <a href="rooms.html" class="active admin-only-item" style="display:none;">🚪 Salas</a>
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+      </nav>
     </div>
-    <nav class="nav-links">
-      <a href="calendar.html">Agenda</a>
-      <a href="my-reservations.html">Minhas reservas</a>
-      <a href="rooms.html" class="active admin-only-item" style="display:none;">Salas</a>
-      <a href="notifications.html">Notificações</a>
-      <a href="admin-users.html" class="admin-only-item" style="display:none;">Usuários (Admin)</a>
-    </nav>
-    <div class="user-profile">
-      <span id="userNameDisplay">Carregando...</span>
-      <a href="#" onclick="fazerLogoutReal(); return false;">Sair</a>
+    <div class="user-profile-box">
+      <div class="user-info-text">
+        <h4 id="userNameDisplay">Carregando...</h4>
+        <p id="userRoleDisplay">Utilizador</p>
+      </div>
+      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
     </div>
   </aside>
 
-  <main class="main-content page-wrapper">
+  <main class="page-wrapper">
     <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
-      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #2563eb;">Perfil</span>
+      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 32px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #ffffff;">Perfil</span>
     </div>
 
     <header class="page-header">
       <h1>Salas Disponíveis</h1>
-      <button id="btnNovaSala" onclick="abrirModalSala()" style="display:none; padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
+      <button id="btnNovaSala" onclick="abrirModalSala()" style="display:none; padding: 10px 16px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
     </header>
 
     <section>
       <div id="listaSalasContainer" class="rooms-grid">
-        <p style="color: #64748b; font-size: 14px;">A carregar salas...</p>
+        <p style="color: var(--text-muted); font-size: 14px;">A carregar salas...</p>
       </div>
     </section>
   </main>
 
-  <!-- MODAL DE CRIAR/EDITAR SALA -->
   <div class="modal-overlay" id="modalSala">
     <div class="modal-card">
       <h3 class="modal-title" id="modalSalaTitulo">Editar Sala</h3>
@@ -147,12 +251,11 @@
     </div>
   </div>
 
-  <!-- MODAL DE ALERTA PERSONALIZADO -->
   <div class="modal-overlay" id="modalAlerta">
     <div class="modal-alert-card">
       <div style="font-size: 32px;" id="modalAlertaIcone">✨</div>
       <h3 class="modal-title" id="modalAlertaTitulo">Aviso</h3>
-      <p style="font-size: 14px; color: #64748b; line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
       <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
     </div>
   </div>
@@ -184,6 +287,7 @@
         if (user) {
           const emailUsuario = user.email.toLowerCase();
           let nomeBase = emailUsuario.split('@')[0];
+          let cargoTexto = "Utilizador";
 
           try {
             const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
@@ -192,17 +296,24 @@
               if (dados.apelido && dados.apelido.trim() !== "") {
                 nomeBase = dados.apelido;
               }
-              if (dados.cargo === "Administrador") usuarioEhAdmin = true;
+              if (dados.cargo === "Administrador") {
+                usuarioEhAdmin = true;
+                cargoTexto = "Administrador";
+              }
             }
           } catch(e) {}
 
-          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) usuarioEhAdmin = true;
+          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
+            usuarioEhAdmin = true;
+            cargoTexto = "Administrador";
+          }
 
           document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userRoleDisplay").innerText = cargoTexto;
           document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
 
           if (usuarioEhAdmin) {
-            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
             document.getElementById("btnNovaSala").style.display = "block";
           }
 
@@ -226,7 +337,7 @@
 
     function carregarSalas() {
       const container = document.getElementById("listaSalasContainer");
-      container.innerHTML = "<p style='color: #64748b;'>A carregar salas...</p>";
+      container.innerHTML = "<p style='color: var(--text-muted);'>A carregar salas...</p>";
 
       firebase.firestore().collection("salas").get().then((snapshot) => {
         container.innerHTML = "";
