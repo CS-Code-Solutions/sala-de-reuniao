@@ -349,12 +349,35 @@
       carregarAgenda();
     }
 
-    function atualizarCabecalhoData() {
-      const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
-      const textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
-      document.getElementById("dataAtualExibicao").innerText = textoFormatado;
-      document.getElementById("dataHeaderExibicao").innerText = textoFormatado;
+        function atualizarCabecalhoData() {
+      const spanData = document.getElementById("dataAtualExibicao");
+      const spanHeader = document.getElementById("dataHeaderExibicao");
+      let textoFormatado = "";
+
+      if (tipoVisaoAtual === 'dia') {
+        const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
+        textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
+      } 
+      else if (tipoVisaoAtual === 'semana') {
+        let inicioSemana = new Date(dataAtualObj);
+        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+        let fimSemana = new Date(inicioSemana);
+        fimSemana.setDate(fimSemana.getDate() + 6);
+
+        const opt = { day: 'numeric', month: 'short' };
+        textoFormatado = `${inicioSemana.toLocaleDateString('pt-BR', opt)} - ${fimSemana.toLocaleDateString('pt-BR', opt)}, ${dataAtualObj.getFullYear()}`;
+      } 
+      else if (tipoVisaoAtual === 'mes') {
+        const options = { month: 'long', year: 'numeric' };
+        textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
+        // Letra maiúscula na primeira letra do mês
+        textoFormatado = textoFormatado.charAt(0).toUpperCase() + textoFormatado.slice(1);
+      }
+
+      spanData.innerText = textoFormatado;
+      spanHeader.innerText = textoFormatado;
     }
+
 
     function mudarData(direcao) {
       if (tipoVisaoAtual === 'dia') {
