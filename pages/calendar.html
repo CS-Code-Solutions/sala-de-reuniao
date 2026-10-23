@@ -103,7 +103,7 @@
   <!-- EMAILJS SDK -->
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script type="text/javascript">
-    emailjs.init("xk4_RSn-EbswoOlr3"); // Chave Pública integrada com sucesso
+    emailjs.init("xk4_RSn-EbswoOlr3"); // Chave Pública
   </script>
 </head>
 <body>
@@ -630,6 +630,7 @@
 
       const user = firebase.auth().currentUser;
       const userId = user ? user.uid : "";
+      const emailAuth = user ? user.email : "";
 
       try {
         // 1. Grava a reserva no Firestore
@@ -644,26 +645,40 @@
           criadoEm: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        // 2. Verifica se o utilizador ativou notificação por e-mail e dispara via EmailJS
-        const userDoc = await db.collection("usuarios").doc(userId).get();
-        if (userDoc.exists && userDoc.data().notificacoes && userDoc.data().notificacoes.email) {
-          const emailDestino = userDoc.data().emailRealNotificacao;
-          
-          if (emailDestino) {
-            const templateParams = {
-              to_email: emailDestino,
-              to_name: apelidoUsuarioGlobal,
-              message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!\n\nReunião: ${titulo}`
-            };
+        // 2. Tenta buscar o e-mail real cadastrado, mas usa o do Auth como garantia para nunca falhar o envio
+        let emailDestino = emailAuth;
+        let nomeDestino = apelidoUsuarioGlobal;
 
-            // Envio utilizando o Service ID e Template ID corretos
-            emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams)
-              .then(response => {
-                console.log('E-mail real enviado com sucesso!', response.status, response.text);
-              }, error => {
-                console.log('Erro ao enviar e-mail:', error);
-              });
+        try {
+          const userDoc = await db.collection("usuarios").doc(userId).get();
+          if (userDoc.exists) {
+            const dados = userDoc.data();
+            if (dados.emailRealNotificacao) {
+              emailDestino = dados.emailRealNotificacao;
+            }
+            if (dados.apelido) {
+              nomeDestino = dados.apelido;
+            }
           }
+        } catch(e) {}
+
+        if (emailDestino) {
+          const templateParams = {
+            to_email: emailDestino,
+            to_name: nomeDestino,
+            message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!\n\nReunião: ${titulo}`,
+            name: titulo,
+            time: `${inicio} às ${fim}`
+          };
+
+          // Disparo direto garantido com o Service ID e Template ID corretos
+          emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams)
+            .then(response => {
+              console.log('E-mail real disparado com sucesso!', response.status, response.text);
+            })
+            .catch(error => {
+              console.error('Erro no envio do EmailJS:', error);
+            });
         }
 
         document.getElementById("modalNovaReserva").style.display = "none";
