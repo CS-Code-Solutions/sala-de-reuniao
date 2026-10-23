@@ -667,18 +667,16 @@
             message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!`
           };
 
-          // Disparo explícito passando a Public Key diretamente para garantir autenticação e evitar erros
-          emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams, 'xk4_RSn-EbswoOlr3')
-            .then(response => {
-              console.log('E-mail real disparado com sucesso!', response.status, response.text);
-            })
-            .catch(error => {
-              console.error('Erro detalhado no envio do EmailJS:', error);
-            });
+          try {
+            await emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams, 'xk4_RSn-EbswoOlr3');
+            console.log('E-mail real disparado com sucesso!');
+          } catch (emailErr) {
+            console.error('Erro detalhado no envio do EmailJS:', emailErr);
+          }
         }
 
         document.getElementById("modalNovaReserva").style.display = "none";
-        mostrarAlerta("Sucesso", "Reserva criada e e-mail enviado com sucesso!", "🎉");
+        mostrarAlerta("Sucesso", "Reserva criada com sucesso!", "🎉");
 
       } catch (err) {
         mostrarAlerta("Erro", "Erro ao criar reserva: " + err.message, "❌");
