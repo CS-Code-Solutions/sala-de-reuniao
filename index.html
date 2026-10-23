@@ -4,87 +4,79 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Entrar</title>
+  <link rel="stylesheet" href="css/global.css">
   <link rel="icon" href="ico.png" type="image/png">
   <style>
     body {
       margin: 0;
-      padding: 0;
+      padding: 16px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #0f172a;
-      background-image: url('fundo.jpg');
-      background-repeat: no-repeat;
-      background-position: center center;
-      background-attachment: fixed;
+      background: url('fundo.jpg') no-repeat center center fixed;
       background-size: cover;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
     .login-card {
-      background: #ffffff;
-      padding: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      padding: 32px 28px;
       border-radius: 16px;
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      max-width: 360px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
       text-align: center;
-      /* Borda inicial sutil e transição suave */
-      border: 2px solid #e2e8f0;
-      transition: all 0.3s ease-in-out;
-    }
-    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima */
-    .login-card:hover {
-      border-color: #d4af37;
-      box-shadow: 0 15px 35px rgba(212, 175, 55, 0.35);
+      box-sizing: border-box;
     }
     .login-logo {
-      max-width: 180px;
-      max-height: 80px;
-      width: auto;
+      max-width: 150px;
       height: auto;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       object-fit: contain;
     }
     .form-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       text-align: left;
     }
     .form-group label {
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12px;
       color: #334155;
+      letter-spacing: 0.3px;
     }
     .form-group input {
-      padding: 12px;
+      padding: 10px 12px;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
       font-size: 14px;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: all 0.2s ease;
+      background: #ffffff;
     }
     .form-group input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      border-color: #0d9488;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
     }
     .btn-login {
       width: 100%;
-      padding: 12px;
-      background: #2563eb;
+      padding: 11px;
+      background: #0d9488;
       color: white;
       border: none;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 15px;
+      font-size: 14px;
       cursor: pointer;
-      margin-top: 10px;
-      transition: background 0.2s;
+      margin-top: 8px;
+      transition: background 0.2s ease;
     }
     .btn-login:hover {
-      background: #1d4ed8;
+      background: #0f766e;
     }
   </style>
 
@@ -93,8 +85,8 @@
 </head>
 <body>
   <div class="login-card">
-    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
-    <h2 id="fallback-title" style="display:none; color: #1e293b; margin-bottom: 24px; font-size: 22px;">MeetingRoom</h2>
+    <!-- Logótipo fixo exclusivamente como login.png -->
+    <img src="login.png" alt="Logo MeetingRoom" class="login-logo">
     
     <div class="form-group">
       <label>E-mail</label>
