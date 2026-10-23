@@ -11,7 +11,11 @@
     .page-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
     .page-header { margin-bottom: 24px; }
     .page-header h1 { font-size: 24px; color: #1e293b; margin-bottom: 4px; }
-    .brand-logo { max-height: 36px; width: auto; object-fit: contain; }
+    .brand-logo {
+      max-height: 55px; /* Logotipo ampliado e elegante */
+      width: 100%;
+      object-fit: contain;
+    }
     
     .reservation-card {
       background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
@@ -38,14 +42,28 @@
     .mobile-bottom-nav { display: none; }
 
     @media (max-width: 1024px) {
-      .sidebar { display: none; }
-      .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      
-      .mobile-topbar-bar {
-        display: flex; justify-content: space-between; align-items: center;
-        background: white; padding: 12px 16px; border-bottom: 1px solid #e2e8f0;
-        margin: -16px -16px 20px -16px;
-      }
+     .sidebar {
+      width: 260px;
+      background-color: #0f172a;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px 24px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+    }
 
       .mobile-bottom-nav {
         display: flex; position: fixed; bottom: 0; left: 0; right: 0;
@@ -68,20 +86,29 @@
 </head>
 <body>
 
-  <aside class="sidebar">
-    <div class="logo-area" style="padding: 20px 24px;">
-      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo">
+<aside class="sidebar">
+    <div>
+      <div class="brand-area">
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
+      </div>
+
+      <nav class="nav-links">
+        <a href="calendar.html">📅 Agenda</a>
+        <a href="my-reservations.html">📋 Minhas reservas</a>
+        <a href="notifications.html">🔔 Notificações</a>
+        
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
+        <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+      </nav>
     </div>
-    <nav class="nav-links">
-      <a href="calendar.html">Agenda</a>
-      <a href="my-reservations.html" class="active">Minhas reservas</a>
-      <a href="rooms.html" class="admin-only-item" style="display:none;">Salas</a>
-      <a href="notifications.html">Notificações</a>
-      <a href="admin-users.html" class="admin-only-item" style="display:none;">Usuários (Admin)</a>
-    </nav>
-    <div class="user-profile">
-      <span id="userNameDisplay">Carregando...</span>
-      <a href="#" onclick="fazerLogoutReal(); return false;">Sair</a>
+
+    <div class="user-profile-box">
+      <div class="user-info-text">
+        <h4 id="userNameDisplay">Carregando...</h4>
+        <p id="userRoleDisplay">Utilizador</p>
+      </div>
+      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
     </div>
   </aside>
 
