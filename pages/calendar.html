@@ -649,6 +649,7 @@
       } else if (tipoVisaoAtual === 'semana') {
         dataAtualObj.setDate(dataAtualObj.getDate() + (direcao * 7));
       } else if (tipoVisaoAtual === 'mes') {
+        // Ao saltar mês, ajusta diretamente o mês no objeto de data
         dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
       }
       atualizarCabecalhoData();
@@ -659,6 +660,9 @@
       tipoVisaoAtual = visao;
       document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
       btnElement.classList.add("active");
+      
+      // Atualiza o cabeçalho de navegação instantaneamente conforme a visão selecionada
+      atualizarCabecalhoData();
       carregarAgenda();
     }
 
