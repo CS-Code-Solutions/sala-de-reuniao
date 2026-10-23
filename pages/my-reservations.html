@@ -8,43 +8,29 @@
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .page-wrapper { padding: 24px; background-color: #f8fafc; min-height: 100vh; }
-    .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 24px; color: #1e293b; margin-bottom: 4px; }
-    .brand-logo {
-      max-height: 55px; /* Logotipo ampliado e elegante */
-      width: 100%;
-      object-fit: contain;
+    :root {
+      --sidebar-bg: #0f172a;
+      --accent-color: #0d9488;
+      --accent-hover: #0f766e;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
     }
-    
-    .reservation-card {
-      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid #e2e8f0;
-      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
-      border-left: 5px solid #2563eb;
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
     }
-    .btn-delete {
-      background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px;
-      font-weight: 600; font-size: 12px; cursor: pointer;
-    }
-    .btn-delete:hover { background: #fecaca; }
 
-    /* MODAL DE CONFIRMAÇÃO ELEGANTE */
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 400px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
-    .modal-title { font-size: 18px; font-weight: 700; color: #1e293b; }
-    .modal-text { font-size: 14px; color: #64748b; line-height: 1.5; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
-    .btn-modal-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-confirm { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-confirm:hover { background: #b91c1c; }
-
-    .mobile-topbar-bar { display: none; }
-    .mobile-bottom-nav { display: none; }
-
-    @media (max-width: 1024px) {
-     .sidebar {
+    .sidebar {
       width: 260px;
-      background-color: #0f172a;
+      background-color: var(--sidebar-bg);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -65,17 +51,112 @@
       margin-bottom: 12px;
     }
 
+    .brand-logo {
+      max-height: 55px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: rgba(13, 148, 136, 0.25);
+      color: #2dd4bf;
+    }
+
+    .user-profile-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-text h4 {
+      font-size: 13px;
+      color: white;
+      margin: 0;
+    }
+
+    .user-info-text p {
+      font-size: 11px;
+      color: #94a3b8;
+      margin: 2px 0 0 0;
+    }
+
+    .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); margin-bottom: 4px; font-weight: 700; }
+    
+    .reservation-card {
+      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
+      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+      border-left: 5px solid var(--accent-color);
+    }
+    .btn-delete {
+      background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px;
+      font-weight: 600; font-size: 12px; cursor: pointer;
+    }
+    .btn-delete:hover { background: #fecaca; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-card { background: white; width: 100%; max-width: 400px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .modal-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+    .btn-modal-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-confirm { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-confirm:hover { background: #b91c1c; }
+
+    .mobile-topbar-bar { display: none; }
+    .mobile-bottom-nav { display: none; }
+
+    @media (max-width: 1024px) {
+      .sidebar { display: none; }
+      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
+      
+      .mobile-topbar-bar {
+        display: flex; justify-content: space-between; align-items: center;
+        background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin: -16px -16px 20px -16px;
+      }
+
       .mobile-bottom-nav {
         display: flex; position: fixed; bottom: 0; left: 0; right: 0;
-        background: white; border-top: 1px solid #e2e8f0; padding: 10px 0;
+        background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0;
         justify-content: space-around; align-items: center; z-index: 1000;
-        box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+        box-shadow: 0 -4px 12px rgba(0,0,0,0.2);
       }
       .mob-nav-item {
         display: flex; flex-direction: column; align-items: center;
-        text-decoration: none; color: #64748b; font-size: 11px; font-weight: 600; gap: 4px;
+        text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px;
       }
-      .mob-nav-item.active { color: #2563eb; }
+      .mob-nav-item.active { color: #2dd4bf; }
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
@@ -86,15 +167,14 @@
 </head>
 <body>
 
-<aside class="sidebar">
+  <aside class="sidebar">
     <div>
       <div class="brand-area">
         <img src="../cabe.png" alt="Logo" class="brand-logo">
       </div>
-
       <nav class="nav-links">
         <a href="calendar.html">📅 Agenda</a>
-        <a href="my-reservations.html">📋 Minhas reservas</a>
+        <a href="my-reservations.html" class="active">📋 Minhas reservas</a>
         <a href="notifications.html">🔔 Notificações</a>
         
         <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
@@ -102,7 +182,6 @@
         <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
       </nav>
     </div>
-
     <div class="user-profile-box">
       <div class="user-info-text">
         <h4 id="userNameDisplay">Carregando...</h4>
@@ -112,25 +191,24 @@
     </div>
   </aside>
 
-  <main class="main-content page-wrapper">
+  <main class="page-wrapper">
     <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="MeetingRoom" class="brand-logo" style="max-height: 28px;">
-      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #2563eb;">Perfil</span>
+      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 32px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #ffffff;">Perfil</span>
     </div>
 
     <header class="page-header">
       <h1>Minhas Reservas</h1>
-      <p style="color: #64748b; font-size: 14px;">Consulte e gerencie as reuniões marcadas por si.</p>
+      <p style="color: var(--text-muted); font-size: 14px;">Consulte e gerencie as reuniões marcadas por si.</p>
     </header>
 
-    <section class="schedule-grid-container">
-      <div id="listaMinhasReservas" class="time-slots" style="display: flex; flex-direction: column; gap: 12px;">
-        <p style="color: #64748b; font-size: 14px;">A carregar as suas reservas...</p>
+    <section>
+      <div id="listaMinhasReservas" style="display: flex; flex-direction: column; gap: 12px;">
+        <p style="color: var(--text-muted); font-size: 14px;">A carregar as suas reservas...</p>
       </div>
     </section>
   </main>
 
-  <!-- MODAL DE CONFIRMAÇÃO PERSONALIZADO -->
   <div class="modal-overlay" id="modalConfirmacao">
     <div class="modal-card">
       <div style="font-size: 32px;">⚠️</div>
@@ -147,8 +225,8 @@
   <nav class="mobile-bottom-nav">
     <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
     <a href="my-reservations.html" class="mob-nav-item active"><span>📋</span> Reservas</a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
     <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
+    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
     <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
   </nav>
 
@@ -170,6 +248,7 @@
         if (user) {
           const emailUsuario = user.email.toLowerCase();
           let nomeBase = emailUsuario.split('@')[0];
+          let cargoTexto = "Utilizador";
 
           try {
             const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
@@ -178,19 +257,24 @@
               if (dados.apelido && dados.apelido.trim() !== "") {
                 nomeBase = dados.apelido;
               }
-              if (dados.cargo === "Administrador") usuarioEhAdmin = true;
+              if (dados.cargo === "Administrador") {
+                usuarioEhAdmin = true;
+                cargoTexto = "Administrador";
+              }
             }
           } catch(e) {}
           
           if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
             usuarioEhAdmin = true;
+            cargoTexto = "Administrador";
           }
 
           document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userRoleDisplay").innerText = cargoTexto;
           document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
 
           if (usuarioEhAdmin) {
-            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "");
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
           }
 
           carregarMinhasReservas(user.uid, nomeBase);
@@ -202,7 +286,7 @@
 
     function carregarMinhasReservas(userId, nomeBase) {
       const container = document.getElementById("listaMinhasReservas");
-      container.innerHTML = "<p style='color: #64748b;'>A procurar reservas...</p>";
+      container.innerHTML = "<p style='color: var(--text-muted);'>A procurar reservas...</p>";
 
       firebase.firestore().collection("reservas")
         .get()
@@ -218,7 +302,7 @@
           });
 
           if (minhasReservas.length === 0) {
-            container.innerHTML = `<p style="color: #64748b; font-size: 14px;">Ainda não tem nenhuma reserva registada.</p>`;
+            container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">Ainda não tem nenhuma reserva registada.</p>`;
             return;
           }
 
@@ -227,9 +311,9 @@
             div.className = "reservation-card";
             div.innerHTML = `
               <div>
-                <span style="font-size: 11px; font-weight: 700; color: #2563eb;">📍 ${reserva.sala || 'Sala 01'} &nbsp;•&nbsp; 📅 ${reserva.data} &nbsp;•&nbsp; ⏰ ${reserva.horarioInicio} - ${reserva.horarioFim || ''}</span>
-                <h4 style="font-size: 16px; color: #1e293b; margin: 4px 0;">${reserva.titulo}</h4>
-                <p style="font-size: 13px; color: #64748b;">Responsável: ${reserva.responsavel || nomeBase}</p>
+                <span style="font-size: 11px; font-weight: 700; color: var(--accent-color);">📍 ${reserva.sala || 'Sala 01'} &nbsp;•&nbsp; 📅 ${reserva.data} &nbsp;•&nbsp; ⏰ ${reserva.horarioInicio} - ${reserva.horarioFim || ''}</span>
+                <h4 style="font-size: 16px; color: var(--text-main); margin: 4px 0;">${reserva.titulo}</h4>
+                <p style="font-size: 13px; color: var(--text-muted);">Responsável: ${reserva.responsavel || nomeBase}</p>
               </div>
               <button class="btn-delete" onclick="abrirModalConfirmacao('${reserva.id}')">🗑️ Cancelar</button>
             `;
