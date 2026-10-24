@@ -140,15 +140,35 @@
     @media (max-width: 1024px) {
       .sidebar { display: none !important; }
       .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-.mobile-topbar-bar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #0f172a;
-  padding: 12px 16px; /* Ajuste o padding lateral se necessário */
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  margin: -16px -16px 20px -16px;
-}
+      .mobile-topbar-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #0f172a;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin: -16px -16px 20px -16px;
+      }
+      .brand-logo {
+        max-height: 38px;
+        object-fit: contain;
+        margin-right: auto;
+      }
+      .btn-sair-mobile {
+        color: #e2e8f0;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 6px 12px;
+        border-radius: 8px;
+        transition: all 0.2s;
+      }
+      .btn-sair-mobile:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+      }
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2dd4bf; }
@@ -183,13 +203,14 @@
   </aside>
 
   <main class="page-wrapper">
-<div class="mobile-topbar-bar">
-  <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 38px; object-fit: contain; margin-left: 0;">
-  <div style="display: flex; align-items: center; gap: 8px;">
-    <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
-    <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 14px; text-decoration: none; background: rgba(255,255,255,0.08); padding: 4px 8px; border-radius: 6px;">🚪 Sair</a>
-  </div>
-</div>
+    <div class="mobile-topbar-bar">
+      <img src="../cabe.png" alt="Logo" class="brand-logo">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
+        <a href="#" onclick="fazerLogoutLocal(); return false;" class="btn-sair-mobile">Sair</a>
+      </div>
+    </div>
+
     <header class="page-header">
       <h1>Gerenciamento de Utilizadores</h1>
       <button onclick="abrirModalUsuario()" style="padding: 10px 16px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Novo Utilizador</button>
@@ -271,8 +292,8 @@
       if (usuarioEhAdmin) {
         document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
       } else {
-        // Se não for admin, não deve estar nesta página, mas por segurança:
         window.location.href = "calendar.html";
+        return;
       }
 
       carregarUsuariosLocal();
@@ -288,7 +309,6 @@
       let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
       container.innerHTML = "";
 
-      // Garante que os dados demo estão inicializados caso o admin nunca tenha aberto esta página
       if (usuarios.length === 0) {
          usuarios = [
           { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador" },
@@ -342,11 +362,9 @@
       const userIdEdit = document.getElementById("editUserId").value;
 
       if (userIdEdit) {
-          // Editar
           usuarios = usuarios.map(u => u.uid === userIdEdit ? { ...u, nome, apelido, email, senha, cargo } : u);
           alert("Utilizador atualizado com sucesso!");
       } else {
-          // Novo
           const novoUser = {
             uid: 'user-' + Date.now(),
             nome,
