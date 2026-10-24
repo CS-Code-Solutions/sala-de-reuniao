@@ -144,16 +144,24 @@
     </div>
   </div>
 
-  <script>
-    // Inicializa utilizadores padrão no localStorage se não existirem
+   <script>
+    // Inicializa ou atualiza utilizadores padrão no localStorage forçando o apelido "Usuário"
     function inicializarBancoLocal() {
-      if (!localStorage.getItem("meetingroom_usuarios")) {
-        const usuariosIniciais = [
-          { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador", whatsapp: "5551981061618" },
-          { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Vania", cargo: "Usuário", whatsapp: "5551981061618" }
-        ];
-        localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuariosIniciais));
-      }
+      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
+
+      const adminPadrao = { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador", whatsapp: "5551981061618" };
+      const userPadrao = { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Usuário", cargo: "Usuário", whatsapp: "5551981061618" };
+
+      // Atualiza ou insere o admin
+      let idxAdmin = usuarios.findIndex(u => u.email === adminPadrao.email);
+      if (idxAdmin >= 0) { usuarios[idxAdmin].apelido = "Programador"; } else { usuarios.push(adminPadrao); }
+
+      // Atualiza ou insere o utilizador comum com o apelido correto "Usuário"
+      let idxUser = usuarios.findIndex(u => u.email === userPadrao.email);
+      if (idxUser >= 0) { usuarios[idxUser].apelido = "Usuário"; } else { usuarios.push(userPadrao); }
+
+      localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
+
       if (!localStorage.getItem("meetingroom_reservas")) {
         localStorage.setItem("meetingroom_reservas", JSON.stringify([]));
       }
@@ -176,7 +184,6 @@
       const userEncontrado = usuarios.find(u => u.email.toLowerCase() === email && u.senha === senha);
 
       if (userEncontrado) {
-        // Guarda a sessão atual no localStorage
         localStorage.setItem("meetingroom_sessao_atual", JSON.stringify(userEncontrado));
         window.location.href = "pages/calendar.html";
       } else {
@@ -184,5 +191,6 @@
       }
     }
   </script>
+
 </body>
 </html>
