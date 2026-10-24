@@ -98,17 +98,8 @@
       justify-content: space-between;
     }
 
-    .user-info-text h4 {
-      font-size: 13px;
-      color: white;
-      margin: 0;
-    }
-
-    .user-info-text p {
-      font-size: 11px;
-      color: #94a3b8;
-      margin: 2px 0 0 0;
-    }
+    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
+    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
 
     .main-content {
       margin-left: 260px;
@@ -315,7 +306,7 @@
 
     @media (max-width: 1024px) {
       .cal-layout { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
+      .sidebar { display: none !important; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
       .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
@@ -640,7 +631,7 @@
                   <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || 'Equipa'}</p>
                 </div>
                 <div style="display: flex; gap: 6px; align-items: center;">
-                  <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${reserva.sala}', '${reserva.data}', '${reserva.horarioInicio}', '${reserva.responsavel || 'Colega'}', '5551981061618')">💬 Negociar</button>
+                  <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${reserva.sala}', '${reserva.data}', '${reserva.horarioInicio}', '${reserva.responsavel || 'Colega'}')">💬 Negociar</button>
                   ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reserva.id}')">🗑️ Excluir</button>` : ''}
                 </div>
               </div>
@@ -743,6 +734,21 @@
       document.getElementById("modalNovaReserva").style.display = "flex";
     }
 
+    function abrirModalNegociacao(sala, data, horario, responsavel) {
+      const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo.`;
+      document.getElementById("inputMsgWhatsapp").value = msgPronta;
+
+      const btnWhatsapp = document.getElementById("linkEnviarWhatsapp");
+      const atualizarLink = () => {
+        const textoAtual = document.getElementById("inputMsgWhatsapp").value;
+        btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAtual)}`;
+      };
+      
+      atualizarLink();
+      document.getElementById("inputMsgWhatsapp").oninput = atualizarLink;
+      document.getElementById("modalNegociacao").style.display = "flex";
+    }
+
     function salvarNovaReservaLocal() {
       const titulo = document.getElementById("inputTituloReserva").value.trim();
       const inicio = document.getElementById("inputHoraInicio").value;
@@ -771,13 +777,6 @@
 
       document.getElementById("modalNovaReserva").style.display = "none";
       mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso no armazenamento local!", "🎉");
-    }
-
-    function abrirModalNegociacao(sala, data, horario, responsavel, whatsapp) {
-      const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo.`;
-      document.getElementById("inputMsgWhatsapp").value = msgPronta;
-      document.getElementById("linkEnviarWhatsapp").href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msgPronta)}`;
-      document.getElementById("modalNegociacao").style.display = "flex";
     }
 
     function confirmarExclusaoLocal(id) {
