@@ -308,7 +308,15 @@
       .cal-layout { grid-template-columns: 1fr; }
       .sidebar { display: none !important; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
+    .mobile-topbar-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0f172a;
+  padding: 12px 16px; /* Ajuste o padding lateral se necessário */
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin: -16px -16px 20px -16px;
+}
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2dd4bf; }
