@@ -31,11 +31,9 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
       text-align: center;
       box-sizing: border-box;
-      /* Borda inicial sutil e transição suave */
       border: 2px solid #e2e8f0;
       transition: all 0.3s ease-in-out;
     }
-    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima */
     .login-card:hover {
       border-color: #d4af37;
       box-shadow: 0 20px 40px rgba(212, 175, 55, 0.35);
@@ -110,15 +108,20 @@
       color: #64748b;
       margin: 0;
     }
+    .demo-credentials {
+      margin-top: 12px;
+      font-size: 11px;
+      color: #64748b;
+      background: #f1f5f9;
+      padding: 8px;
+      border-radius: 6px;
+      text-align: left;
+    }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <div class="login-card">
-    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
-    <h2 id="fallback-title" style="display:none; color: #1e293b; margin-bottom: 24px; font-size: 22px;">MeetingRoom</h2>
+    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.src='cabe.png';">
     
     <div class="form-group">
       <label>E-mail</label>
@@ -128,7 +131,13 @@
       <label>Senha</label>
       <input type="password" id="senhaLogin" placeholder="••••••••" required>
     </div>
-    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+    <button class="btn-login" onclick="fazerLoginLocal()">Entrar</button>
+
+    <div class="demo-credentials">
+      <b>Acessos Demo:</b><br>
+      Admin: <code>admin@viecelli.com</code> / <code>123456</code><br>
+      User: <code>usuario@viecelli.com</code> / <code>123456</code>
+    </div>
 
     <div class="login-footer">
       <p>&copy; 2026 Viecelli | Powered by <strong>CS Code Solutions</strong></p>
@@ -136,21 +145,26 @@
   </div>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-      authDomain: "reuniao-d1b29.firebaseapp.com",
-      projectId: "reuniao-d1b29",
-      storageBucket: "reuniao-d1b29.firebasestorage.app",
-      messagingSenderId: "887897617950",
-      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-    };
-
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+    // Inicializa utilizadores padrão no localStorage se não existirem
+    function inicializarBancoLocal() {
+      if (!localStorage.getItem("meetingroom_usuarios")) {
+        const usuariosIniciais = [
+          { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador", whatsapp: "5551981061618" },
+          { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Vania", cargo: "Usuário", whatsapp: "5551981061618" }
+        ];
+        localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuariosIniciais));
+      }
+      if (!localStorage.getItem("meetingroom_reservas")) {
+        localStorage.setItem("meetingroom_reservas", JSON.stringify([]));
+      }
     }
 
-    function fazerLogin() {
-      const email = document.getElementById("emailLogin").value.trim();
+    document.addEventListener("DOMContentLoaded", () => {
+      inicializarBancoLocal();
+    });
+
+    function fazerLoginLocal() {
+      const email = document.getElementById("emailLogin").value.trim().toLowerCase();
       const senha = document.getElementById("senhaLogin").value.trim();
 
       if (!email || !senha) {
@@ -158,14 +172,16 @@
         return;
       }
 
-      firebase.auth().signInWithEmailAndPassword(email, senha)
-        .then(() => {
-          window.location.href = "pages/calendar.html";
-        })
-        .catch((error) => {
-          console.error("Erro no login:", error);
-          alert("Erro ao entrar (" + error.code + "): " + error.message);
-        });
+      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
+      const userEncontrado = usuarios.find(u => u.email.toLowerCase() === email && u.senha === senha);
+
+      if (userEncontrado) {
+        // Guarda a sessão atual no localStorage
+        localStorage.setItem("meetingroom_sessao_atual", JSON.stringify(userEncontrado));
+        window.location.href = "pages/calendar.html";
+      } else {
+        alert("E-mail ou senha incorretos.");
+      }
     }
   </script>
 </body>
