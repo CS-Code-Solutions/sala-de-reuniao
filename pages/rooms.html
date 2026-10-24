@@ -145,7 +145,6 @@
 
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
     .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-ok:hover { background: var(--accent-hover); }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -160,10 +159,6 @@
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -187,7 +182,7 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
     </div>
   </aside>
 
@@ -240,13 +235,13 @@
       </div>
 
       <div class="form-group">
-        <label>Imagem da Sala (Dispositivo)</label>
+        <label>Imagem da Sala (Ficheiro)</label>
         <input type="file" id="inputFileSala" accept="image/*" onchange="converterImagemParaBase64(event)">
       </div>
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalSala()">Cancelar</button>
-        <button class="btn-save" onclick="salvarSalaFirebase()">Guardar Alterações</button>
+        <button class="btn-save" onclick="salvarSalaLocal()">Guardar Alterações</button>
       </div>
     </div>
   </div>
@@ -260,69 +255,38 @@
     </div>
   </div>
 
-  <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
-    <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
-    <a href="rooms.html" class="mob-nav-item active admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
-    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
-  </nav>
-
   <script>
+    let usuarioSessao = null;
     let usuarioEhAdmin = false;
     let listaSalasGlobal = [];
 
     document.addEventListener("DOMContentLoaded", () => {
-      const firebaseConfig = {
-        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-        authDomain: "reuniao-d1b29.firebaseapp.com",
-        projectId: "reuniao-d1b29",
-        storageBucket: "reuniao-d1b29.firebasestorage.app",
-        messagingSenderId: "887897617950",
-        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-      };
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (!sessaoStr) {
+        window.location.href = "../index.html";
+        return;
+      }
 
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-          const emailUsuario = user.email.toLowerCase();
-          let nomeBase = emailUsuario.split('@')[0];
-          let cargoTexto = "Utilizador";
+      usuarioSessao = JSON.parse(sessaoStr);
+      let nomeBase = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
+      usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
 
-          try {
-            const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
-            if (doc.exists) {
-              const dados = doc.data();
-              if (dados.apelido && dados.apelido.trim() !== "") {
-                nomeBase = dados.apelido;
-              }
-              if (dados.cargo === "Administrador") {
-                usuarioEhAdmin = true;
-                cargoTexto = "Administrador";
-              }
-            }
-          } catch(e) {}
+      document.getElementById("userNameDisplay").innerText = nomeBase;
+      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
+      document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
 
-          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
-            usuarioEhAdmin = true;
-            cargoTexto = "Administrador";
-          }
+      if (usuarioEhAdmin) {
+        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+        document.getElementById("btnNovaSala").style.display = "block";
+      }
 
-          document.getElementById("userNameDisplay").innerText = nomeBase;
-          document.getElementById("userRoleDisplay").innerText = cargoTexto;
-          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
-
-          if (usuarioEhAdmin) {
-            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-            document.getElementById("btnNovaSala").style.display = "block";
-          }
-
-          carregarSalas();
-        } else {
-          window.location.href = "../index.html";
-        }
-      });
+      carregarSalasLocal();
     });
+
+    function fazerLogoutLocal() {
+      localStorage.removeItem("meetingroom_sessao_atual");
+      window.location.href = "../index.html";
+    }
 
     function mostrarAlerta(titulo, texto, icone = "✨") {
       document.getElementById("modalAlertaTitulo").innerText = titulo;
@@ -333,80 +297,57 @@
 
     function fecharModalAlerta() {
       document.getElementById("modalAlerta").style.display = "none";
+      carregarSalasLocal();
     }
 
-    function carregarSalas() {
+    function carregarSalasLocal() {
       const container = document.getElementById("listaSalasContainer");
-      container.innerHTML = "<p style='color: var(--text-muted);'>A carregar salas...</p>";
+      container.innerHTML = "";
 
-      firebase.firestore().collection("salas").get().then((snapshot) => {
-        container.innerHTML = "";
-        listaSalasGlobal = [];
+      let salas = JSON.parse(localStorage.getItem("meetingroom_salas")) || [];
 
-        if (snapshot.empty) {
-          criarSalasPadrao();
-          return;
+      if (salas.length === 0) {
+        salas = [
+          { id: "sala-1", nome: "Sala de Reuniões 01", capacidade: 8, equipamentos: "TV, Videoconferência, Quadro", status: "Ativa", imagem: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" },
+          { id: "sala-2", nome: "Sala de Reuniões 02", capacidade: 6, equipamentos: "TV, Quadro", status: "Em breve", imagem: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80" }
+        ];
+        localStorage.setItem("meetingroom_salas", JSON.stringify(salas));
+      }
+
+      listaSalasGlobal = salas;
+
+      salas.forEach(sala => {
+        let classeStatus = "ativa";
+        let textoStatus = "Ativa";
+        let classeCard = "";
+
+        if (sala.status === "Inativa") {
+          classeStatus = "inativa";
+          textoStatus = "Inativa";
+          classeCard = "inativa";
+        } else if (sala.status === "Em breve") {
+          classeStatus = "embreve";
+          textoStatus = "Em breve";
+          classeCard = "embreve";
         }
 
-        snapshot.forEach(doc => {
-          const sala = doc.data();
-          listaSalasGlobal.push({ id: doc.id, ...sala });
-          
-          const status = sala.status || "Ativa";
-          let classeStatus = "ativa";
-          let textoStatus = "Ativa";
-          let classeCard = "";
-
-          if (status === "Inativa") {
-            classeStatus = "inativa";
-            textoStatus = "Inativa";
-            classeCard = "inativa";
-          } else if (status === "Em breve") {
-            classeStatus = "embreve";
-            textoStatus = "Em breve";
-            classeCard = "embreve";
-          }
-
-          const div = document.createElement("div");
-          div.className = `room-card-item ${classeCard}`;
-          div.innerHTML = `
-            <div class="room-info-box">
-              <img src="${sala.imagem || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80'}" alt="Sala" class="room-card-img">
-              <div class="room-details">
-                <h3>${sala.nome}</h3>
-                <p>👥 Capacidade: ${sala.capacidade || 8} pessoas</p>
-                <p>💻 Equipamentos: ${sala.equipamentos || 'TV, Videoconferência...'}</p>
-              </div>
+        const div = document.createElement("div");
+        div.className = `room-card-item ${classeCard}`;
+        div.innerHTML = `
+          <div class="room-info-box">
+            <img src="${sala.imagem || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80'}" alt="Sala" class="room-card-img">
+            <div class="room-details">
+              <h3>${sala.nome}</h3>
+              <p>👥 Capacidade: ${sala.capacidade || 8} pessoas</p>
+              <p>💻 Equipamentos: ${sala.equipamentos || 'TV, Videoconferência...'}</p>
             </div>
-            <div class="room-actions">
-              <span class="badge-status ${classeStatus}">${textoStatus}</span>
-              ${usuarioEhAdmin ? `<button class="btn-edit-room" onclick="abrirModalEdicao('${doc.id}')">✏️ Editar</button>` : ''}
-            </div>
-          `;
-          container.appendChild(div);
-        });
-      }).catch(err => {
-        container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar salas: ${err.message}</p>`;
-      });
-    }
-
-    function criarSalasPadrao() {
-      const db = firebase.firestore();
-      db.collection("salas").add({
-        nome: "Sala de Reuniões 01",
-        capacidade: 8,
-        equipamentos: "TV, Videoconferência, Quadro",
-        status: "Ativa",
-        imagem: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
-      });
-      db.collection("salas").add({
-        nome: "Sala de Reuniões 02",
-        capacidade: 6,
-        equipamentos: "TV, Quadro",
-        status: "Em breve",
-        imagem: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80"
-      }).then(() => {
-        carregarSalas();
+          </div>
+          <div class="room-actions">
+            <span class="badge-status ${classeStatus}">${textoStatus}</span>
+            ${usuarioEhAdmin ? `<button class="btn-edit-room" onclick="abrirModalEdicao('${sala.id}')">✏️ Editar</button>` : ''}
+          </div>
+        `;
+        container.appendChild(div);
       });
     }
 
@@ -452,7 +393,7 @@
       document.getElementById("modalSala").style.display = "none";
     }
 
-    function salvarSalaFirebase() {
+    function salvarSalaLocal() {
       const id = document.getElementById("editSalaId").value;
       const nome = document.getElementById("inputNomeSala").value.trim();
       const capacidade = document.getElementById("inputCapacidade").value;
@@ -469,35 +410,26 @@
         imagem = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
       }
 
-      const dadosSala = {
-        nome: nome,
-        capacidade: capacidade ? parseInt(capacidade) : 8,
-        equipamentos: equipamentos,
-        status: status,
-        imagem: imagem
-      };
-
-      const db = firebase.firestore();
+      let salas = JSON.parse(localStorage.getItem("meetingroom_salas")) || [];
 
       if (id) {
-        db.collection("salas").doc(id).update(dadosSala).then(() => {
-          fecharModalSala();
-          mostrarAlerta("Sucesso", "Sala atualizada com sucesso!", "🎉");
-          carregarSalas();
-        }).catch(err => mostrarAlerta("Erro", "Erro ao atualizar: " + err.message, "❌"));
+        salas = salas.map(s => s.id === id ? { ...s, nome, capacidade: parseInt(capacidade) || 8, equipamentos, status, imagem } : s);
       } else {
-        db.collection("salas").add(dadosSala).then(() => {
-          fecharModalSala();
-          mostrarAlerta("Sucesso", "Sala criada com sucesso!", "🎉");
-          carregarSalas();
-        }).catch(err => mostrarAlerta("Erro", "Erro ao criar: " + err.message, "❌"));
+        const novaSala = {
+          id: 'sala-' + Date.now(),
+          nome,
+          capacidade: parseInt(capacidade) || 8,
+          equipamentos,
+          status,
+          imagem
+        };
+        salas.push(novaSala);
       }
-    }
-  </script>
 
-  <script type="module">
-    import { verificarAutenticacao } from "../js/auth.js";
-    verificarAutenticacao();
+      localStorage.setItem("meetingroom_salas", JSON.stringify(salas));
+      fecharModalSala();
+      mostrarAlerta("Sucesso", "Sala guardada com sucesso!", "🎉");
+    }
   </script>
 </body>
 </html>
