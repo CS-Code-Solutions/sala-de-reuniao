@@ -260,6 +260,9 @@
 
       if (usuarioEhAdmin) {
         document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+      } else {
+        // Se não for admin, não deve estar nesta página, mas por segurança:
+        window.location.href = "calendar.html";
       }
 
       carregarUsuariosLocal();
@@ -272,8 +275,17 @@
 
     function carregarUsuariosLocal() {
       const container = document.getElementById("listaUtilizadores");
-      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
+      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
       container.innerHTML = "";
+
+      // Garante que os dados demo estão inicializados caso o admin nunca tenha aberto esta página
+      if (usuarios.length === 0) {
+         usuarios = [
+          { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador" },
+          { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Usuário", cargo: "Usuário" }
+        ];
+        localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
+      }
 
       usuarios.forEach(user => {
         const isAd = user.cargo === 'Administrador';
@@ -281,7 +293,7 @@
         div.className = "user-card";
         div.innerHTML = `
           <div style="flex: 1;">
-            <strong style="color: var(--text-main); font-size: 16px;">${user.nome}</strong> <span style="color: var(--text-muted); font-size: 13px;">(Apelido: <b>${user.apelido}</b>)</span>
+            <strong style="color: var(--text-main); font-size: 16px;">${user.nome}</strong> <span style="color: var(--text-muted); font-size: 13px;">(Apelido: <b>${user.apelido || ''}</b>)</span>
             <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0;">${user.email}</p>
             <span class="badge ${isAd ? 'admin' : 'user'}">${user.cargo}</span>
           </div>
@@ -300,39 +312,59 @@
       document.getElementById("inputEmail").value = "";
       document.getElementById("inputSenha").value = "";
       document.getElementById("inputCargo").value = "Usuário";
+      document.getElementById("modalTitleText").innerText = "Novo Utilizador";
       document.getElementById("modalUsuario").style.display = "flex";
     }
 
     function salvarUtilizadorLocal() {
       const nome = document.getElementById("inputNome").value.trim();
-      const apelido = document.getElementById("inputApelido").value.trim() || nome.split(' ')[0];
+      const apelido = document.getElementById("inputApelido").value.trim();
       const email = document.getElementById("inputEmail").value.trim();
       const senha = document.getElementById("inputSenha").value.trim();
       const cargo = document.getElementById("inputCargo").value;
 
       if (!nome || !email || !senha) {
-        alert("Preencha todos os campos obrigatórios.");
+        alert("Preencha todos os campos obrigatórios (Nome, E-mail, Senha).");
         return;
       }
 
       let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
-      const novoUser = {
-        uid: 'user-' + Date.now(),
-        nome,
-        apelido,
-        email,
-        senha,
-        cargo,
-        whatsapp: "5551981061618"
-      };
+      const userIdEdit = document.getElementById("editUserId").value;
 
-      usuarios.push(novoUser);
+      if (userIdEdit) {
+          // Editar
+          usuarios = usuarios.map(u => u.uid === userIdEdit ? { ...u, nome, apelido, email, senha, cargo } : u);
+          alert("Utilizador atualizado com sucesso!");
+      } else {
+          // Novo
+          const novoUser = {
+            uid: 'user-' + Date.now(),
+            nome,
+            apelido,
+            email,
+            senha,
+            cargo
+          };
+          usuarios.push(novoUser);
+          alert("Utilizador criado com sucesso!");
+      }
+
       localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
       document.getElementById("modalUsuario").style.display = "none";
       carregarUsuariosLocal();
     }
 
     function excluirUsuarioLocal(uid) {
+      if (uid === 'admin-1') {
+        alert("Não é possível excluir o administrador principal Programador.");
+        return;
+      }
+      if (uid === usuarioSessao.uid) {
+        alert("Não é possível excluir o seu próprio utilizador enquanto está logado.");
+        return;
+      }
+      if(!confirm("Tem certeza que deseja excluir este utilizador?")) return;
+
       let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
       usuarios = usuarios.filter(u => u.uid !== uid);
       localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
