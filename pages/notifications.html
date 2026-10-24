@@ -138,24 +138,7 @@
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
     .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-    .mobile-topbar-bar { display: none; }
-    .mobile-bottom-nav { display: none; }
-
-    @media (max-width: 1024px) {
-      .sidebar { display: none; }
-      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
-      .mob-nav-item.active { color: #2dd4bf; }
-      .mob-nav-item span { font-size: 18px; }
-    }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -179,16 +162,11 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
     </div>
   </aside>
 
   <main class="page-wrapper">
-    <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 42px;">
-      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #ffffff;">Perfil</span>
-    </div>
-
     <header class="page-header">
       <h1>Configurações de Notificações</h1>
     </header>
@@ -207,17 +185,9 @@
               <p>Confirmações e cancelamentos.</p>
             </div>
             <label class="switch">
-              <input type="checkbox" id="toggleEmail" onchange="toggleCampoEmailReal(this)">
+              <input type="checkbox" id="toggleEmail" onchange="salvarPreferenciaLocal()">
               <span class="slider"></span>
             </label>
-          </div>
-          
-          <div id="grupoEmailReal" style="display: none; margin-top: 4px; flex-direction: column; gap: 6px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
-            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">E-mail real para receber os avisos:</label>
-            <div style="display: flex; gap: 8px;">
-              <input type="email" id="inputEmailReal" placeholder="seu.email@real.com" style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; outline: none; background: white;">
-              <button onclick="salvarEmailReal()" style="padding: 8px 14px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Salvar</button>
-            </div>
           </div>
         </div>
 
@@ -228,7 +198,7 @@
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
             <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Avisar com antecedência de:</label>
-            <select id="selectTempoAntecedencia" onchange="salvarPreferenciaNotificacao()" style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white; outline: none;">
+            <select id="selectTempoAntecedencia" onchange="salvarPreferenciaLocal()" style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white; outline: none;">
               <option value="5">5 minutos</option>
               <option value="10" selected>10 minutos</option>
               <option value="15">15 minutos</option>
@@ -243,150 +213,61 @@
 
   <div class="modal-overlay" id="modalAlerta">
     <div class="modal-alert-card">
-      <div style="font-size: 32px;" id="modalAlertaIcone">🔔</div>
-      <h3 class="modal-title" id="modalAlertaTitulo">Preferências</h3>
-      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Configurações guardadas com sucesso!</p>
-      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+      <div style="font-size: 32px;">🔔</div>
+      <h3 class="modal-title">Preferências</h3>
+      <p style="font-size: 14px; color: var(--text-muted);">Configurações guardadas com sucesso!</p>
+      <button class="btn-modal-ok" onclick="document.getElementById('modalAlerta').style.display='none'">OK</button>
     </div>
   </div>
 
-  <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
-    <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
-    <a href="notifications.html" class="mob-nav-item active"><span>🔔</span> Avisos</a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
-  </nav>
-
   <script>
-    let usuarioAtualId = null;
-    let usuarioEhAdmin = false;
+    let usuarioSessao = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      const firebaseConfig = {
-        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-        authDomain: "reuniao-d1b29.firebaseapp.com",
-        projectId: "reuniao-d1b29",
-        storageBucket: "reuniao-d1b29.firebasestorage.app",
-        messagingSenderId: "887897617950",
-        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-      };
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-          usuarioAtualId = user.uid;
-          const emailUsuario = user.email.toLowerCase();
-          let nomeBase = emailUsuario.split('@')[0];
-          let cargoTexto = "Utilizador";
-
-          try {
-            const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
-            if (doc.exists) {
-              const dados = doc.data();
-              if (dados.apelido && dados.apelido.trim() !== "") {
-                nomeBase = dados.apelido;
-              }
-              if (dados.cargo === "Administrador") {
-                usuarioEhAdmin = true;
-                cargoTexto = "Administrador";
-              }
-
-              if (dados.notificacoes) {
-                const emailAtivo = !!dados.notificacoes.email;
-                document.getElementById("toggleEmail").checked = emailAtivo;
-                if (dados.notificacoes.tempoAntecedencia) {
-                  document.getElementById("selectTempoAntecedencia").value = dados.notificacoes.tempoAntecedencia;
-                }
-
-                if (emailAtivo) {
-                  document.getElementById("grupoEmailReal").style.display = "flex";
-                }
-              }
-
-              if (dados.emailRealNotificacao) {
-                document.getElementById("inputEmailReal").value = dados.emailRealNotificacao;
-              }
-            }
-          } catch(e) {}
-
-          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
-            usuarioEhAdmin = true;
-            cargoTexto = "Administrador";
-          }
-
-          document.getElementById("userNameDisplay").innerText = nomeBase;
-          document.getElementById("userRoleDisplay").innerText = cargoTexto;
-          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
-
-          if (usuarioEhAdmin) {
-            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-          }
-        } else {
-          window.location.href = "../index.html";
-        }
-      });
-    });
-
-    function mostrarAlerta(titulo, texto, icone = "🔔") {
-      document.getElementById("modalAlertaTitulo").innerText = titulo;
-      document.getElementById("modalAlertaTexto").innerText = texto;
-      document.getElementById("modalAlertaIcone").innerText = icone;
-      document.getElementById("modalAlerta").style.display = "flex";
-    }
-
-    function fecharModalAlerta() {
-      document.getElementById("modalAlerta").style.display = "none";
-    }
-
-    function toggleCampoEmailReal(checkbox) {
-      const grupoEmail = document.getElementById("grupoEmailReal");
-      if (checkbox.checked) {
-        grupoEmail.style.display = "flex";
-      } else {
-        grupoEmail.style.display = "none";
-        salvarPreferenciaNotificacao();
-      }
-    }
-
-    function salvarEmailReal() {
-      const emailReal = document.getElementById("inputEmailReal").value.trim();
-      if (!emailReal || !emailReal.includes("@")) {
-        mostrarAlerta("Atenção", "Por favor, insira um e-mail válido.", "⚠️");
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (!sessaoStr) {
+        window.location.href = "../index.html";
         return;
       }
 
-      if (!usuarioAtualId) return;
+      usuarioSessao = JSON.parse(sessaoStr);
+      let nomeBase = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
+      let usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
 
-      firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
-        emailRealNotificacao: emailReal,
-        "notificacoes.email": true
-      }).then(() => {
-        mostrarAlerta("Sucesso", "E-mail de notificação guardado com sucesso!", "🎉");
-      }).catch(err => {
-        mostrarAlerta("Erro", "Erro ao salvar e-mail: " + err.message, "❌");
-      });
+      document.getElementById("userNameDisplay").innerText = nomeBase;
+      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
+
+      if (usuarioEhAdmin) {
+        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+      }
+
+      if (usuarioSessao.notificacoes) {
+        document.getElementById("toggleEmail").checked = !!usuarioSessao.notificacoes.email;
+        if (usuarioSessao.notificacoes.tempoAntecedencia) {
+          document.getElementById("selectTempoAntecedencia").value = usuarioSessao.notificacoes.tempoAntecedencia;
+        }
+      }
+    });
+
+    function fazerLogoutLocal() {
+      localStorage.removeItem("meetingroom_sessao_atual");
+      window.location.href = "../index.html";
     }
 
-    function salvarPreferenciaNotificacao() {
-      if (!usuarioAtualId) return;
-
-      const notificacoes = {
+    function salvarPreferenciaLocal() {
+      usuarioSessao.notificacoes = {
         email: document.getElementById("toggleEmail").checked,
         tempoAntecedencia: parseInt(document.getElementById("selectTempoAntecedencia").value) || 10
       };
 
-      firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
-        notificacoes: notificacoes
-      }).catch(err => {
-        console.error("Erro ao guardar preferências:", err);
-      });
-    }
-  </script>
+      localStorage.setItem("meetingroom_sessao_atual", JSON.stringify(usuarioSessao));
 
-  <script type="module">
-    import { verificarAutenticacao } from "../js/auth.js";
-    verificarAutenticacao();
+      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
+      usuarios = usuarios.map(u => u.uid === usuarioSessao.uid ? usuarioSessao : u);
+      localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
+
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
   </script>
 </body>
 </html>
