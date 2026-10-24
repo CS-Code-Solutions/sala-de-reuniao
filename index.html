@@ -117,6 +117,50 @@
       border-radius: 6px;
       text-align: left;
     }
+
+    /* Estilos do Modal Personalizado */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .modal-alert-card {
+      background: white;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+    .btn-modal-ok {
+      width: 100%;
+      padding: 10px;
+      background: #0d9488;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-modal-ok:hover {
+      background: #0f766e;
+    }
   </style>
 </head>
 <body>
@@ -144,19 +188,26 @@
     </div>
   </div>
 
-   <script>
-    // Inicializa ou atualiza utilizadores padrão no localStorage forçando o apelido "Usuário"
+  <!-- Modal de Alerta Personalizado -->
+  <div class="modal-overlay" id="modalAlertaLogin">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;" id="modalAlertaIcone">⚠️</div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Atenção</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;" id="modalAlertaTexto">Mensagem aqui</p>
+      <button class="btn-modal-ok" onclick="document.getElementById('modalAlertaLogin').style.display='none'">OK</button>
+    </div>
+  </div>
+
+  <script>
     function inicializarBancoLocal() {
       let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
 
       const adminPadrao = { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador", whatsapp: "5551981061618" };
       const userPadrao = { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Usuário", cargo: "Usuário", whatsapp: "5551981061618" };
 
-      // Atualiza ou insere o admin
       let idxAdmin = usuarios.findIndex(u => u.email === adminPadrao.email);
       if (idxAdmin >= 0) { usuarios[idxAdmin].apelido = "Programador"; } else { usuarios.push(adminPadrao); }
 
-      // Atualiza ou insere o utilizador comum com o apelido correto "Usuário"
       let idxUser = usuarios.findIndex(u => u.email === userPadrao.email);
       if (idxUser >= 0) { usuarios[idxUser].apelido = "Usuário"; } else { usuarios.push(userPadrao); }
 
@@ -171,12 +222,19 @@
       inicializarBancoLocal();
     });
 
+    function mostrarAlertaLogin(titulo, texto, icone = "⚠️") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      document.getElementById("modalAlertaIcone").innerText = icone;
+      document.getElementById("modalAlertaLogin").style.display = "flex";
+    }
+
     function fazerLoginLocal() {
       const email = document.getElementById("emailLogin").value.trim().toLowerCase();
       const senha = document.getElementById("senhaLogin").value.trim();
 
       if (!email || !senha) {
-        alert("Por favor, preencha o e-mail e a senha.");
+        mostrarAlertaLogin("Atenção", "Por favor, preencha o e-mail e a senha.", "⚠️");
         return;
       }
 
@@ -187,10 +245,9 @@
         localStorage.setItem("meetingroom_sessao_atual", JSON.stringify(userEncontrado));
         window.location.href = "pages/calendar.html";
       } else {
-        alert("E-mail ou senha incorretos.");
+        mostrarAlertaLogin("Erro no Acesso", "E-mail ou senha incorretos.", "❌");
       }
     }
   </script>
-
 </body>
 </html>
