@@ -7,15 +7,6 @@
   <title>MeetingRoom - Agenda</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
-  
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script type="text/javascript">
-    (function(){
-      emailjs.init({
-        publicKey: "X6E_oavkyc9MgyxTc"
-      });
-    })();
-  </script>
 
   <style>
     :root {
@@ -293,45 +284,6 @@
     .btn-delete-admin { background: #fee2e2; color: #dc2626; padding: 4px 8px; font-size: 11px; border-radius: 4px; font-weight: 600; cursor: pointer; border: none; }
     .btn-delete-admin:hover { background: #fecaca; }
 
-    /* Sistema de Alerta Flutuante (Toast) */
-    #floatingToastContainer {
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 380px;
-      width: 100%;
-      pointer-events: none;
-    }
-    .toast-alert {
-      background: #ffffff;
-      border-left: 5px solid var(--accent-color);
-      border-top: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-      pointer-events: auto;
-      animation: slideInRight 0.3s ease-out forwards;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-    .toast-alert.warning { border-left-color: #d97706; background: #fffbeb; }
-    .toast-alert.danger { border-left-color: #dc2626; background: #fef2f2; }
-    @keyframes slideInRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; transform: translateY(-10px); }
-    }
-
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
     .modal-card { background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
@@ -342,6 +294,7 @@
     .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save:hover { background: var(--accent-hover); }
     .btn-whatsapp { flex: 1; padding: 10px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
 
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
@@ -371,15 +324,8 @@
       .mob-nav-item span { font-size: 18px; }
     }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
-  <!-- Contentor para os Avisos Flutuantes Automáticos -->
-  <div id="floatingToastContainer"></div>
 
   <aside class="sidebar">
     <div>
@@ -403,7 +349,7 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
     </div>
   </aside>
 
@@ -483,7 +429,7 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNovaReserva').style.display='none'">Cancelar</button>
-        <button class="btn-save" onclick="salvarNovaReservaFirebase()">Confirmar Reserva</button>
+        <button class="btn-save" onclick="salvarNovaReservaLocal()">Confirmar Reserva</button>
       </div>
     </div>
   </div>
@@ -515,7 +461,7 @@
       <input type="hidden" id="idReservaParaExcluir">
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
-        <button class="btn-modal-danger" onclick="executarExclusaoReserva()">Sim, Excluir</button>
+        <button class="btn-modal-danger" onclick="executarExclusaoReservaLocal()">Sim, Excluir</button>
       </div>
     </div>
   </div>
@@ -538,130 +484,38 @@
   </nav>
 
   <script>
+    let usuarioSessao = null;
     let usuarioEhAdmin = false;
     let apelidoUsuarioGlobal = "Utilizador";
     let dataAtualObj = new Date();
     let tipoVisaoAtual = 'dia';
-    let db;
-    let tempoAntecedenciaMinutos = 10;
-    let usuarioIdGlobal = null;
 
     document.addEventListener("DOMContentLoaded", () => {
-      const firebaseConfig = {
-        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-        authDomain: "reuniao-d1b29.firebaseapp.com",
-        projectId: "reuniao-d1b29",
-        storageBucket: "reuniao-d1b29.firebasestorage.app",
-        messagingSenderId: "887897617950",
-        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-      };
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (!sessaoStr) {
+        window.location.href = "../index.html";
+        return;
+      }
+
+      usuarioSessao = JSON.parse(sessaoStr);
+      apelidoUsuarioGlobal = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
+      usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
+
+      document.getElementById("userNameDisplay").innerText = apelidoUsuarioGlobal;
+      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
+      document.getElementById("userAvatarMobile").innerText = "Olá, " + apelidoUsuarioGlobal;
+
+      if (usuarioEhAdmin) {
+        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+      }
 
       atualizarCabecalhoData();
-
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-          usuarioIdGlobal = user.uid;
-          const emailUsuario = user.email.toLowerCase();
-          apelidoUsuarioGlobal = emailUsuario.split('@')[0];
-          let cargoTexto = "Utilizador";
-
-          try {
-            const doc = await db.collection("usuarios").doc(user.uid).get();
-            if (doc.exists) {
-              const dados = doc.data();
-              if (dados.apelido && dados.apelido.trim() !== "") {
-                apelidoUsuarioGlobal = dados.apelido;
-              }
-              if (dados.cargo === "Administrador") {
-                usuarioEhAdmin = true;
-                cargoTexto = "Administrador";
-              }
-              if (dados.notificacoes && dados.notificacoes.tempoAntecedencia) {
-                tempoAntecedenciaMinutos = dados.notificacoes.tempoAntecedencia;
-              }
-            }
-          } catch(e) {}
-
-          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
-            usuarioEhAdmin = true;
-            cargoTexto = "Administrador";
-          }
-
-          document.getElementById("userNameDisplay").innerText = apelidoUsuarioGlobal;
-          document.getElementById("userRoleDisplay").innerText = cargoTexto;
-          document.getElementById("userAvatarMobile").innerText = "Olá, " + apelidoUsuarioGlobal;
-
-          if (usuarioEhAdmin) {
-            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-          }
-
-          verificarAvisosLoginEProximidade();
-          mudarSalaSelecionada();
-        } else {
-          window.location.href = "../index.html";
-        }
-      });
+      mudarSalaSelecionada();
     });
 
-    // Função para disparar Alertas Flutuantes Automáticos (Toast que some sozinho)
-    function mostrarToastFlutuante(titulo, mensagem, tipo = "info") {
-      const container = document.getElementById("floatingToastContainer");
-      if (!container) return;
-
-      const toast = document.createElement("div");
-      toast.className = `toast-alert ${tipo}`;
-      
-      let icone = "📢";
-      if (tipo === "warning") icone = "⏰";
-      if (tipo === "danger") icone = "⚠️";
-
-      toast.innerHTML = `
-        <div style="font-size: 20px;">${icone}</div>
-        <div style="flex: 1;">
-          <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0 0 2px 0;">${titulo}</h4>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;">${mensagem}</p>
-        </div>
-      `;
-
-      container.appendChild(toast);
-
-      // O toast desaparece automaticamente após 6 segundos sem precisar de botão
-      setTimeout(() => {
-        toast.style.animation = "fadeOut 0.3s ease-out forwards";
-        setTimeout(() => toast.remove(), 300);
-      }, 6000);
-    }
-
-    // Verifica cancelamentos feitos por admin ao logar e reuniões próximas
-    async function verificarAvisosLoginEProximidade() {
-      const hojeStr = new Date().toISOString().split('T')[0];
-
-      db.collection("reservas").where("data", "==", hojeStr).get().then(snapshot => {
-        const agora = new Date();
-        
-        snapshot.forEach(doc => {
-          const r = doc.data();
-          // Se for do utilizador atual
-          if (r.userId === usuarioIdGlobal || r.responsavel === apelidoUsuarioGlobal) {
-            if (r.canceladoPorAdmin) {
-              mostrarToastFlutuante("Reunião Cancelada", `A sua reserva "${r.titulo}" na ${r.sala} (${r.horarioInicio}) foi cancelada pela administração.`, "danger");
-            } else if (r.horarioInicio) {
-              const [hora, min] = r.horarioInicio.split(':').map(Number);
-              const dataReuniao = new Date();
-              dataReuniao.setHours(hora, min, 0, 0);
-
-              const diferencaMinutos = (dataReuniao - agora) / (1000 * 60);
-
-              // Se a reunião está próxima dentro do tempo configurado e ainda não passou
-              if (diferencaMinutos >= 0 && diferencaMinutos <= tempoAntecedenciaMinutos) {
-                mostrarToastFlutuante("Reunião Próxima", `A reunião "${r.titulo}" (${r.sala}) começa às ${r.horarioInicio} (em ${Math.round(diferencaMinutos)} min).`, "warning");
-              }
-            }
-          }
-        });
-      }).catch(err => console.log("Erro ao verificar avisos:", err));
+    function fazerLogoutLocal() {
+      localStorage.removeItem("meetingroom_sessao_atual");
+      window.location.href = "../index.html";
     }
 
     function mudarSalaSelecionada() {
@@ -679,7 +533,7 @@
         document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
       }
 
-      carregarAgenda();
+      carregarAgendaLocal();
     }
 
     function mostrarAlerta(titulo, texto, icone = "🎉") {
@@ -691,6 +545,7 @@
 
     function fecharModalAlerta() {
       document.getElementById("modalAlerta").style.display = "none";
+      carregarAgendaLocal();
     }
 
     function atualizarCabecalhoData() {
@@ -707,7 +562,6 @@
         inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
         let fimSemana = new Date(inicioSemana);
         fimSemana.setDate(fimSemana.getDate() + 6);
-
         const opt = { day: 'numeric', month: 'short' };
         textoFormatado = `${inicioSemana.toLocaleDateString('pt-BR', opt)} - ${fimSemana.toLocaleDateString('pt-BR', opt)}, ${dataAtualObj.getFullYear()}`;
       } 
@@ -730,7 +584,7 @@
         dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
       }
       atualizarCabecalhoData();
-      carregarAgenda();
+      carregarAgendaLocal();
     }
 
     function alterarVisao(visao, btnElement) {
@@ -738,7 +592,7 @@
       document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
       btnElement.classList.add("active");
       atualizarCabecalhoData();
-      carregarAgenda();
+      carregarAgendaLocal();
     }
 
     function selecionarDiaEspecifico(dataStr) {
@@ -749,10 +603,10 @@
         else b.classList.remove("active");
       });
       atualizarCabecalhoData();
-      carregarAgenda();
+      carregarAgendaLocal();
     }
 
-    function carregarAgenda() {
+    function carregarAgendaLocal() {
       const sala = document.getElementById("salaSelect").value;
       const container = document.getElementById("gridHorarios");
       document.getElementById("salaHeaderTitulo").innerText = sala;
@@ -760,144 +614,119 @@
       const dataStr = dataAtualObj.toISOString().split('T')[0];
       const horariosPadrao = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
 
-      db.collection("reservas")
-        .where("sala", "==", sala)
-        .onSnapshot(async (snapshot) => {
-          let fragmentoHTML = "";
-          let reservasMapa = {};
-          
-          snapshot.forEach(doc => {
-            const res = doc.data();
-            if (res.data === dataStr) {
-              if (!reservasMapa[res.horarioInicio]) {
-                reservasMapa[res.horarioInicio] = [];
-              }
-              reservasMapa[res.horarioInicio].push({ id: doc.id, ...res });
-            }
-          });
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      let reservasMapa = {};
 
-          if (tipoVisaoAtual === 'dia') {
-            for (const hora of horariosPadrao) {
-              const listaReservasSlot = reservasMapa[hora] || [];
+      reservas.forEach(res => {
+        if (res.sala === sala && res.data === dataStr) {
+          if (!reservasMapa[res.horarioInicio]) reservasMapa[res.horarioInicio] = [];
+          reservasMapa[res.horarioInicio].push(res);
+        }
+      });
 
-              if (listaReservasSlot.length > 0) {
-                const reserva = listaReservasSlot[0];
-                let whatsappResponsavel = "";
-                if (reserva.userId) {
-                  try {
-                    const userDoc = await db.collection("usuarios").doc(reserva.userId).get();
-                    if (userDoc.exists && userDoc.data().whatsapp) {
-                      whatsappResponsavel = userDoc.data().whatsapp;
-                    }
-                  } catch(e) {}
-                }
+      let fragmentoHTML = "";
 
-                fragmentoHTML += `
-                  <div class="slot-row reserved">
-                    <div>
-                      <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
-                      <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo}</h4>
-                      <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || 'Equipa'}</p>
-                    </div>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                      <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${reserva.sala}', '${reserva.data}', '${reserva.horarioInicio}', '${reserva.responsavel || 'Colega'}', '${whatsappResponsavel}')">💬 Negociar</button>
-                      ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusao('${reserva.id}')">🗑️ Excluir</button>` : ''}
-                    </div>
-                  </div>
-                `;
-              } else {
-                fragmentoHTML += `
-                  <div class="slot-row available" onclick="abrirModalReserva('${hora}', '${dataStr}')">
-                    <div>
-                      <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
-                      <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar reunião neste horário.</p>
-                    </div>
-                    <button class="btn-action-slot btn-reserve">📅 Agendar</button>
-                  </div>
-                `;
-              }
-            }
-            container.innerHTML = fragmentoHTML;
-          } 
-          else if (tipoVisaoAtual === 'semana') {
-            let gridDivHtml = `<div class="grid-semana">`;
-            let inicioSemana = new Date(dataAtualObj);
-            inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+      if (tipoVisaoAtual === 'dia') {
+        for (const hora of horariosPadrao) {
+          const listaSlot = reservasMapa[hora] || [];
 
-            for (let i = 0; i < 7; i++) {
-              let diaAtual = new Date(inicioSemana);
-              diaAtual.setDate(diaAtual.getDate() + i);
-              let diaStr = diaAtual.toISOString().split('T')[0];
-              let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
-
-              gridDivHtml += `
-                <div class="card-dia-semana" style="cursor: pointer;" onclick="selecionarDiaEspecifico('${diaStr}')">
-                  <strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>
-              `;
-              
-              let reservasDoDia = [];
-              snapshot.forEach(doc => {
-                if (doc.data().data === diaStr) reservasDoDia.push({ id: doc.id, ...doc.data() });
-              });
-
-              if (reservasDoDia.length > 0) {
-                reservasDoDia.forEach(r => {
-                  gridDivHtml += `
-                    <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
-                      <b>${r.horarioInicio}</b> - ${r.titulo}
-                      ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" onclick="event.stopPropagation(); confirmarExclusao('${r.id}')">Excluir</button>` : ''}
-                    </div>
-                  `;
-                });
-              } else {
-                gridDivHtml += `<span style="font-size: 10px; color: #94a3b8; font-style: italic; margin-top: 4px;">Sem reuniões</span>`;
-              }
-              gridDivHtml += `</div>`;
-            }
-            gridDivHtml += `</div>`;
-            container.innerHTML = gridDivHtml;
-          } 
-          else if (tipoVisaoAtual === 'mes') {
-            let wrapperHtml = `<div>`;
-            wrapperHtml += `<div class="grid-mes-header"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>`;
-            wrapperHtml += `<div class="grid-mes">`;
-
-            let ano = dataAtualObj.getFullYear();
-            let mes = dataAtualObj.getMonth();
-            let primeiroDiaMes = new Date(ano, mes, 1);
-            let inicioGrid = new Date(primeiroDiaMes);
-            inicioGrid.setDate(inicioGrid.getDate() - inicioGrid.getDate() + 1 - primeiroDiaMes.getDay());
-
-            let hojeStr = new Date().toISOString().split('T')[0];
-
-            for (let i = 0; i < 42; i++) {
-              let diaAtual = new Date(inicioGrid);
-              diaAtual.setDate(diaAtual.getDate() + i);
-              let diaStr = diaAtual.toISOString().split('T')[0];
-              let eMesAtual = diaAtual.getMonth() === mes;
-              let eHoje = diaStr === hojeStr;
-
-              let countReservasDia = 0;
-              snapshot.forEach(doc => {
-                if (doc.data().data === diaStr) countReservasDia++;
-              });
-
-              wrapperHtml += `
-                <div class="card-dia-mes ${eMesAtual ? '' : 'outro-mes'} ${eHoje ? 'dia-hoje' : ''}" onclick="selecionarDiaEspecifico('${diaStr}')">
-                  <span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>
-              `;
-              if (countReservasDia > 0) {
-                wrapperHtml += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${countReservasDia} reunião(ões)</div>`;
-              }
-              wrapperHtml += `</div>`;
-            }
-            wrapperHtml += `</div></div>`;
-            container.innerHTML = wrapperHtml;
+          if (listaSlot.length > 0) {
+            const reserva = listaSlot[0];
+            fragmentoHTML += `
+              <div class="slot-row reserved">
+                <div>
+                  <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
+                  <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo}</h4>
+                  <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || 'Equipa'}</p>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                  <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${reserva.sala}', '${reserva.data}', '${reserva.horarioInicio}', '${reserva.responsavel || 'Colega'}', '5551981061618')">💬 Negociar</button>
+                  ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reserva.id}')">🗑️ Excluir</button>` : ''}
+                </div>
+              </div>
+            `;
+          } else {
+            fragmentoHTML += `
+              <div class="slot-row available" onclick="abrirModalReserva('${hora}', '${dataStr}')">
+                <div>
+                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
+                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar reunião neste horário.</p>
+                </div>
+                <button class="btn-action-slot btn-reserve">📅 Agendar</button>
+              </div>
+            `;
           }
+        }
+        container.innerHTML = fragmentoHTML;
+      }
+      else if (tipoVisaoAtual === 'semana') {
+        let gridDivHtml = `<div class="grid-semana">`;
+        let inicioSemana = new Date(dataAtualObj);
+        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
 
-        }, (err) => {
-          container.innerHTML = `<p style="color: #ef4444;">Erro ao sincronizar reservas: ${err.message}</p>`;
-        });
+        for (let i = 0; i < 7; i++) {
+          let diaAtual = new Date(inicioSemana);
+          diaAtual.setDate(diaAtual.getDate() + i);
+          let diaStr = diaAtual.toISOString().split('T')[0];
+          let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
+
+          gridDivHtml += `
+            <div class="card-dia-semana" style="cursor: pointer;" onclick="selecionarDiaEspecifico('${diaStr}')">
+              <strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>
+          `;
+          
+          let reservasDoDia = reservas.filter(r => r.sala === sala && r.data === diaStr);
+          if (reservasDoDia.length > 0) {
+            reservasDoDia.forEach(r => {
+              gridDivHtml += `
+                <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
+                  <b>${r.horarioInicio}</b> - ${r.titulo}
+                  ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" onclick="event.stopPropagation(); confirmarExclusaoLocal('${r.id}')">Excluir</button>` : ''}
+                </div>
+              `;
+            });
+          } else {
+            gridDivHtml += `<span style="font-size: 10px; color: #94a3b8; font-style: italic; margin-top: 4px;">Sem reuniões</span>`;
+          }
+          gridDivHtml += `</div>`;
+        }
+        gridDivHtml += `</div>`;
+        container.innerHTML = gridDivHtml;
+      }
+      else if (tipoVisaoAtual === 'mes') {
+        let wrapperHtml = `<div>`;
+        wrapperHtml += `<div class="grid-mes-header"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>`;
+        wrapperHtml += `<div class="grid-mes">`;
+
+        let ano = dataAtualObj.getFullYear();
+        let mes = dataAtualObj.getMonth();
+        let primeiroDiaMes = new Date(ano, mes, 1);
+        let inicioGrid = new Date(primeiroDiaMes);
+        inicioGrid.setDate(inicioGrid.getDate() - inicioGrid.getDate() + 1 - primeiroDiaMes.getDay());
+
+        let hojeStr = new Date().toISOString().split('T')[0];
+
+        for (let i = 0; i < 42; i++) {
+          let diaAtual = new Date(inicioGrid);
+          diaAtual.setDate(diaAtual.getDate() + i);
+          let diaStr = diaAtual.toISOString().split('T')[0];
+          let eMesAtual = diaAtual.getMonth() === mes;
+          let eHoje = diaStr === hojeStr;
+
+          let reservasDia = reservas.filter(r => r.sala === sala && r.data === diaStr);
+
+          wrapperHtml += `
+            <div class="card-dia-mes ${eMesAtual ? '' : 'outro-mes'} ${eHoje ? 'dia-hoje' : ''}" onclick="selecionarDiaEspecifico('${diaStr}')">
+              <span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>
+          `;
+          if (reservasDia.length > 0) {
+            wrapperHtml += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${reservasDia.length} reunião(ões)</div>`;
+          }
+          wrapperHtml += `</div>`;
+        }
+        wrapperHtml += `</div></div>`;
+        container.innerHTML = wrapperHtml;
+      }
     }
 
     function abrirModalReserva(horaInicio, dataStr) {
@@ -914,32 +743,7 @@
       document.getElementById("modalNovaReserva").style.display = "flex";
     }
 
-    function abrirModalNegociacao(sala, data, horario, responsavel, whatsapp) {
-      const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo. Seria possível?`;
-      document.getElementById("inputMsgWhatsapp").value = msgPronta;
-
-      const btnWhatsapp = document.getElementById("linkEnviarWhatsapp");
-      
-      if (!whatsapp) {
-        btnWhatsapp.onclick = (e) => {
-          e.preventDefault();
-          mostrarAlerta("Atenção", "Este utilizador não tem um número de WhatsApp cadastrado no perfil.", "⚠️");
-        };
-        btnWhatsapp.href = "#";
-      } else {
-        const atualizarLink = () => {
-          const textoAtual = document.getElementById("inputMsgWhatsapp").value;
-          btnWhatsapp.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(textoAtual)}`;
-        };
-        atualizarLink();
-        document.getElementById("inputMsgWhatsapp").oninput = atualizarLink;
-        btnWhatsapp.onclick = null;
-      }
-
-      document.getElementById("modalNegociacao").style.display = "flex";
-    }
-
-    async function salvarNovaReservaFirebase() {
+    function salvarNovaReservaLocal() {
       const titulo = document.getElementById("inputTituloReserva").value.trim();
       const inicio = document.getElementById("inputHoraInicio").value;
       const fim = document.getElementById("inputHoraFim").value;
@@ -950,94 +754,33 @@
         return;
       }
 
-      const user = firebase.auth().currentUser;
-      const userId = user ? user.uid : "";
-      const emailAuth = user ? user.email : "";
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const novaReserva = {
+        id: 'res-' + Date.now(),
+        titulo: titulo,
+        horarioInicio: inicio,
+        horarioFim: fim,
+        sala: sala,
+        data: window.dataSelecionadaGlobal,
+        responsavel: apelidoUsuarioGlobal,
+        userId: usuarioSessao.uid
+      };
 
-      try {
-        await db.collection("reservas").add({
-          titulo: titulo,
-          horarioInicio: inicio,
-          horarioFim: fim,
-          sala: sala,
-          data: window.dataSelecionadaGlobal,
-          responsavel: apelidoUsuarioGlobal,
-          userId: userId,
-          canceladoPorAdmin: false,
-          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-        });
+      reservas.push(novaReserva);
+      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
 
-        let emailDestino = emailAuth;
-        let nomeDestino = apelidoUsuarioGlobal;
-
-        try {
-          if (userId) {
-            const userDoc = await db.collection("usuarios").doc(userId).get();
-            if (userDoc.exists) {
-              const dados = userDoc.data() || {};
-              if (typeof dados.emailRealNotificacao === "string" && dados.emailRealNotificacao.trim() !== "") {
-                emailDestino = dados.emailRealNotificacao.trim();
-              }
-              if (typeof dados.apelido === "string" && dados.apelido.trim() !== "") {
-                nomeDestino = dados.apelido.trim();
-              }
-            }
-          }
-        } catch (profileErr) {
-          console.error("Erro ao carregar dados do perfil:", profileErr);
-        }
-
-        let emailEnviado = false;
-        let motivoFalhaEmail = "";
-
-        if (!emailDestino || !String(emailDestino).includes("@")) {
-          motivoFalhaEmail = "Nenhum e-mail de destino válido encontrado.";
-        } else if (!window.emailjs || typeof window.emailjs.send !== "function") {
-          motivoFalhaEmail = "A biblioteca EmailJS não foi carregada.";
-        } else {
-          const templateParams = {
-            to_email: emailDestino,
-            to_name: nomeDestino,
-            name: titulo,
-            message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!`
-          };
-
-          try {
-            await emailjs.send(
-              'service_d30n93a',
-              'template_3uxpjzk',
-              templateParams
-            );
-            emailEnviado = true;
-          } catch (emailErr) {
-            motivoFalhaEmail = emailErr && emailErr.text 
-              ? emailErr.text 
-              : (emailErr && emailErr.message ? emailErr.message : String(emailErr));
-          }
-        }
-
-        document.getElementById("modalNovaReserva").style.display = "none";
-
-        if (emailEnviado) {
-          mostrarAlerta(
-            "Reserva confirmada",
-            `Reserva criada com sucesso. E-mail enviado para ${emailDestino}.`,
-            "🎉"
-          );
-        } else {
-          mostrarAlerta(
-            "Reserva criada; e-mail não enviado",
-            `A reserva foi salva, mas o envio de e-mail falhou: ${motivoFalhaEmail}.`,
-            "⚠️"
-          );
-        }
-
-      } catch (err) {
-        mostrarAlerta("Erro", "Erro ao criar reserva: " + err.message, "❌");
-      }
+      document.getElementById("modalNovaReserva").style.display = "none";
+      mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso no armazenamento local!", "🎉");
     }
 
-    function confirmarExclusao(id) {
+    function abrirModalNegociacao(sala, data, horario, responsavel, whatsapp) {
+      const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo.`;
+      document.getElementById("inputMsgWhatsapp").value = msgPronta;
+      document.getElementById("linkEnviarWhatsapp").href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msgPronta)}`;
+      document.getElementById("modalNegociacao").style.display = "flex";
+    }
+
+    function confirmarExclusaoLocal(id) {
       document.getElementById("idReservaParaExcluir").value = id;
       document.getElementById("modalConfirmacaoExclusao").style.display = "flex";
     }
@@ -1046,36 +789,17 @@
       document.getElementById("modalConfirmacaoExclusao").style.display = "none";
     }
 
-    function executarExclusaoReserva() {
+    function executarExclusaoReservaLocal() {
       const id = document.getElementById("idReservaParaExcluir").value;
       if (!id) return;
 
-      // Se o admin exclui, podemos marcar como canceladoPorAdmin para alertar o dono na entrada, ou simplesmente deletar.
-      // Aqui atualizamos com canceladoPorAdmin = true antes de deletar ou deletamos diretamente. 
-      // Para o dono receber o aviso de cancelamento imediato ao logar, atualizamos o documento com flag de cancelado:
-      db.collection("reservas").doc(id).update({
-        canceladoPorAdmin: true
-      }).then(() => {
-        return db.collection("reservas").doc(id).delete();
-      }).then(() => {
-        fecharModalConfirmacao();
-        mostrarAlerta("Sucesso", "Reserva excluída e utilizador notificado!", "🗑️");
-      }).catch(err => {
-        // Se a reserva já foi removida ou falhou update, tenta deletar direto
-        db.collection("reservas").doc(id).delete().then(() => {
-          fecharModalConfirmacao();
-          mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
-        }).catch(e2 => {
-          fecharModalConfirmacao();
-          mostrarAlerta("Erro", "Erro ao excluir: " + e2.message, "❌");
-        });
-      });
-    }
-  </script>
+      let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      reservas = reservas.filter(r => r.id !== id);
+      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
 
-  <script type="module">
-    import { verificarAutenticacao } from "../js/auth.js";
-    verificarAutenticacao();
+      fecharModalConfirmacao();
+      mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
+    }
   </script>
 </body>
 </html>
