@@ -27,7 +27,6 @@
 
     body {
       background-color: var(--bg-dark);
-      /* Suporte a imagem de fundo dinâmica */
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
@@ -42,7 +41,6 @@
       transition: background-image 0.5s ease-in-out;
     }
 
-    /* Camada escura translúcida para garantir legibilidade sobre imagens de fundo */
     .bg-overlay {
       position: absolute;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -197,8 +195,15 @@
 
     .meeting-item.concluida { opacity: 0.45; }
     .meeting-item.concluida .meeting-indicator { background: #64748b; }
+    
+    .meeting-item.em-andamento {
+      background: rgba(13, 148, 136, 0.15);
+      border-radius: 8px;
+      border-color: rgba(13, 148, 136, 0.4);
+    }
+    .meeting-item.em-andamento .meeting-indicator { background: var(--green-status); }
 
-    /* Seletor Rápido de Fundo (Flutuante Discreto no Canto Inferior Esquerdo) */
+    /* Seletor Rápido de Fundo */
     .bg-switcher {
       position: fixed;
       bottom: 12px;
@@ -261,7 +266,6 @@
       border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
     }
 
-    /* Ajuste para teste no telemóvel na vertical */
     @media (max-width: 768px) {
       .display-container {
         grid-template-columns: 1fr;
@@ -283,7 +287,6 @@
 
   <div class="bg-overlay" id="bgOverlay"></div>
 
-  <!-- Seletor Rápido de Fundo (com setas para trocar para os lados) -->
   <div class="bg-switcher">
     <button onclick="mudarFundo(-1)" title="Fundo Anterior">&#10094;</button>
     <span id="nomeTemaAtual">Tema: Padrão</span>
@@ -291,7 +294,6 @@
   </div>
 
   <div class="display-container">
-    <!-- Coluna Esquerda -->
     <div class="left-col">
       <img src="../login.png" alt="Logo" class="brand-logo-porta">
       
@@ -300,12 +302,9 @@
         <div class="clock-date" id="clockDate">segunda-feira, 26/10/2026</div>
       </div>
 
-      <div class="room-title-box" id="containerSalaDisplay">
-        <!-- Preenchido via JS -->
-      </div>
+      <div class="room-title-box" id="containerSalaDisplay"></div>
     </div>
 
-    <!-- Coluna Direita -->
     <div class="right-col">
       <div class="status-card" id="statusBanner">
         <div class="status-info">
@@ -317,23 +316,18 @@
 
       <div class="schedule-box">
         <h3>Próximas reuniões de hoje</h3>
-        <div id="listaReunioesHoje">
-          <!-- Itens carregados via script -->
-        </div>
+        <div id="listaReunioesHoje"></div>
       </div>
     </div>
   </div>
 
-  <!-- Modal Reserva Rápida -->
   <div class="modal-overlay" id="modalReservaPorta">
     <div class="modal-card">
       <h3 style="font-size: 18px;">Nova Reserva na Porta</h3>
 
       <div class="form-group">
         <label>Selecione o Utilizador</label>
-        <select id="selectUsuarioPorta">
-          <!-- Carregado via JS -->
-        </select>
+        <select id="selectUsuarioPorta"></select>
       </div>
 
       <div class="form-group" style="display: flex; flex-direction: row; gap: 12px;">
@@ -368,7 +362,6 @@
     let duracaoMinutos = 15;
     let salaAtualGlobal = "Sala 01";
 
-    // Lista de fundos disponíveis (pode adicionar links de imagens da Unsplash ou locais)
     const temasFundo = [
       { nome: "Padrão Escuro", url: "", overlay: "rgba(15, 23, 42, 0.82)" },
       { nome: "Natureza / Folhas", url: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.75)" },
@@ -520,16 +513,31 @@
         containerList.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">Nenhuma reunião agendada para hoje.</p>`;
       } else {
         reservasHoje.sort((a,b) => a.horarioInicio.localeCompare(b.horarioInicio)).forEach(r => {
+          const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
           const [hFim, mFim] = (r.horarioFim || r.horarioInicio).split(':').map(Number);
+          const minIni = hIni * 60 + mIni;
           const minFim = hFim * 60 + mFim;
+
           const jaConcluida = horaAtualNum >= minFim;
+          const estaEmAndamento = horaAtualNum >= minIni && horaAtualNum < minFim;
+
+          let classeItem = "";
+          let tagBadge = "";
+
+          if (jaConcluida) {
+            classeItem = "concluida";
+            tagBadge = '<span style="font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Concluída</span>';
+          } else if (estaEmAndamento) {
+            classeItem = "em-andamento";
+            tagBadge = '<span style="font-size: 11px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 700;">Em andamento</span>';
+          }
 
           const div = document.createElement("div");
-          div.className = `meeting-item ${jaConcluida ? 'concluida' : ''}`;
+          div.className = `meeting-item ${classeItem}`;
           div.innerHTML = `
             <div class="meeting-indicator"></div>
             <div class="meeting-details">
-              <h4>${r.horarioInicio} - ${r.horarioFim || ''} | ${r.titulo} ${jaConcluida ? '<span style="font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Concluída</span>' : ''}</h4>
+              <h4>${r.horarioInicio} - ${r.horarioFim || ''} | ${r.titulo} ${tagBadge}</h4>
               <p>Responsável: ${r.responsavel}</p>
             </div>
           `;
