@@ -36,7 +36,7 @@
       width: 100vw;
       overflow: hidden;
       display: flex;
-      padding: 16px; /* Reduzido para dar mais espaço vertical */
+      padding: 16px;
       position: relative;
       transition: background-image 0.5s ease-in-out;
     }
@@ -48,31 +48,33 @@
       z-index: 1;
     }
 
+    /* Container Principal */
     .display-container {
       position: relative;
       z-index: 2;
       display: grid;
-      grid-template-columns: 1fr 1fr; /* Divisão Exata 50/50 (Metade para cada lado) */
-      gap: 20px; /* Reduzido para aproximar as colunas */
+      grid-template-columns: 1fr 1fr; /* Divisão Exata 50/50 */
+      gap: 24px;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
       height: 100%;
       overflow: hidden;
-      align-items: center;
+      align-items: stretch; /* Permite que as duas colunas alinhem pelo topo */
+      padding: 6vh 0; /* Mantém o conjunto centralizado no ecrã verticalmente */
     }
 
-    /* Coluna da Esquerda */
+    /* Coluna da Esquerda (Logo, Relógio, Título) */
     .left-col {
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start; /* Força o alinhamento no topo exato */
       align-items: flex-start;
-      gap: 14px; /* Reduzido para juntar mais os elementos verticalmente */
+      gap: 16px;
     }
 
     .brand-logo-porta {
-      max-height: 75px; /* Tamanho confortável */
+      max-height: 75px; 
       width: auto;
       object-fit: contain;
     }
@@ -86,7 +88,7 @@
       font-weight: 800; outline: none; cursor: pointer; padding: 0; margin: 0;
     }
 
-    /* Seletor Rápido de Fundo - Compacto e Elegante */
+    /* Seletor Rápido de Fundo */
     .bg-switcher {
       display: inline-flex;
       align-items: center;
@@ -96,6 +98,7 @@
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(4px);
+      margin-top: -6px;
     }
     .bg-switcher button {
       background: none; border: none; color: rgba(255, 255, 255, 0.6); cursor: pointer;
@@ -104,9 +107,15 @@
     .bg-switcher button:hover { color: white; background: rgba(255,255,255,0.1); }
     .bg-switcher span { font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.6); letter-spacing: 1px; text-transform: uppercase; }
 
-    /* Coluna da Direita */
+    /* Coluna da Direita (Status e Reuniões) */
     .right-col {
-      display: flex; flex-direction: column; gap: 14px; height: 100%; max-height: 100%; overflow: hidden; justify-content: center;
+      display: flex; 
+      flex-direction: column; 
+      justify-content: flex-start; /* Força o alinhamento no topo exato, igualando à coluna esquerda */
+      gap: 16px; 
+      height: 100%; 
+      max-height: 100%; 
+      overflow: hidden;
     }
 
     .status-card {
@@ -213,7 +222,7 @@
 
     /* Layout para Modo Retrato (Dispositivos na Vertical) */
     @media (orientation: portrait) {
-      .display-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow-y: auto; align-items: flex-start; }
+      .display-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow-y: auto; align-items: flex-start; padding: 0; }
       body { overflow-y: auto; height: auto; min-height: 100vh; padding: 20px; }
       .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 12px; }
       .brand-logo-porta { max-height: 60px; }
