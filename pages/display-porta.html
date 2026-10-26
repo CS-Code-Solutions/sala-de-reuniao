@@ -548,14 +548,11 @@
 
       if (!horaSelecionada) return showToast("Por favor, selecione o horário de início.");
 
-      const [hIni, mIni] = horaSelecionada.split(':').map(Number);
-      const minInicioNovo = hIni * 60 + mIni;
-      const minFimNovo = minInicioNovo + duracaoMinutos;
-      
-      const horaFimH = String(Math.floor(minFimNovo/60) % 24).padStart(2,'0');
-      const horaFimM = String(minFimNovo%60).padStart(2,'0');
-      const horaFimStr = `${horaFimH}:${horaFimM}`;
-      
+      // CORREÇÃO CRUCIAL: Ajusta o horário para a hora cheia exata compatível com a grelha da agenda
+      const [hIni] = horaSelecionada.split(':').map(Number);
+      const horaCheiaInicio = String(hIni).padStart(2, '0') + ":00";
+      const horaCheiaFim = String((hIni + 1) % 24).padStart(2, '0') + ":00";
+
       const hojeStr = getLocalDateString();
       let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
 
@@ -565,26 +562,21 @@
         if (rSala !== salaAtualGlobal || rData !== hojeStr) return false;
         
         const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
-        if(!strIni) return false;
-
-        const rIni = strIni.split(':').map(Number)[0] * 60 + strIni.split(':').map(Number)[1];
-        const rFim = strFim.split(':').map(Number)[0] * 60 + strFim.split(':').map(Number)[1];
-        return (minInicioNovo < rFim && minFimNovo > rIni);
+        return strIni === horaCheiaInicio;
       });
 
-      if (conflito) return showToast("❌ Conflito de Horário! Já existe uma reunião marcada neste intervalo.");
+      if (conflito) return showToast("❌ Conflito de Horário! Já existe uma reunião marcada neste horário exato.");
 
       const novoEvento = {
         id: 'res-' + Date.now(),
         titulo: titulo,
         title: titulo,
-        horarioInicio: horaSelecionada,
-        horaInicio: horaSelecionada,
-        horarioFim: horaFimStr,
-        horaFim: horaFimStr,
-        start: `${hojeStr}T${horaSelecionada}:00`,
-        end: `${hojeStr}T${horaFimStr}:00`,
+        horarioInicio: horaCheiaInicio,
+        horaInicio: horaCheiaInicio,
+        horarioFim: horaCheiaFim,
+        horaFim: horaCheiaFim,
+        start: `${hojeStr}T${horaCheiaInicio}:00`,
+        end: `${hojeStr}T${horaCheiaFim}:00`,
         sala: salaAtualGlobal,
         room: salaAtualGlobal,
         data: hojeStr,
@@ -609,6 +601,7 @@
       document.getElementById("modalReservaPorta").style.display = "none";
       document.getElementById("inputTituloPorta").value = "";
       atualizarPainel();
+      showToast("✅ Reserva efetuada com sucesso!");
     }
   </script>
 </body>
