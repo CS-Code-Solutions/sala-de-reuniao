@@ -53,22 +53,22 @@
       position: relative;
       z-index: 2;
       display: grid;
-      grid-template-columns: 1fr 1fr; /* Divisão Exata 50/50 */
+      grid-template-columns: 1fr 1fr;
       gap: 24px;
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
       height: 100%;
       overflow: hidden;
-      align-items: stretch; /* Permite que as duas colunas alinhem pelo topo */
-      padding: 6vh 0; /* Mantém o conjunto centralizado no ecrã verticalmente */
+      align-items: stretch;
+      padding: 6vh 0;
     }
 
-    /* Coluna da Esquerda (Logo, Relógio, Título) */
+    /* Coluna da Esquerda */
     .left-col {
       display: flex;
       flex-direction: column;
-      justify-content: flex-start; /* Força o alinhamento no topo exato */
+      justify-content: flex-start;
       align-items: flex-start;
       gap: 16px;
     }
@@ -107,11 +107,11 @@
     .bg-switcher button:hover { color: white; background: rgba(255,255,255,0.1); }
     .bg-switcher span { font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.6); letter-spacing: 1px; text-transform: uppercase; }
 
-    /* Coluna da Direita (Status e Reuniões) */
+    /* Coluna da Direita */
     .right-col {
       display: flex; 
       flex-direction: column; 
-      justify-content: flex-start; /* Força o alinhamento no topo exato, igualando à coluna esquerda */
+      justify-content: flex-start;
       gap: 16px; 
       height: 100%; 
       max-height: 100%; 
@@ -178,35 +178,36 @@
       background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color);
     }
 
-    /* Modal de Agendamento Rápido */
+    /* Modal de Agendamento Rápido - Ajustado para não cortar e ter scroll interno */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px);
-      z-index: 2000; justify-content: center; align-items: center; padding: 16px;
+      z-index: 2000; justify-content: center; align-items: center; padding: 12px;
     }
     .modal-card {
-      background: #1e293b; width: 100%; max-width: 480px; border-radius: 16px;
-      padding: 20px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 14px;
-      max-height: 95vh; overflow-y: auto;
+      background: #1e293b; width: 100%; max-width: 440px; border-radius: 16px;
+      padding: 18px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;
+      max-height: 85vh; /* Garante que nunca ultrapassa a tela verticalmente */
+      overflow-y: auto;  /* Adiciona scroll interno limpo se necessário */
     }
-    .form-group { display: flex; flex-direction: column; gap: 6px; }
-    .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
+    .form-group { display: flex; flex-direction: column; gap: 4px; }
+    .form-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
     .form-group input, .form-group select {
-      padding: 10px; background: #0f172a; border: 1px solid var(--border-color);
-      border-radius: 8px; color: white; font-size: 14px; outline: none;
+      padding: 8px 10px; background: #0f172a; border: 1px solid var(--border-color);
+      border-radius: 8px; color: white; font-size: 13px; outline: none;
     }
     ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
-    .quick-time-btns { display: flex; gap: 8px; }
+    .quick-time-btns { display: flex; gap: 6px; }
     .btn-time-opt {
-      flex: 1; padding: 10px; background: #0f172a; border: 1px solid var(--border-color);
-      color: white; border-radius: 8px; font-weight: 600; cursor: pointer;
+      flex: 1; padding: 8px; background: #0f172a; border: 1px solid var(--border-color);
+      color: white; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 12px;
     }
     .btn-time-opt.active { background: var(--accent); border-color: var(--accent); }
 
-    .modal-actions { display: flex; gap: 10px; margin-top: 4px; }
-    .btn-cancel { flex: 1; padding: 10px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-confirm { flex: 1; padding: 10px; background: var(--green-status); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
+    .btn-cancel { flex: 1; padding: 9px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    .btn-confirm { flex: 1; padding: 9px; background: var(--green-status); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
 
     /* Alerta Elegante Flutuante (Toast) */
     .toast-container {
@@ -237,7 +238,6 @@
 
   <div class="bg-overlay" id="bgOverlay"></div>
 
-  <!-- Container de Alertas Flutuantes -->
   <div id="toastContainer" class="toast-container"></div>
 
   <div class="display-container">
@@ -251,7 +251,6 @@
 
       <div class="room-title-box" id="containerSalaDisplay"></div>
       
-      <!-- Botão Tema abaixo da sala -->
       <div class="bg-switcher">
         <button onclick="mudarFundo(-1)">&#10094;</button>
         <span>Tema</span>
@@ -277,7 +276,7 @@
 
   <div class="modal-overlay" id="modalReservaPorta">
     <div class="modal-card">
-      <h3 style="font-size: 18px; margin-bottom: 4px;">Nova Reserva na Porta</h3>
+      <h3 style="font-size: 16px; margin-bottom: 2px;">Nova Reserva na Porta</h3>
 
       <div class="form-group">
         <label>Selecione o Utilizador</label>
@@ -285,7 +284,7 @@
       </div>
 
       <div class="form-group" style="display: flex; flex-direction: row; gap: 12px;">
-        <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px;">
           <label>Horário de Início</label>
           <input type="time" id="inputHoraInicioPorta" required>
         </div>
@@ -413,7 +412,13 @@
 
     function carregarUsuariosDrop() {
       const select = document.getElementById("selectUsuarioPorta");
-      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
+      // Busca nas chaves possíveis onde o sistema guarda os utilizadores
+      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || 
+                       JSON.parse(localStorage.getItem("usuarios")) || [
+        { nome: "Programador", apelido: "Programador" },
+        { nome: "Utilizador Teste", apelido: "Usuário" }
+      ];
+
       select.innerHTML = "";
       usuarios.forEach(u => {
         const opt = document.createElement("option");
@@ -439,8 +444,12 @@
       let concluidasArr = [];
 
       reservasHoje.forEach(r => {
-        const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
-        const [hFim, mFim] = (r.horarioFim || r.horarioInicio).split(':').map(Number);
+        const strIni = r.horarioInicio || r.horaInicio;
+        const strFim = r.horarioFim || r.horaFim || strIni;
+        if(!strIni) return;
+
+        const [hIni, mIni] = strIni.split(':').map(Number);
+        const [hFim, mFim] = strFim.split(':').map(Number);
         const minIni = hIni * 60 + mIni;
         const minFim = hFim * 60 + mFim;
 
@@ -449,7 +458,7 @@
         else futurasArr.push(r);
       });
 
-      const sortByTime = (a, b) => a.horarioInicio.localeCompare(b.horarioInicio);
+      const sortByTime = (a, b) => (a.horarioInicio || a.horaInicio).localeCompare(b.horarioInicio || b.horaInicio);
       emAndamentoArr.sort(sortByTime);
       futurasArr.sort(sortByTime);
       concluidasArr.sort(sortByTime);
@@ -459,7 +468,7 @@
         const emAndamento = emAndamentoArr[0];
         banner.classList.add("ocupado");
         document.getElementById("statusTexto").innerText = "Ocupado";
-        document.getElementById("statusSubtexto").innerText = `${emAndamento.titulo} (${emAndamento.responsavel})`;
+        document.getElementById("statusSubtexto").innerText = `${emAndamento.titulo || emAndamento.title} (${emAndamento.responsavel || emAndamento.usuario})`;
       } else {
         banner.classList.remove("ocupado");
         document.getElementById("statusTexto").innerText = "Disponível";
@@ -476,8 +485,10 @@
         let proximaEvidenciada = false;
 
         ordenadasFinal.forEach(r => {
-          const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
-          const [hFim, mFim] = (r.horarioFim || r.horarioInicio).split(':').map(Number);
+          const strIni = r.horarioInicio || r.horaInicio;
+          const strFim = r.horarioFim || r.horaFim || strIni;
+          const [hIni, mIni] = strIni.split(':').map(Number);
+          const [hFim, mFim] = strFim.split(':').map(Number);
           const minIni = hIni * 60 + mIni;
           const minFim = hFim * 60 + mFim;
 
@@ -500,8 +511,8 @@
           div.innerHTML = `
             <div class="meeting-indicator"></div>
             <div class="meeting-details" style="width: 100%;">
-              <h4>${r.horarioInicio} - ${r.horarioFim} | ${r.titulo} ${tagBadge}</h4>
-              <p>Responsável: ${r.responsavel}</p>
+              <h4>${strIni} - ${strFim} | ${r.titulo || r.title} ${tagBadge}</h4>
+              <p>Responsável: ${r.responsavel || r.usuario}</p>
             </div>
           `;
           containerList.appendChild(div);
@@ -510,6 +521,7 @@
     }
 
     function abrirModalReservaRapida() {
+      carregarUsuariosDrop(); // Garante que carrega sempre que abrir
       const d = new Date();
       document.getElementById("inputHoraInicioPorta").value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
       document.getElementById("modalReservaPorta").style.display = "flex";
@@ -538,8 +550,13 @@
 
       const conflito = reservas.some(r => {
         if (r.sala !== salaAtualGlobal || r.data !== hojeStr) return false;
-        const rIni = r.horarioInicio.split(':').map(Number)[0] * 60 + r.horarioInicio.split(':').map(Number)[1];
-        const rFim = r.horarioFim.split(':').map(Number)[0] * 60 + r.horarioFim.split(':').map(Number)[1];
+        
+        const strIni = r.horarioInicio || r.horaInicio;
+        const strFim = r.horarioFim || r.horaFim || strIni;
+        if(!strIni) return false;
+
+        const rIni = strIni.split(':').map(Number)[0] * 60 + strIni.split(':').map(Number)[1];
+        const rFim = strFim.split(':').map(Number)[0] * 60 + strFim.split(':').map(Number)[1];
         return (minInicioNovo < rFim && minFimNovo > rIni);
       });
 
@@ -548,13 +565,23 @@
       reservas.push({
         id: 'res-' + Date.now(),
         titulo: titulo,
+        title: titulo,
         horarioInicio: horaSelecionada,
+        horaInicio: horaSelecionada,
         horarioFim: horaFimStr,
+        horaFim: horaFimStr,
+        start: `${hojeStr}T${horaSelecionada}:00`,
+        end: `${hojeStr}T${horaFimStr}:00`,
         sala: salaAtualGlobal,
         data: hojeStr,
+        dataReserva: hojeStr,
         responsavel: responsavel,
+        usuario: responsavel,
         userId: 'porta',
-        status: 'Confirmada',
+        status: 'Aprovada',
+        situacao: 'Aprovada',
+        color: '#10b981',
+        backgroundColor: '#10b981',
         dataCriacao: new Date().toISOString()
       });
 
