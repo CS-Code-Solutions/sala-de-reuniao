@@ -113,7 +113,6 @@
       overflow: hidden;
     }
 
-    /* Cartão de Status mais fino e compacto para dar espaço à lista */
     .status-card {
       background: var(--card-bg); border: 1px solid var(--border-color);
       border-radius: 14px; padding: 10px 16px; display: flex;
@@ -423,11 +422,9 @@
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get('sala')) salaAtualGlobal = urlParams.get('sala');
 
-      // Lê de todas as chaves possíveis onde a agenda principal possa guardar os dados
       let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
       const calendarioExtra = JSON.parse(localStorage.getItem("meetingroom_calendario")) || JSON.parse(localStorage.getItem("calendar_events")) || [];
       
-      // Mescla as fontes para garantir que exibe tudo o que a agenda tem
       const idsExistentes = new Set(reservas.map(r => r.id));
       calendarioExtra.forEach(ev => {
         if(ev && !idsExistentes.has(ev.id)) {
@@ -531,8 +528,9 @@
     function abrirModalReservaRapida() {
       carregarUsuariosDrop();
       const d = new Date();
-      const hh = String(d.getHours()).padStart(2,'0');
-      const mm = d.getMinutes() < 30 ? '00' : '30';
+      // Pega exatamente a hora e os minutos atuais do sistema
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
       document.getElementById("inputHoraInicioPorta").value = `${hh}:${mm}`;
       document.getElementById("modalReservaPorta").style.display = "flex";
     }
@@ -604,7 +602,6 @@
       reservas.push(novoEvento);
       localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
       
-      // Sincroniza também com chaves extras de calendário caso a agenda principal utilize
       let calendarioExtra = JSON.parse(localStorage.getItem("meetingroom_calendario")) || [];
       calendarioExtra.push(novoEvento);
       localStorage.setItem("meetingroom_calendario", JSON.stringify(calendarioExtra));
