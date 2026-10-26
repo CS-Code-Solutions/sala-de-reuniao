@@ -31,7 +31,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       height: 100vh;
       width: 100vw;
-      overflow: hidden; /* Trava a página inteira */
+      overflow: hidden;
       display: flex;
       padding: 24px;
     }
@@ -45,13 +45,14 @@
       overflow: hidden;
     }
 
-    /* Coluna da Esquerda (Centralizada Verticalmente) */
+    /* Coluna da Esquerda Ajustada para a área desejada */
     .left-col {
       display: flex;
       flex-direction: column;
-      justify-content: center; /* Centraliza tudo verticalmente */
+      justify-content: flex-start;
       align-items: flex-start;
-      gap: 24px; /* Espaçamento uniforme entre os elementos */
+      gap: 20px;
+      padding-top: 12vh; /* Posiciona o bloco exatamente na área que circulou */
     }
 
     .brand-logo-porta {
@@ -222,7 +223,7 @@
         overflow-y: auto;
       }
       body { overflow-y: auto; height: auto; min-height: 100vh; }
-      .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 16px; padding-bottom: 10px; }
+      .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 16px; padding-top: 20px; }
       .brand-logo-porta { max-height: 65px; }
       .clock-time { font-size: 48px; }
       .status-card { padding: 15px; flex-direction: column; text-align: center; gap: 12px; }
@@ -234,7 +235,7 @@
 <body>
 
   <div class="display-container">
-    <!-- Coluna Esquerda Centralizada -->
+    <!-- Coluna Esquerda Ajustada -->
     <div class="left-col">
       <img src="../login.png" alt="Logo" class="brand-logo-porta">
       
@@ -325,11 +326,9 @@
       const container = document.getElementById("containerSalaDisplay");
 
       if (salaParam) {
-        // Se a sala veio fixa pela URL (ex: ?sala=Sala%2002), exibe apenas como texto fixo
         salaAtualGlobal = salaParam;
         container.innerHTML = `<h2>${salaAtualGlobal}</h2>`;
       } else {
-        // Se não veio nada na URL, exibe o seletor normal
         container.innerHTML = `
           <select id="selectSalaDisplay" onchange="mudarSalaUrl()" style="background: transparent; color: white; border: none; font-size: 28px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
             <option value="Sala 01" style="background:#0f172a;">Sala de Reuniões 01</option>
