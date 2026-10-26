@@ -46,7 +46,7 @@
     }
 
     .brand-logo-porta {
-      max-height: 40px;
+      max-height: 45px;
       width: auto;
       object-fit: contain;
       align-self: flex-start;
@@ -72,13 +72,6 @@
 
     .room-title-box {
       margin-top: auto;
-    }
-
-    .room-name-display {
-      font-size: 36px;
-      font-weight: 800;
-      line-height: 1.2;
-      color: #ffffff;
     }
 
     /* Coluna da Direita */
@@ -168,6 +161,7 @@
       padding: 10px 12px;
       border-bottom: 1px solid var(--border-color);
       gap: 12px;
+      transition: all 0.2s;
     }
 
     .meeting-item:last-child { border-bottom: none; }
@@ -187,6 +181,15 @@
     .meeting-details p {
       font-size: 12px;
       color: var(--text-muted);
+    }
+
+    /* Estilo para reuniões concluídas (passadas) */
+    .meeting-item.concluida {
+      opacity: 0.45;
+    }
+
+    .meeting-item.concluida .meeting-indicator {
+      background: #64748b;
     }
 
     /* Modal de Agendamento Rápido */
@@ -291,7 +294,7 @@
   <div class="display-container">
     <!-- Coluna Esquerda -->
     <div class="left-col">
-      <img src="../cabe.png" alt="Logo" class="brand-logo-porta">
+      <img src="../login.png" alt="Logo" class="brand-logo-porta">
       
       <div class="clock-box">
         <div class="clock-time" id="clockTime">12:00</div>
@@ -333,7 +336,7 @@
       <div class="form-group">
         <label>Selecione o Utilizador</label>
         <select id="selectUsuarioPorta">
-          <!-- Carregado via JS com os utilizadores registados -->
+          <!-- Carregado via JS -->
         </select>
       </div>
 
@@ -365,7 +368,6 @@
       iniciarRelogio();
       carregarUsuariosDrop();
       atualizarPainel();
-      // Atualiza o painel automaticamente a cada 10 segundos
       setInterval(atualizarPainel, 10000);
     });
 
@@ -404,7 +406,6 @@
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
       const hojeStr = new Date().toISOString().split('T')[0];
 
-      // Filtra reservas da sala para o dia atual
       const reservasHoje = reservas.filter(r => r.sala === sala && r.data === hojeStr);
       
       const agora = new Date();
@@ -437,7 +438,6 @@
         txtSub.innerText = "Sem reuniões a decorrer agora";
       }
 
-      // Preenche a lista do dia
       const containerList = document.getElementById("listaReunioesHoje");
       containerList.innerHTML = "";
 
@@ -445,12 +445,16 @@
         containerList.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">Nenhuma reunião agendada para hoje.</p>`;
       } else {
         reservasHoje.sort((a,b) => a.horarioInicio.localeCompare(b.horarioInicio)).forEach(r => {
+          const [hFim, mFim] = (r.horarioFim || r.horarioInicio).split(':').map(Number);
+          const minFim = hFim * 60 + mFim;
+          const jaConcluida = horaAtualNum >= minFim;
+
           const div = document.createElement("div");
-          div.className = "meeting-item";
+          div.className = `meeting-item ${jaConcluida ? 'concluida' : ''}`;
           div.innerHTML = `
             <div class="meeting-indicator"></div>
             <div class="meeting-details">
-              <h4>${r.horarioInicio} - ${r.horarioFim || ''} | ${r.titulo}</h4>
+              <h4>${r.horarioInicio} - ${r.horarioFim || ''} | ${r.titulo} ${jaConcluida ? '<span style="font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Concluída</span>' : ''}</h4>
               <p>Responsável: ${r.responsavel}</p>
             </div>
           `;
