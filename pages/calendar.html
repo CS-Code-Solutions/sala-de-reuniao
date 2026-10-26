@@ -309,7 +309,7 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 8px 12px 8px 0px;
+        padding: 10px 12px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
@@ -565,13 +565,14 @@
       carregarAgendaLocal();
     }
 
-    function atualizarCabecalhoData() {
+        function atualizarCabecalhoData() {
       const spanData = document.getElementById("dataAtualExibicao");
       let textoFormatado = "";
 
       if (tipoVisaoAtual === 'dia') {
-        const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
-        textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
+        const diaSemana = dataAtualObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+        const dataCurta = dataAtualObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        textoFormatado = `${diaSemana}, ${dataCurta}`;
       } 
       else if (tipoVisaoAtual === 'semana') {
         let inicioSemana = new Date(dataAtualObj);
