@@ -52,14 +52,14 @@
       position: relative;
       z-index: 2;
       display: grid;
-      grid-template-columns: 1fr 1.35fr; /* Mais espaço para a direita */
+      grid-template-columns: 1fr 1.35fr;
       gap: 32px;
       width: 100%;
-      max-width: 1100px; /* Evita que estique demasiado em ecrãs largos */
-      margin: 0 auto; /* Centraliza na tela */
+      max-width: 1100px;
+      margin: 0 auto;
       height: 100%;
       overflow: hidden;
-      align-items: center; /* Alinhamento vertical perfeito */
+      align-items: center;
     }
 
     /* Coluna da Esquerda */
@@ -70,24 +70,6 @@
       align-items: flex-start;
       gap: 18px;
     }
-
-    /* Seletor Rápido de Fundo - No Topo Sucinto */
-    .bg-switcher {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(4px);
-    }
-    .bg-switcher button {
-      background: none; border: none; color: white; cursor: pointer;
-      font-size: 16px; font-weight: bold; padding: 2px 6px; border-radius: 4px;
-    }
-    .bg-switcher button:hover { background: rgba(255,255,255,0.15); }
-    .bg-switcher span { font-size: 14px; font-weight: 600; color: var(--text-main); letter-spacing: 0.5px; }
 
     .brand-logo-porta {
       max-height: 85px;
@@ -103,6 +85,25 @@
       background: transparent; color: white; border: none; font-size: 28px;
       font-weight: 800; outline: none; cursor: pointer; padding: 0; margin: 0;
     }
+
+    /* Seletor Rápido de Fundo - Pequeno e elegante, abaixo do título */
+    .bg-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      padding: 4px 10px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(4px);
+      margin-top: -10px; /* Puxa o botão sutilmente para perto do nome da sala */
+    }
+    .bg-switcher button {
+      background: none; border: none; color: rgba(255, 255, 255, 0.6); cursor: pointer;
+      font-size: 11px; font-weight: bold; padding: 2px 4px; border-radius: 4px; transition: all 0.2s;
+    }
+    .bg-switcher button:hover { color: white; background: rgba(255,255,255,0.1); }
+    .bg-switcher span { font-size: 10px; font-weight: 600; color: rgba(255, 255, 255, 0.6); letter-spacing: 1px; text-transform: uppercase; }
 
     /* Coluna da Direita */
     .right-col {
@@ -128,7 +129,7 @@
     .btn-reserva-rapida {
       background: var(--green-status); color: white; border: none; padding: 12px 20px;
       border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
-      white-space: nowrap; /* Impede a quebra de linha no texto */
+      white-space: nowrap;
     }
     .btn-reserva-rapida:hover { opacity: 0.9; transform: scale(1.02); }
 
@@ -216,6 +217,7 @@
       .display-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow-y: auto; align-items: flex-start; }
       body { overflow-y: auto; height: auto; min-height: 100vh; }
       .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 12px; padding-top: 20px; }
+      .bg-switcher { margin-top: 0; } /* Reseta a margem negativa no mobile retrato */
       .brand-logo-porta { max-height: 60px; }
       .clock-time { font-size: 52px; }
       .status-card { padding: 16px; flex-direction: column; text-align: center; gap: 14px; }
@@ -233,12 +235,6 @@
 
   <div class="display-container">
     <div class="left-col">
-      <div class="bg-switcher">
-        <button onclick="mudarFundo(-1)">&#10094;</button>
-        <span>Tema</span>
-        <button onclick="mudarFundo(1)">&#10095;</button>
-      </div>
-
       <img src="../login.png" alt="Logo" class="brand-logo-porta">
       
       <div class="clock-box">
@@ -247,6 +243,13 @@
       </div>
 
       <div class="room-title-box" id="containerSalaDisplay"></div>
+      
+      <!-- Botão Tema relocado para baixo do nome da sala -->
+      <div class="bg-switcher">
+        <button onclick="mudarFundo(-1)">&#10094;</button>
+        <span>Tema</span>
+        <button onclick="mudarFundo(1)">&#10095;</button>
+      </div>
     </div>
 
     <div class="right-col">
