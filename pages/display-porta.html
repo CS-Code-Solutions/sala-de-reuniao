@@ -3,7 +3,7 @@
 <head>
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MeetingRoom - Painel da Porta</title>
   <style>
     :root {
@@ -66,8 +66,27 @@
       justify-content: flex-start;
       align-items: flex-start;
       gap: 20px;
-      padding-top: 10vh;
+      padding-top: 4vh;
     }
+
+    /* Seletor Rápido de Fundo - No Topo Sucinto */
+    .bg-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(4px);
+      margin-bottom: 10px;
+    }
+    .bg-switcher button {
+      background: none; border: none; color: white; cursor: pointer;
+      font-size: 16px; font-weight: bold; padding: 2px 6px; border-radius: 4px;
+    }
+    .bg-switcher button:hover { background: rgba(255,255,255,0.15); }
+    .bg-switcher span { font-size: 14px; font-weight: 600; color: var(--text-main); letter-spacing: 0.5px; }
 
     .brand-logo-porta {
       max-height: 90px;
@@ -75,63 +94,29 @@
       object-fit: contain;
     }
 
-    .clock-box {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .clock-time {
-      font-size: 64px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      line-height: 1;
-    }
-
-    .clock-date {
-      font-size: 18px;
-      color: var(--text-muted);
-      margin-top: 6px;
-      text-transform: capitalize;
-    }
+    .clock-box { display: flex; flex-direction: column; }
+    .clock-time { font-size: 64px; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+    .clock-date { font-size: 18px; color: var(--text-muted); margin-top: 6px; text-transform: capitalize; }
 
     .room-title-box select, .room-title-box h2 {
-      background: transparent;
-      color: white;
-      border: none;
-      font-size: 28px;
-      font-weight: 800;
-      outline: none;
-      cursor: pointer;
-      padding: 0;
-      margin: 0;
+      background: transparent; color: white; border: none; font-size: 28px;
+      font-weight: 800; outline: none; cursor: pointer; padding: 0; margin: 0;
     }
 
     /* Coluna da Direita */
     .right-col {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      height: 100%;
-      overflow: hidden;
+      display: flex; flex-direction: column; gap: 16px; height: 100%; overflow: hidden;
     }
 
     .status-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 20px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: relative;
-      flex-shrink: 0;
-      backdrop-filter: blur(8px);
+      background: var(--card-bg); border: 1px solid var(--border-color);
+      border-radius: 16px; padding: 20px 24px; display: flex;
+      justify-content: space-between; align-items: center; position: relative;
+      flex-shrink: 0; backdrop-filter: blur(8px);
     }
 
     .status-card::before {
-      content: "";
-      position: absolute;
-      left: 0; top: 0; bottom: 0; width: 8px;
+      content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 8px;
       background: var(--green-status);
     }
     .status-card.ocupado::before { background: var(--red-status); }
@@ -140,96 +125,47 @@
     .status-info p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
 
     .btn-reserva-rapida {
-      background: var(--green-status);
-      color: white; border: none; padding: 12px 20px;
-      border-radius: 10px; font-size: 15px; font-weight: 700;
-      cursor: pointer; transition: all 0.2s;
+      background: var(--green-status); color: white; border: none; padding: 12px 20px;
+      border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s;
     }
     .btn-reserva-rapida:hover { opacity: 0.9; transform: scale(1.02); }
 
-    /* Lista de Reuniões do Dia */
+    /* Lista de Reuniões */
     .schedule-box {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 20px;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      backdrop-filter: blur(8px);
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+      padding: 20px; flex: 1; display: flex; flex-direction: column; overflow: hidden; backdrop-filter: blur(8px);
     }
 
     .schedule-box h3 {
-      font-size: 14px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--text-muted);
-      margin-bottom: 12px;
-      flex-shrink: 0;
+      font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;
+      color: var(--text-muted); margin-bottom: 12px; flex-shrink: 0;
     }
 
     #listaReunioesHoje {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      overflow-y: auto;
-      padding-right: 6px;
+      flex: 1; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding-right: 6px;
     }
 
     .meeting-item {
-      display: flex;
-      align-items: center;
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--border-color);
-      gap: 12px;
-      transition: all 0.2s;
-      flex-shrink: 0;
+      display: flex; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--border-color);
+      gap: 12px; transition: all 0.2s; flex-shrink: 0; border-radius: 8px;
     }
     .meeting-item:last-child { border-bottom: none; }
 
     .meeting-indicator { width: 4px; height: 28px; background: var(--accent); border-radius: 2px; }
-    .meeting-details h4 { font-size: 15px; font-weight: 600; }
-    .meeting-details p { font-size: 12px; color: var(--text-muted); }
+    .meeting-details h4 { font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 8px;}
+    .meeting-details p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
-    .meeting-item.concluida { opacity: 0.45; }
+    .meeting-item.concluida { opacity: 0.45; border-bottom: 1px solid transparent; }
     .meeting-item.concluida .meeting-indicator { background: #64748b; }
     
     .meeting-item.em-andamento {
-      background: rgba(13, 148, 136, 0.15);
-      border-radius: 8px;
-      border-color: rgba(13, 148, 136, 0.4);
+      background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3);
     }
     .meeting-item.em-andamento .meeting-indicator { background: var(--green-status); }
 
-    /* Seletor Rápido de Fundo */
-    .bg-switcher {
-      position: fixed;
-      bottom: 12px;
-      left: 24px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(30, 41, 59, 0.85);
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(4px);
+    .meeting-item.proxima {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color);
     }
-    .bg-switcher button {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    .bg-switcher button:hover { background: rgba(255,255,255,0.1); }
-    .bg-switcher span { font-size: 11px; color: var(--text-muted); }
 
     /* Modal de Agendamento Rápido */
     .modal-overlay {
@@ -240,6 +176,7 @@
     .modal-card {
       background: #1e293b; width: 100%; max-width: 480px; border-radius: 16px;
       padding: 24px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 16px;
+      max-height: 90vh; overflow-y: auto;
     }
     .form-group { display: flex; flex-direction: column; gap: 6px; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
@@ -257,29 +194,31 @@
     .btn-time-opt.active { background: var(--accent); border-color: var(--accent); }
 
     .modal-actions { display: flex; gap: 10px; margin-top: 8px; }
-    .btn-cancel {
-      flex: 1; padding: 12px; background: rgba(255,255,255,0.1); color: white;
-      border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
-    }
-    .btn-confirm {
-      flex: 1; padding: 12px; background: var(--green-status); color: white;
-      border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
-    }
+    .btn-cancel { flex: 1; padding: 12px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-confirm { flex: 1; padding: 12px; background: var(--green-status); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
-    @media (max-width: 768px) {
-      .display-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        overflow-y: auto;
-      }
+    /* Alerta Elegante Flutuante (Toast) */
+    .toast-container {
+      position: fixed; top: 24px; right: 24px; z-index: 3000;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .toast {
+      background: var(--red-status); color: white; padding: 16px 24px; border-radius: 10px;
+      font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .toast.show { transform: translateX(0); }
+
+    /* Adaptação estritamente baseada na orientação (Retrato empilha, Paisagem 2 colunas) */
+    @media (orientation: portrait) {
+      .display-container { grid-template-columns: 1fr; grid-template-rows: auto 1fr; overflow-y: auto; }
       body { overflow-y: auto; height: auto; min-height: 100vh; }
-      .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 16px; padding-top: 20px; }
-      .brand-logo-porta { max-height: 65px; }
-      .clock-time { font-size: 48px; }
-      .status-card { padding: 15px; flex-direction: column; text-align: center; gap: 12px; }
+      .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 12px; padding-top: 20px; }
+      .brand-logo-porta { max-height: 60px; }
+      .clock-time { font-size: 52px; }
+      .status-card { padding: 16px; flex-direction: column; text-align: center; gap: 14px; }
       .status-card::before { width: 100%; height: 6px; top: 0; left: 0; }
       .btn-reserva-rapida { width: 100%; }
-      .bg-switcher { bottom: 8px; left: 12px; right: 12px; justify-content: center; }
     }
   </style>
 </head>
@@ -287,14 +226,17 @@
 
   <div class="bg-overlay" id="bgOverlay"></div>
 
-  <div class="bg-switcher">
-    <button onclick="mudarFundo(-1)" title="Fundo Anterior">&#10094;</button>
-    <span id="nomeTemaAtual">Tema: Padrão</span>
-    <button onclick="mudarFundo(1)" title="Próximo Fundo">&#10095;</button>
-  </div>
+  <!-- Container de Alertas Flutuantes -->
+  <div id="toastContainer" class="toast-container"></div>
 
   <div class="display-container">
     <div class="left-col">
+      <div class="bg-switcher">
+        <button onclick="mudarFundo(-1)">&#10094;</button>
+        <span>&lt; Tema &gt;</span>
+        <button onclick="mudarFundo(1)">&#10095;</button>
+      </div>
+
       <img src="../login.png" alt="Logo" class="brand-logo-porta">
       
       <div class="clock-box">
@@ -323,7 +265,7 @@
 
   <div class="modal-overlay" id="modalReservaPorta">
     <div class="modal-card">
-      <h3 style="font-size: 18px;">Nova Reserva na Porta</h3>
+      <h3 style="font-size: 18px; margin-bottom: 4px;">Nova Reserva na Porta</h3>
 
       <div class="form-group">
         <label>Selecione o Utilizador</label>
@@ -363,12 +305,33 @@
     let salaAtualGlobal = "Sala 01";
 
     const temasFundo = [
-      { nome: "Padrão Escuro", url: "", overlay: "rgba(15, 23, 42, 0.82)" },
-      { nome: "Natureza / Folhas", url: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.75)" },
-      { nome: "Escritório Moderno", url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.78)" },
-      { nome: "Minimalista Cinza", url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.80)" }
+      { url: "", overlay: "rgba(15, 23, 42, 0.82)" },
+      { url: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.75)" },
+      { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.78)" },
+      { url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.80)" }
     ];
     let indiceTemaAtual = 0;
+
+    // Garante que a data salva é a do aparelho e não a do meridiano de Greenwich (UTC)
+    function getLocalDateString() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    // Sistema Elegante de Alerta
+    function showToast(message) {
+      const container = document.getElementById("toastContainer");
+      const toast = document.createElement("div");
+      toast.className = "toast";
+      toast.innerText = message;
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add("show"), 10);
+      setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 400);
+      }, 4000);
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       carregarTemaSalvo();
@@ -376,14 +339,18 @@
       iniciarRelogio();
       carregarUsuariosDrop();
       atualizarPainel();
+      
+      // Auto-Sync: Atualiza a tela sozinho se marcarem noutro computador
+      window.addEventListener('storage', (e) => {
+        if(e.key === "meetingroom_reservas") atualizarPainel();
+      });
+      
       setInterval(atualizarPainel, 10000);
     });
 
     function carregarTemaSalvo() {
       const salvo = localStorage.getItem("meetingroom_porta_tema");
-      if (salvo !== null) {
-        indiceTemaAtual = parseInt(salvo);
-      }
+      if (salvo !== null) indiceTemaAtual = parseInt(salvo);
       aplicarTemaAtual();
     }
 
@@ -391,20 +358,13 @@
       indiceTemaAtual += direcao;
       if (indiceTemaAtual >= temasFundo.length) indiceTemaAtual = 0;
       if (indiceTemaAtual < 0) indiceTemaAtual = temasFundo.length - 1;
-
       localStorage.setItem("meetingroom_porta_tema", indiceTemaAtual);
       aplicarTemaAtual();
     }
 
     function aplicarTemaAtual() {
       const tema = temasFundo[indiceTemaAtual];
-      document.getElementById("nomeTemaAtual").innerText = `Tema: ${tema.nome}`;
-      
-      if (tema.url === "") {
-        document.body.style.backgroundImage = "none";
-      } else {
-        document.body.style.backgroundImage = `url('${tema.url}')`;
-      }
+      document.body.style.backgroundImage = tema.url === "" ? "none" : `url('${tema.url}')`;
       document.getElementById("bgOverlay").style.background = tema.overlay;
     }
 
@@ -435,12 +395,8 @@
     function iniciarRelogio() {
       const atualizar = () => {
         const agora = new Date();
-        const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-        const diaSemana = agora.toLocaleDateString('pt-BR', { weekday: 'long' });
-        const dataStr = agora.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
-        document.getElementById("clockTime").innerText = horaStr;
-        document.getElementById("clockDate").innerText = `${diaSemana}, ${dataStr}`;
+        document.getElementById("clockTime").innerText = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById("clockDate").innerText = `${agora.toLocaleDateString('pt-BR', { weekday: 'long' })}, ${agora.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' })}`;
       };
       atualizar();
       setInterval(atualizar, 1000);
@@ -448,11 +404,7 @@
 
     function carregarUsuariosDrop() {
       const select = document.getElementById("selectUsuarioPorta");
-      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [
-        { nome: "Programador", apelido: "Programador" },
-        { nome: "Utilizador Teste", apelido: "Usuário" }
-      ];
-
+      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
       select.innerHTML = "";
       usuarios.forEach(u => {
         const opt = document.createElement("option");
@@ -464,22 +416,18 @@
 
     function atualizarPainel() {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('sala')) {
-        salaAtualGlobal = urlParams.get('sala');
-      } else {
-        const sel = document.getElementById("selectSalaDisplay");
-        if (sel) salaAtualGlobal = sel.value;
-      }
+      if (urlParams.get('sala')) salaAtualGlobal = urlParams.get('sala');
 
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      const hojeStr = new Date().toISOString().split('T')[0];
-
+      const hojeStr = getLocalDateString();
       const reservasHoje = reservas.filter(r => r.sala === salaAtualGlobal && r.data === hojeStr);
       
       const agora = new Date();
       const horaAtualNum = agora.getHours() * 60 + agora.getMinutes();
 
-      let emAndamento = null;
+      let emAndamentoArr = [];
+      let futurasArr = [];
+      let concluidasArr = [];
 
       reservasHoje.forEach(r => {
         const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
@@ -487,32 +435,38 @@
         const minIni = hIni * 60 + mIni;
         const minFim = hFim * 60 + mFim;
 
-        if (horaAtualNum >= minIni && horaAtualNum < minFim) {
-          emAndamento = r;
-        }
+        if (horaAtualNum >= minFim) concluidasArr.push(r);
+        else if (horaAtualNum >= minIni && horaAtualNum < minFim) emAndamentoArr.push(r);
+        else futurasArr.push(r);
       });
 
-      const banner = document.getElementById("statusBanner");
-      const txtTitulo = document.getElementById("statusTexto");
-      const txtSub = document.getElementById("statusSubtexto");
+      const sortByTime = (a, b) => a.horarioInicio.localeCompare(b.horarioInicio);
+      emAndamentoArr.sort(sortByTime);
+      futurasArr.sort(sortByTime);
+      concluidasArr.sort(sortByTime);
 
-      if (emAndamento) {
+      const banner = document.getElementById("statusBanner");
+      if (emAndamentoArr.length > 0) {
+        const emAndamento = emAndamentoArr[0];
         banner.classList.add("ocupado");
-        txtTitulo.innerText = "Ocupado";
-        txtSub.innerText = `${emAndamento.titulo} (${emAndamento.responsavel})`;
+        document.getElementById("statusTexto").innerText = "Ocupado";
+        document.getElementById("statusSubtexto").innerText = `${emAndamento.titulo} (${emAndamento.responsavel})`;
       } else {
         banner.classList.remove("ocupado");
-        txtTitulo.innerText = "Disponível";
-        txtSub.innerText = "Sem reuniões a decorrer agora";
+        document.getElementById("statusTexto").innerText = "Disponível";
+        document.getElementById("statusSubtexto").innerText = "Sem reuniões a decorrer agora";
       }
 
       const containerList = document.getElementById("listaReunioesHoje");
       containerList.innerHTML = "";
+      const ordenadasFinal = [...emAndamentoArr, ...futurasArr, ...concluidasArr];
 
-      if (reservasHoje.length === 0) {
+      if (ordenadasFinal.length === 0) {
         containerList.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">Nenhuma reunião agendada para hoje.</p>`;
       } else {
-        reservasHoje.sort((a,b) => a.horarioInicio.localeCompare(b.horarioInicio)).forEach(r => {
+        let proximaEvidenciada = false;
+
+        ordenadasFinal.forEach(r => {
           const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
           const [hFim, mFim] = (r.horarioFim || r.horarioInicio).split(':').map(Number);
           const minIni = hIni * 60 + mIni;
@@ -520,24 +474,25 @@
 
           const jaConcluida = horaAtualNum >= minFim;
           const estaEmAndamento = horaAtualNum >= minIni && horaAtualNum < minFim;
+          let isProxima = false;
 
-          let classeItem = "";
-          let tagBadge = "";
-
-          if (jaConcluida) {
-            classeItem = "concluida";
-            tagBadge = '<span style="font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px; margin-left: 6px;">Concluída</span>';
-          } else if (estaEmAndamento) {
-            classeItem = "em-andamento";
-            tagBadge = '<span style="font-size: 11px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 700;">Em andamento</span>';
+          // Se não há nenhuma a decorrer, destaca a próxima do topo
+          if (!jaConcluida && !estaEmAndamento && !proximaEvidenciada && emAndamentoArr.length === 0) {
+            isProxima = true;
+            proximaEvidenciada = true;
           }
+
+          let classeItem = jaConcluida ? "concluida" : (estaEmAndamento ? "em-andamento" : (isProxima ? "proxima" : ""));
+          let tagBadge = jaConcluida ? '<span style="font-size: 11px; color: #94a3b8; background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 4px;">Concluída</span>' :
+                         (estaEmAndamento ? '<span style="font-size: 11px; color: #22c55e; background: rgba(34, 197, 94, 0.15); padding: 2px 6px; border-radius: 4px; font-weight: 700;">Em andamento</span>' : 
+                         (isProxima ? '<span style="font-size: 11px; color: #38bdf8; background: rgba(56, 189, 248, 0.15); padding: 2px 6px; border-radius: 4px; font-weight: 700;">Próxima</span>' : ""));
 
           const div = document.createElement("div");
           div.className = `meeting-item ${classeItem}`;
           div.innerHTML = `
             <div class="meeting-indicator"></div>
-            <div class="meeting-details">
-              <h4>${r.horarioInicio} - ${r.horarioFim || ''} | ${r.titulo} ${tagBadge}</h4>
+            <div class="meeting-details" style="width: 100%;">
+              <h4>${r.horarioInicio} - ${r.horarioFim} | ${r.titulo} ${tagBadge}</h4>
               <p>Responsável: ${r.responsavel}</p>
             </div>
           `;
@@ -547,11 +502,8 @@
     }
 
     function abrirModalReservaRapida() {
-      const agora = new Date();
-      const hh = String(agora.getHours()).padStart(2, '0');
-      const mm = String(agora.getMinutes()).padStart(2, '0');
-      document.getElementById("inputHoraInicioPorta").value = `${hh}:${mm}`;
-      
+      const d = new Date();
+      document.getElementById("inputHoraInicioPorta").value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
       document.getElementById("modalReservaPorta").style.display = "flex";
     }
 
@@ -564,40 +516,45 @@
     function confirmarReservaPorta() {
       const responsavel = document.getElementById("selectUsuarioPorta").value;
       const horaSelecionada = document.getElementById("inputHoraInicioPorta").value;
-      let titulo = document.getElementById("inputTituloPorta").value.trim();
+      const titulo = document.getElementById("inputTituloPorta").value.trim() || "Reunião Presencial";
 
-      if (!horaSelecionada) {
-        alert("Por favor, selecione o horário de início.");
-        return;
-      }
-      if (!titulo) titulo = "Reunião Presencial";
+      if (!horaSelecionada) return showToast("Por favor, selecione o horário de início.");
 
       const [hIni, mIni] = horaSelecionada.split(':').map(Number);
+      const minInicioNovo = hIni * 60 + mIni;
+      const minFimNovo = minInicioNovo + duracaoMinutos;
+      const horaFimStr = `${String(Math.floor(minFimNovo/60)).padStart(2,'0')}:${String(minFimNovo%60).padStart(2,'0')}`;
       
-      const agora = new Date();
-      const dataFim = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), hIni, mIni + duracaoMinutos);
-      
-      const horaFimStr = dataFim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      const hojeStr = agora.toISOString().split('T')[0];
-
+      const hojeStr = getLocalDateString();
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      const novaReserva = {
-        id: 'res-porta-' + Date.now(),
+
+      // Proteção de Choque de Horários
+      const conflito = reservas.some(r => {
+        if (r.sala !== salaAtualGlobal || r.data !== hojeStr) return false;
+        const rIni = r.horarioInicio.split(':').map(Number)[0] * 60 + r.horarioInicio.split(':').map(Number)[1];
+        const rFim = r.horarioFim.split(':').map(Number)[0] * 60 + r.horarioFim.split(':').map(Number)[1];
+        return (minInicioNovo < rFim && minFimNovo > rIni);
+      });
+
+      if (conflito) return showToast("❌ Conflito de Horário! Já existe uma reunião marcada neste intervalo.");
+
+      // Salva exatamente no formato exigido pela aba "Agenda" e "Reservas"
+      reservas.push({
+        id: 'res-' + Date.now(),
         titulo: titulo,
         horarioInicio: horaSelecionada,
         horarioFim: horaFimStr,
         sala: salaAtualGlobal,
         data: hojeStr,
         responsavel: responsavel,
-        userId: 'porta'
-      };
+        userId: 'porta',
+        status: 'Confirmada',
+        dataCriacao: new Date().toISOString()
+      });
 
-      reservas.push(novaReserva);
       localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
-
       document.getElementById("modalReservaPorta").style.display = "none";
       document.getElementById("inputTituloPorta").value = "";
-
       atualizarPainel();
     }
   </script>
