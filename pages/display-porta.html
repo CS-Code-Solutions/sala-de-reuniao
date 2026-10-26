@@ -36,7 +36,7 @@
       width: 100vw;
       overflow: hidden;
       display: flex;
-      padding: 24px;
+      padding: 20px;
       position: relative;
       transition: background-image 0.5s ease-in-out;
     }
@@ -48,29 +48,30 @@
       z-index: 1;
     }
 
+    /* Contatedor principal em grelha fixa (2 colunas) */
     .display-container {
       position: relative;
       z-index: 2;
       display: grid;
-      grid-template-columns: 1fr 1.2fr;
+      grid-template-columns: 1fr 1.25fr;
       gap: 24px;
       width: 100%;
       height: 100%;
       overflow: hidden;
+      align-items: center;
     }
 
-    /* Coluna da Esquerda */
+    /* Coluna da Esquerda (Com o seletor integrado no fluxo) */
     .left-col {
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
+      justify-content: center;
       align-items: flex-start;
-      gap: 20px;
-      padding-top: 10vh;
+      gap: 16px;
     }
 
     .brand-logo-porta {
-      max-height: 90px;
+      max-height: 75px;
       width: auto;
       object-fit: contain;
     }
@@ -81,16 +82,16 @@
     }
 
     .clock-time {
-      font-size: 64px;
+      font-size: 58px;
       font-weight: 800;
       letter-spacing: -1px;
       line-height: 1;
     }
 
     .clock-date {
-      font-size: 18px;
+      font-size: 16px;
       color: var(--text-muted);
-      margin-top: 6px;
+      margin-top: 4px;
       text-transform: capitalize;
     }
 
@@ -98,7 +99,7 @@
       background: transparent;
       color: white;
       border: none;
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 800;
       outline: none;
       cursor: pointer;
@@ -106,12 +107,38 @@
       margin: 0;
     }
 
+    /* Seletor de Fundo 100% Estático e Integrado (Sem posição fixa) */
+    .bg-switcher {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(30, 41, 59, 0.85);
+      padding: 6px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      backdrop-filter: blur(4px);
+      margin-top: 4px;
+    }
+    .bg-switcher button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    .bg-switcher button:hover { background: rgba(255,255,255,0.1); }
+    .bg-switcher span { font-size: 12px; color: var(--text-muted); }
+
     /* Coluna da Direita */
     .right-col {
       display: flex;
       flex-direction: column;
       gap: 16px;
       height: 100%;
+      justify-content: center;
       overflow: hidden;
     }
 
@@ -119,7 +146,7 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 20px 24px;
+      padding: 18px 22px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -136,13 +163,13 @@
     }
     .status-card.ocupado::before { background: var(--red-status); }
 
-    .status-info h2 { font-size: 28px; font-weight: 700; }
-    .status-info p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+    .status-info h2 { font-size: 26px; font-weight: 700; }
+    .status-info p { font-size: 13px; color: var(--text-muted); margin-top: 2px; }
 
     .btn-reserva-rapida {
       background: var(--green-status);
-      color: white; border: none; padding: 12px 20px;
-      border-radius: 10px; font-size: 15px; font-weight: 700;
+      color: white; border: none; padding: 10px 18px;
+      border-radius: 10px; font-size: 14px; font-weight: 700;
       cursor: pointer; transition: all 0.2s;
     }
     .btn-reserva-rapida:hover { opacity: 0.9; transform: scale(1.02); }
@@ -152,8 +179,8 @@
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
-      padding: 20px;
-      flex: 1;
+      padding: 18px;
+      max-height: 400px;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -161,7 +188,7 @@
     }
 
     .schedule-box h3 {
-      font-size: 14px;
+      font-size: 13px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--text-muted);
@@ -175,23 +202,23 @@
       flex-direction: column;
       gap: 8px;
       overflow-y: auto;
-      padding-right: 6px;
+      padding-right: 4px;
     }
 
     .meeting-item {
       display: flex;
       align-items: center;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-bottom: 1px solid var(--border-color);
-      gap: 12px;
+      gap: 10px;
       transition: all 0.2s;
       flex-shrink: 0;
     }
     .meeting-item:last-child { border-bottom: none; }
 
-    .meeting-indicator { width: 4px; height: 28px; background: var(--accent); border-radius: 2px; }
-    .meeting-details h4 { font-size: 15px; font-weight: 600; }
-    .meeting-details p { font-size: 12px; color: var(--text-muted); }
+    .meeting-indicator { width: 4px; height: 26px; background: var(--accent); border-radius: 2px; }
+    .meeting-details h4 { font-size: 14px; font-weight: 600; }
+    .meeting-details p { font-size: 11px; color: var(--text-muted); }
 
     .meeting-item.concluida { opacity: 0.45; }
     .meeting-item.concluida .meeting-indicator { background: #64748b; }
@@ -203,33 +230,41 @@
     }
     .meeting-item.em-andamento .meeting-indicator { background: var(--green-status); }
 
-    /* Seletor Rápido de Fundo */
-    .bg-switcher {
-      position: fixed;
-      bottom: 12px;
-      left: 24px;
-      z-index: 10;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: rgba(30, 41, 59, 0.85);
-      padding: 6px 12px;
-      border-radius: 20px;
-      border: 1px solid var(--border-color);
-      backdrop-filter: blur(4px);
+    /* Forçar adaptação inteligente se o dispositivo estiver em retrato estrito */
+    @media (max-width: 850px) {
+      body {
+        height: auto;
+        min-height: 100vh;
+        overflow-y: auto;
+      }
+      .display-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow: visible;
+        padding-bottom: 20px;
+      }
+      .left-col {
+        align-items: center;
+        text-align: center;
+      }
+      .right-col {
+        height: auto;
+        overflow: visible;
+      }
+      .status-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+      }
+      .status-card::before {
+        width: 100%;
+        height: 6px;
+        top: 0; left: 0;
+      }
+      .btn-reserva-rapida {
+        width: 100%;
+      }
     }
-    .bg-switcher button {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-    .bg-switcher button:hover { background: rgba(255,255,255,0.1); }
-    .bg-switcher span { font-size: 11px; color: var(--text-muted); }
 
     /* Modal de Agendamento Rápido */
     .modal-overlay {
@@ -265,33 +300,11 @@
       flex: 1; padding: 12px; background: var(--green-status); color: white;
       border: none; border-radius: 8px; font-weight: 600; cursor: pointer;
     }
-
-    @media (max-width: 768px) {
-      .display-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        overflow-y: auto;
-      }
-      body { overflow-y: auto; height: auto; min-height: 100vh; }
-      .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 16px; padding-top: 20px; }
-      .brand-logo-porta { max-height: 65px; }
-      .clock-time { font-size: 48px; }
-      .status-card { padding: 15px; flex-direction: column; text-align: center; gap: 12px; }
-      .status-card::before { width: 100%; height: 6px; top: 0; left: 0; }
-      .btn-reserva-rapida { width: 100%; }
-      .bg-switcher { bottom: 8px; left: 12px; right: 12px; justify-content: center; }
-    }
   </style>
 </head>
 <body>
 
   <div class="bg-overlay" id="bgOverlay"></div>
-
-  <div class="bg-switcher">
-    <button onclick="mudarFundo(-1)" title="Fundo Anterior">&#10094;</button>
-    <span id="nomeTemaAtual">Tema: Padrão</span>
-    <button onclick="mudarFundo(1)" title="Próximo Fundo">&#10095;</button>
-  </div>
 
   <div class="display-container">
     <div class="left-col">
@@ -303,6 +316,13 @@
       </div>
 
       <div class="room-title-box" id="containerSalaDisplay"></div>
+
+      <!-- Seletor de Fundo estático integrado na coluna esquerda -->
+      <div class="bg-switcher">
+        <button onclick="mudarFundo(-1)" title="Fundo Anterior">&#10094;</button>
+        <span id="nomeTemaAtual">Tema: Padrão</span>
+        <button onclick="mudarFundo(1)" title="Próximo Fundo">&#10095;</button>
+      </div>
     </div>
 
     <div class="right-col">
@@ -418,7 +438,7 @@
         container.innerHTML = `<h2>${salaAtualGlobal}</h2>`;
       } else {
         container.innerHTML = `
-          <select id="selectSalaDisplay" onchange="mudarSalaUrl()" style="background: transparent; color: white; border: none; font-size: 28px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
+          <select id="selectSalaDisplay" onchange="mudarSalaUrl()" style="background: transparent; color: white; border: none; font-size: 26px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
             <option value="Sala 01" style="background:#0f172a;">Sala de Reuniões 01</option>
             <option value="Sala 02" style="background:#0f172a;">Sala de Reuniões 02</option>
           </select>
@@ -512,7 +532,6 @@
       if (reservasHoje.length === 0) {
         containerList.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">Nenhuma reunião agendada para hoje.</p>`;
       } else {
-        // Ordena colocando as reuniões ativas/futuras no topo e as concluídas no final
         reservasHoje.sort((a, b) => {
           const [hIniA, mIniA] = a.horarioInicio.split(':').map(Number);
           const [hFimA, mFimA] = (a.horarioFim || a.horarioInicio).split(':').map(Number);
@@ -525,9 +544,9 @@
           const concB = horaAtualNum >= fimB;
 
           if (concA !== concB) {
-            return concA ? 1 : -1; // Concluídas vão para baixo
+            return concA ? 1 : -1;
           }
-          return a.horarioInicio.localeCompare(b.horarioInicio); // Ordena por horário
+          return a.horarioInicio.localeCompare(b.horarioInicio);
         });
 
         reservasHoje.forEach(r => {
