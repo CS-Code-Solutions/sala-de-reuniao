@@ -178,7 +178,7 @@
       background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-color);
     }
 
-    /* Modal de Agendamento Rápido - Ajustado para não cortar e ter scroll interno */
+    /* Modal de Agendamento Rápido */
     .modal-overlay {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px);
@@ -187,8 +187,8 @@
     .modal-card {
       background: #1e293b; width: 100%; max-width: 440px; border-radius: 16px;
       padding: 18px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 10px;
-      max-height: 85vh; /* Garante que nunca ultrapassa a tela verticalmente */
-      overflow-y: auto;  /* Adiciona scroll interno limpo se necessário */
+      max-height: 85vh;
+      overflow-y: auto;
     }
     .form-group { display: flex; flex-direction: column; gap: 4px; }
     .form-group label { font-size: 11px; font-weight: 600; color: var(--text-muted); }
@@ -293,8 +293,8 @@
       <div class="form-group">
         <label>Duração da Reunião</label>
         <div class="quick-time-btns">
-          <button class="btn-time-opt active" onclick="selecionarDuracao(15, this)">15 min</button>
-          <button class="btn-time-opt" onclick="selecionarDuracao(30, this)">30 min</button>
+          <button class="btn-time-opt" onclick="selecionarDuracao(15, this)">15 min</button>
+          <button class="btn-time-opt active" onclick="selecionarDuracao(30, this)">30 min</button>
           <button class="btn-time-opt" onclick="selecionarDuracao(60, this)">1 hora</button>
         </div>
       </div>
@@ -312,7 +312,7 @@
   </div>
 
   <script>
-    let duracaoMinutos = 15;
+    let duracaoMinutos = 30; // Padrão alterado para 30 minutos
     let salaAtualGlobal = "Sala 01";
 
     const temasFundo = [
@@ -412,7 +412,6 @@
 
     function carregarUsuariosDrop() {
       const select = document.getElementById("selectUsuarioPorta");
-      // Busca nas chaves possíveis onde o sistema guarda os utilizadores
       const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || 
                        JSON.parse(localStorage.getItem("usuarios")) || [
         { nome: "Programador", apelido: "Programador" },
@@ -444,8 +443,8 @@
       let concluidasArr = [];
 
       reservasHoje.forEach(r => {
-        const strIni = r.horarioInicio || r.horaInicio;
-        const strFim = r.horarioFim || r.horaFim || strIni;
+        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
+        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
         if(!strIni) return;
 
         const [hIni, mIni] = strIni.split(':').map(Number);
@@ -458,7 +457,7 @@
         else futurasArr.push(r);
       });
 
-      const sortByTime = (a, b) => (a.horarioInicio || a.horaInicio).localeCompare(b.horarioInicio || b.horaInicio);
+      const sortByTime = (a, b) => (a.horarioInicio || a.horaInicio || "").localeCompare(b.horarioInicio || b.horaInicio || "");
       emAndamentoArr.sort(sortByTime);
       futurasArr.sort(sortByTime);
       concluidasArr.sort(sortByTime);
@@ -485,8 +484,8 @@
         let proximaEvidenciada = false;
 
         ordenadasFinal.forEach(r => {
-          const strIni = r.horarioInicio || r.horaInicio;
-          const strFim = r.horarioFim || r.horaFim || strIni;
+          const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
+          const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
           const [hIni, mIni] = strIni.split(':').map(Number);
           const [hFim, mFim] = strFim.split(':').map(Number);
           const minIni = hIni * 60 + mIni;
@@ -521,9 +520,12 @@
     }
 
     function abrirModalReservaRapida() {
-      carregarUsuariosDrop(); // Garante que carrega sempre que abrir
+      carregarUsuariosDrop();
       const d = new Date();
-      document.getElementById("inputHoraInicioPorta").value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      const hh = String(d.getHours()).padStart(2,'0');
+      // Arredonda para o bloco de 30 minutos mais próximo
+      const mm = d.getMinutes() < 30 ? '00' : '30';
+      document.getElementById("inputHoraInicioPorta").value = `${hh}:${mm}`;
       document.getElementById("modalReservaPorta").style.display = "flex";
     }
 
@@ -543,7 +545,10 @@
       const [hIni, mIni] = horaSelecionada.split(':').map(Number);
       const minInicioNovo = hIni * 60 + mIni;
       const minFimNovo = minInicioNovo + duracaoMinutos;
-      const horaFimStr = `${String(Math.floor(minFimNovo/60)).padStart(2,'0')}:${String(minFimNovo%60).padStart(2,'0')}`;
+      
+      const horaFimH = String(Math.floor(minFimNovo/60) % 24).padStart(2,'0');
+      const horaFimM = String(minFimNovo%60).padStart(2,'0');
+      const horaFimStr = `${horaFimH}:${horaFimM}`;
       
       const hojeStr = getLocalDateString();
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
@@ -551,8 +556,8 @@
       const conflito = reservas.some(r => {
         if (r.sala !== salaAtualGlobal || r.data !== hojeStr) return false;
         
-        const strIni = r.horarioInicio || r.horaInicio;
-        const strFim = r.horarioFim || r.horaFim || strIni;
+        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
+        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
         if(!strIni) return false;
 
         const rIni = strIni.split(':').map(Number)[0] * 60 + strIni.split(':').map(Number)[1];
