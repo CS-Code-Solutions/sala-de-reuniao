@@ -512,9 +512,27 @@
       if (reservasHoje.length === 0) {
         containerList.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">Nenhuma reunião agendada para hoje.</p>`;
       } else {
-        reservasHoje.sort((a,b) => a.horarioInicio.localeCompare(b.horarioInicio)).forEach(r => {
-          const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
+        // Ordena colocando as reuniões ativas/futuras no topo e as concluídas no final
+        reservasHoje.sort((a, b) => {
+          const [hIniA, mIniA] = a.horarioInicio.split(':').map(Number);
+          const [hFimA, mFimA] = (a.horarioFim || a.horarioInicio).split(':').map(Number);
+          const fimA = hFimA * 60 + mFimA;
+          const concA = horaAtualNum >= fimA;
+
+          const [hIniB, mIniB] = b.horarioInicio.split(':').map(Number);
+          const [hFimB, mFimB] = (b.horarioFim || b.horarioInicio).split(':').map(Number);
+          const fimB = hFimB * 60 + mFimB;
+          const concB = horaAtualNum >= fimB;
+
+          if (concA !== concB) {
+            return concA ? 1 : -1; // Concluídas vão para baixo
+          }
+          return a.horarioInicio.localeCompare(b.horarioInicio); // Ordena por horário
+        });
+
+        reservasHoje.forEach(r => {
           const [hFim, mFim] = (r.horarioFim || r.horarioInicio).split(':').map(Number);
+          const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
           const minIni = hIni * 60 + mIni;
           const minFim = hFim * 60 + mFim;
 
