@@ -45,22 +45,24 @@
       overflow: hidden;
     }
 
-    /* Coluna da Esquerda */
+    /* Coluna da Esquerda (Centralizada Verticalmente) */
     .left-col {
       display: flex;
       flex-direction: column;
+      justify-content: center; /* Centraliza tudo verticalmente */
+      align-items: flex-start;
+      gap: 24px; /* Espaçamento uniforme entre os elementos */
     }
 
     .brand-logo-porta {
-      max-height: 90px; /* Logótipo maior para mais destaque */
+      max-height: 90px;
       width: auto;
       object-fit: contain;
-      align-self: flex-start;
     }
 
     .clock-box {
-      margin-top: 24px; /* Margem ajustada para compensar o tamanho do logo */
-      margin-bottom: 20px; 
+      display: flex;
+      flex-direction: column;
     }
 
     .clock-time {
@@ -75,6 +77,18 @@
       color: var(--text-muted);
       margin-top: 6px;
       text-transform: capitalize;
+    }
+
+    .room-title-box select, .room-title-box h2 {
+      background: transparent;
+      color: white;
+      border: none;
+      font-size: 28px;
+      font-weight: 800;
+      outline: none;
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
     }
 
     /* Coluna da Direita */
@@ -95,7 +109,7 @@
       justify-content: space-between;
       align-items: center;
       position: relative;
-      flex-shrink: 0; /* Impede que o card encolha */
+      flex-shrink: 0;
     }
 
     .status-card::before {
@@ -126,7 +140,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      overflow: hidden; /* Trava o container */
+      overflow: hidden;
     }
 
     .schedule-box h3 {
@@ -143,7 +157,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      overflow-y: auto; /* Apenas as reuniões rolam */
+      overflow-y: auto;
       padding-right: 6px;
     }
 
@@ -181,7 +195,6 @@
       padding: 12px; background: #0f172a; border: 1px solid var(--border-color);
       border-radius: 8px; color: white; font-size: 14px; outline: none;
     }
-    /* Muda o ícone do relógio do input time para branco (no Chrome) */
     ::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
 
     .quick-time-btns { display: flex; gap: 8px; }
@@ -206,9 +219,11 @@
       .display-container {
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
+        overflow-y: auto;
       }
-      .brand-logo-porta { max-height: 65px; } /* Logótipo ajustado no mobile */
-      .clock-box { margin-top: 15px; margin-bottom: 15px; }
+      body { overflow-y: auto; height: auto; min-height: 100vh; }
+      .left-col { justify-content: flex-start; align-items: center; text-align: center; gap: 16px; padding-bottom: 10px; }
+      .brand-logo-porta { max-height: 65px; }
       .clock-time { font-size: 48px; }
       .status-card { padding: 15px; flex-direction: column; text-align: center; gap: 12px; }
       .status-card::before { width: 100%; height: 6px; top: 0; left: 0; }
@@ -219,7 +234,7 @@
 <body>
 
   <div class="display-container">
-    <!-- Coluna Esquerda -->
+    <!-- Coluna Esquerda Centralizada -->
     <div class="left-col">
       <img src="../login.png" alt="Logo" class="brand-logo-porta">
       
@@ -228,11 +243,8 @@
         <div class="clock-date" id="clockDate">segunda-feira, 26/10/2026</div>
       </div>
 
-      <div class="room-title-box">
-        <select id="selectSalaDisplay" onchange="atualizarPainel()" style="background: transparent; color: white; border: none; font-size: 28px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
-          <option value="Sala 01" style="background:#0f172a;">Sala de Reuniões 01</option>
-          <option value="Sala 02" style="background:#0f172a;">Sala de Reuniões 02</option>
-        </select>
+      <div class="room-title-box" id="containerSalaDisplay">
+        <!-- Preenchido via JS (Select ou Fixo) -->
       </div>
     </div>
 
@@ -297,13 +309,41 @@
 
   <script>
     let duracaoMinutos = 15;
+    let salaAtualGlobal = "Sala 01";
 
     document.addEventListener("DOMContentLoaded", () => {
+      inicializarSala();
       iniciarRelogio();
       carregarUsuariosDrop();
       atualizarPainel();
-      setInterval(atualizarPainel, 10000); // Verifica a cada 10s
+      setInterval(atualizarPainel, 10000);
     });
+
+    function inicializarSala() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const salaParam = urlParams.get('sala');
+      const container = document.getElementById("containerSalaDisplay");
+
+      if (salaParam) {
+        // Se a sala veio fixa pela URL (ex: ?sala=Sala%2002), exibe apenas como texto fixo
+        salaAtualGlobal = salaParam;
+        container.innerHTML = `<h2>${salaAtualGlobal}</h2>`;
+      } else {
+        // Se não veio nada na URL, exibe o seletor normal
+        container.innerHTML = `
+          <select id="selectSalaDisplay" onchange="mudarSalaUrl()" style="background: transparent; color: white; border: none; font-size: 28px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
+            <option value="Sala 01" style="background:#0f172a;">Sala de Reuniões 01</option>
+            <option value="Sala 02" style="background:#0f172a;">Sala de Reuniões 02</option>
+          </select>
+        `;
+        document.getElementById("selectSalaDisplay").value = salaAtualGlobal;
+      }
+    }
+
+    function mudarSalaUrl() {
+      salaAtualGlobal = document.getElementById("selectSalaDisplay").value;
+      atualizarPainel();
+    }
 
     function iniciarRelogio() {
       const atualizar = () => {
@@ -336,11 +376,18 @@
     }
 
     function atualizarPainel() {
-      const sala = document.getElementById("selectSalaDisplay").value;
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('sala')) {
+        salaAtualGlobal = urlParams.get('sala');
+      } else {
+        const sel = document.getElementById("selectSalaDisplay");
+        if (sel) salaAtualGlobal = sel.value;
+      }
+
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
       const hojeStr = new Date().toISOString().split('T')[0];
 
-      const reservasHoje = reservas.filter(r => r.sala === sala && r.data === hojeStr);
+      const reservasHoje = reservas.filter(r => r.sala === salaAtualGlobal && r.data === hojeStr);
       
       const agora = new Date();
       const horaAtualNum = agora.getHours() * 60 + agora.getMinutes();
@@ -398,7 +445,6 @@
     }
 
     function abrirModalReservaRapida() {
-      // Define a hora atual como padrão no campo
       const agora = new Date();
       const hh = String(agora.getHours()).padStart(2, '0');
       const mm = String(agora.getMinutes()).padStart(2, '0');
@@ -414,7 +460,6 @@
     }
 
     function confirmarReservaPorta() {
-      const sala = document.getElementById("selectSalaDisplay").value;
       const responsavel = document.getElementById("selectUsuarioPorta").value;
       const horaSelecionada = document.getElementById("inputHoraInicioPorta").value;
       let titulo = document.getElementById("inputTituloPorta").value.trim();
@@ -439,7 +484,7 @@
         titulo: titulo,
         horarioInicio: horaSelecionada,
         horarioFim: horaFimStr,
-        sala: sala,
+        sala: salaAtualGlobal,
         data: hojeStr,
         responsavel: responsavel,
         userId: 'porta'
