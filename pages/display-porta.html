@@ -52,15 +52,15 @@
     }
 
     .brand-logo-porta {
-      max-height: 45px;
+      max-height: 90px; /* Logótipo maior para mais destaque */
       width: auto;
       object-fit: contain;
       align-self: flex-start;
     }
 
     .clock-box {
-      margin-top: 40px;
-      margin-bottom: 20px; /* Aproxima a sala do relógio */
+      margin-top: 24px; /* Margem ajustada para compensar o tamanho do logo */
+      margin-bottom: 20px; 
     }
 
     .clock-time {
@@ -207,8 +207,8 @@
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
       }
+      .brand-logo-porta { max-height: 65px; } /* Logótipo ajustado no mobile */
       .clock-box { margin-top: 15px; margin-bottom: 15px; }
-      .brand-logo-porta { max-height: 35px; }
       .clock-time { font-size: 48px; }
       .status-card { padding: 15px; flex-direction: column; text-align: center; gap: 12px; }
       .status-card::before { width: 100%; height: 6px; top: 0; left: 0; }
