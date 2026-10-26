@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" href="../ico.png" type="image/png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeetingRoom - Painel da Porta</title>
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: rgba(30, 41, 59, 0.7);
+      --text-main: #ffffff;
+      --text-muted: #94a3b8;
+      --green-status: #22c55e;
+      --red-status: #ef4444;
+      --accent: #0d9488;
+      --border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+      padding: 24px;
+    }
+
+    .display-container {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 24px;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Coluna da Esquerda */
+    .left-col {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .brand-logo-porta {
+      max-height: 40px;
+      width: auto;
+      object-fit: contain;
+      align-self: flex-start;
+    }
+
+    .clock-box {
+      margin-top: 10px;
+    }
+
+    .clock-time {
+      font-size: 64px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1;
+    }
+
+    .clock-date {
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      text-transform: capitalize;
+    }
+
+    .room-title-box {
+      margin-top: auto;
+    }
+
+    .room-name-display {
+      font-size: 36px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #ffffff;
+    }
+
+    /* Coluna da Direita */
+    .right-col {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .status-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .status-card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+      background: var(--green-status);
+    }
+
+    .status-card.ocupado::before {
+      background: var(--red-status);
+    }
+
+    .status-info h2 {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .status-info p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn-reserva-rapida {
+      background: var(--green-status);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-reserva-rapida:hover {
+      opacity: 0.9;
+      transform: scale(1.02);
+    }
+
+    /* Lista de Reuniões do Dia */
+    .schedule-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 20px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .schedule-box h3 {
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .meeting-item {
+      display: flex;
+      align-items: center;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      gap: 12px;
+    }
+
+    .meeting-item:last-child { border-bottom: none; }
+
+    .meeting-indicator {
+      width: 4px;
+      height: 28px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .meeting-details h4 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .meeting-details p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Modal de Agendamento Rápido */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #1e293b;
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-group input, .form-group select {
+      padding: 12px;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: white;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .quick-time-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-time-opt {
+      flex: 1;
+      padding: 10px;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-time-opt.active {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .btn-cancel {
+      flex: 1;
+      padding: 12px;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-confirm {
+      flex: 1;
+      padding: 12px;
+      background: var(--green-status);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="display-container">
+    <!-- Coluna Esquerda -->
+    <div class="left-col">
+      <img src="../cabe.png" alt="Logo" class="brand-logo-porta">
+      
+      <div class="clock-box">
+        <div class="clock-time" id="clockTime">12:00</div>
+        <div class="clock-date" id="clockDate">segunda-feira, 26/10/2026</div>
+      </div>
+
+      <div class="room-title-box">
+        <select id="selectSalaDisplay" onchange="atualizarPainel()" style="background: transparent; color: white; border: none; font-size: 28px; font-weight: 800; outline: none; cursor: pointer;">
+          <option value="Sala 01" style="background:#0f172a;">Sala de Reuniões 01</option>
+          <option value="Sala 02" style="background:#0f172a;">Sala de Reuniões 02</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Coluna Direita -->
+    <div class="right-col">
+      <div class="status-card" id="statusBanner">
+        <div class="status-info">
+          <h2 id="statusTexto">Disponível</h2>
+          <p id="statusSubtexto">Sem reuniões a decorrer agora</p>
+        </div>
+        <button class="btn-reserva-rapida" onclick="abrirModalReservaRapida()">+ Reserva Rápida</button>
+      </div>
+
+      <div class="schedule-box">
+        <h3>Próximas reuniões de hoje</h3>
+        <div id="listaReunioesHoje" style="display: flex; flex-direction: column; gap: 8px;">
+          <!-- Itens carregados via script -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Reserva Rápida -->
+  <div class="modal-overlay" id="modalReservaPorta">
+    <div class="modal-card">
+      <h3 style="font-size: 18px;">Nova Reserva na Porta</h3>
+
+      <div class="form-group">
+        <label>Selecione o Utilizador</label>
+        <select id="selectUsuarioPorta">
+          <!-- Carregado via JS com os utilizadores registados -->
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Duração da Reunião</label>
+        <div class="quick-time-btns">
+          <button class="btn-time-opt active" onclick="selecionarDuracao(15, this)">15 min</button>
+          <button class="btn-time-opt" onclick="selecionarDuracao(30, this)">30 min</button>
+          <button class="btn-time-opt" onclick="selecionarDuracao(60, this)">1 hora</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Descrição / Título (Opcional)</label>
+        <input type="text" id="inputTituloPorta" placeholder="Ex: Alinhamento rápido">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="document.getElementById('modalReservaPorta').style.display='none'">Cancelar</button>
+        <button class="btn-confirm" onclick="confirmarReservaPorta()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let duracaoMinutos = 15;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      iniciarRelogio();
+      carregarUsuariosDrop();
+      atualizarPainel();
+      // Atualiza o painel automaticamente a cada 10 segundos
+      setInterval(atualizarPainel, 10000);
+    });
+
+    function iniciarRelogio() {
+      const atualizar = () => {
+        const agora = new Date();
+        const horaStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        const diaSemana = agora.toLocaleDateString('pt-BR', { weekday: 'long' });
+        const dataStr = agora.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+        document.getElementById("clockTime").innerText = horaStr;
+        document.getElementById("clockDate").innerText = `${diaSemana}, ${dataStr}`;
+      };
+      atualizar();
+      setInterval(atualizar, 1000);
+    }
+
+    function carregarUsuariosDrop() {
+      const select = document.getElementById("selectUsuarioPorta");
+      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [
+        { nome: "Programador", apelido: "Programador" },
+        { nome: "Utilizador Teste", apelido: "Usuário" }
+      ];
+
+      select.innerHTML = "";
+      usuarios.forEach(u => {
+        const opt = document.createElement("option");
+        opt.value = u.apelido || u.nome.split(' ')[0];
+        opt.innerText = `${u.nome} (${u.apelido || ''})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function atualizarPainel() {
+      const sala = document.getElementById("selectSalaDisplay").value;
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const hojeStr = new Date().toISOString().split('T')[0];
+
+      // Filtra reservas da sala para o dia atual
+      const reservasHoje = reservas.filter(r => r.sala === sala && r.data === hojeStr);
+      
+      const agora = new Date();
+      const horaAtualNum = agora.getHours() * 60 + agora.getMinutes();
+
+      let emAndamento = null;
+
+      reservasHoje.forEach(r => {
+        const [hIni, mIni] = r.horarioInicio.split(':').map(Number);
+        const [hFim, mFim] = (r.horarioFim || r.horarioInicio).split(':').map(Number);
+        const minIni = hIni * 60 + mIni;
+        const minFim = hFim * 60 + mFim;
+
+        if (horaAtualNum >= minIni && horaAtualNum < minFim) {
+          emAndamento = r;
+        }
+      });
+
+      const banner = document.getElementById("statusBanner");
+      const txtTitulo = document.getElementById("statusTexto");
+      const txtSub = document.getElementById("statusSubtexto");
+
+      if (emAndamento) {
+        banner.classList.add("ocupado");
+        txtTitulo.innerText = "Ocupado";
+        txtSub.innerText = `${emAndamento.titulo} (${emAndamento.responsavel})`;
+      } else {
+        banner.classList.remove("ocupado");
+        txtTitulo.innerText = "Disponível";
+        txtSub.innerText = "Sem reuniões a decorrer agora";
+      }
+
+      // Preenche a lista do dia
+      const containerList = document.getElementById("listaReunioesHoje");
+      containerList.innerHTML = "";
+
+      if (reservasHoje.length === 0) {
+        containerList.innerHTML = `<p style="color: var(--text-muted); font-size: 13px;">Nenhuma reunião agendada para hoje.</p>`;
+      } else {
+        reservasHoje.sort((a,b) => a.horarioInicio.localeCompare(b.horarioInicio)).forEach(r => {
+          const div = document.createElement("div");
+          div.className = "meeting-item";
+          div.innerHTML = `
+            <div class="meeting-indicator"></div>
+            <div class="meeting-details">
+              <h4>${r.horarioInicio} - ${r.horarioFim || ''} | ${r.titulo}</h4>
+              <p>Responsável: ${r.responsavel}</p>
+            </div>
+          `;
+          containerList.appendChild(div);
+        });
+      }
+    }
+
+    function abrirModalReservaRapida() {
+      document.getElementById("modalReservaPorta").style.display = "flex";
+    }
+
+    function selecionarDuracao(minutos, btn) {
+      duracaoMinutos = minutos;
+      document.querySelectorAll(".btn-time-opt").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+    }
+
+    function confirmarReservaPorta() {
+      const sala = document.getElementById("selectSalaDisplay").value;
+      const responsavel = document.getElementById("selectUsuarioPorta").value;
+      let titulo = document.getElementById("inputTituloPorta").value.trim();
+
+      if (!titulo) titulo = "Reunião Presencial (Porta)";
+
+      const agora = new Date();
+      const horaInicioStr = agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+      
+      const dataFim = new Date(agora.getTime() + duracaoMinutos * 60000);
+      const horaFimStr = dataFim.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+      const hojeStr = agora.toISOString().split('T')[0];
+
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const novaReserva = {
+        id: 'res-porta-' + Date.now(),
+        titulo: titulo,
+        horarioInicio: horaInicioStr,
+        horarioFim: horaFimStr,
+        sala: sala,
+        data: hojeStr,
+        responsavel: responsavel,
+        userId: 'porta'
+      };
+
+      reservas.push(novaReserva);
+      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
+
+      document.getElementById("modalReservaPorta").style.display = "none";
+      document.getElementById("inputTituloPorta").value = "";
+
+      atualizarPainel();
+    }
+  </script>
+</body>
+</html>
