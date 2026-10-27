@@ -613,6 +613,26 @@
       atualizarPainel();
       showToast("✅ Reserva efetuada com sucesso!");
     }
+    // Força o ecrã a manter-se sempre ligado (Screen Wake Lock API)
+let wakeLock = null;
+async function manterEcraLigado() {
+  try {
+    if ('wakeLock' in navigator) {
+      wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch (err) {
+    console.log(`Erro no Wake Lock: ${err.message}`);
+  }
+}
+
+// Ativa as proteções assim que o utilizador tocar no ecrã pela primeira vez
+document.addEventListener('click', () => {
+  manterEcraLigado();
+  // Força o ecrã inteiro nativamente
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(e => console.log(e));
+  }
+}, { once: true });
   </script>
 </body>
 </html>
