@@ -84,6 +84,13 @@
       transition: all 0.2s;
     }
 
+    .nav-links a svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
     .nav-links a:hover, .nav-links a.active {
       background: rgba(255, 255, 255, 0.08);
       color: white;
@@ -103,17 +110,8 @@
       justify-content: space-between;
     }
 
-    .user-info-text h4 {
-      font-size: 13px;
-      color: white;
-      margin: 0;
-    }
-
-    .user-info-text p {
-      font-size: 11px;
-      color: #94a3b8;
-      margin: 2px 0 0 0;
-    }
+    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
+    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
 
     .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
     .page-header { margin-bottom: 24px; }
@@ -124,10 +122,15 @@
       display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
       border-left: 5px solid var(--accent-color);
     }
+    
+    .res-meta { font-size: 12px; font-weight: 600; color: var(--accent-color); display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+    .res-meta svg { width: 14px; height: 14px; stroke-width: 2; }
+    
     .btn-delete {
       background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px;
-      font-weight: 600; font-size: 12px; cursor: pointer;
+      font-weight: 600; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
     }
+    .btn-delete svg { width: 14px; height: 14px; }
     .btn-delete:hover { background: #fecaca; }
 
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
@@ -149,36 +152,21 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8;
+        padding: 10px 12px 10px 8px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
-      .brand-logo {
-    max-height: 38px;
-    width: auto;
-    object-fit: contain;
-    margin-right: auto;
-    margin-left: 0;
-}
+      .brand-logo { max-height: 38px; width: auto; object-fit: contain; margin-right: auto; margin-left: 0; }
       .btn-sair-mobile {
-        color: #e2e8f0;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 6px 12px;
-        border-radius: 8px;
-        transition: all 0.2s;
+        color: #e2e8f0; font-size: 13px; font-weight: 600; text-decoration: none;
+        background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 6px 12px; border-radius: 8px; transition: all 0.2s;
       }
-      .btn-sair-mobile:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: #ffffff;
-      }
+      .btn-sair-mobile:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
-      .mob-nav-item.active { color: #2dd4bf; }
-      .mob-nav-item span { font-size: 18px; }
+      .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
+      .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
     }
   </style>
 </head>
@@ -190,13 +178,28 @@
         <img src="../cabe.png" alt="Logo" class="brand-logo">
       </div>
       <nav class="nav-links">
-        <a href="calendar.html">📅 Agenda</a>
-        <a href="my-reservations.html" class="active">📋 Minhas reservas</a>
-        <a href="notifications.html">🔔 Notificações</a>
+        <a href="calendar.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Agenda</span>
+        </a>
+        <a href="my-reservations.html" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span>Minhas reservas</span>
+        </a>
+        <a href="notifications.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notificações</span>
+        </a>
         
         <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+        <a href="rooms.html" class="admin-only-item" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+          <span>Salas</span>
+        </a>
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Usuários</span>
+        </a>
       </nav>
     </div>
     <div class="user-profile-box">
@@ -204,7 +207,9 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; display: flex; align-items: center;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </a>
     </div>
   </aside>
 
@@ -231,7 +236,9 @@
 
   <div class="modal-overlay" id="modalConfirmacao">
     <div class="modal-card">
-      <div style="font-size: 32px;">⚠️</div>
+      <div style="display: flex; justify-content: center; color: #dc2626;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
       <h3 class="modal-title">Cancelar Reserva</h3>
       <p class="modal-text">Tem certeza que deseja cancelar e excluir esta reunião agendada?</p>
       <input type="hidden" id="reservaParaExcluirId">
@@ -243,11 +250,26 @@
   </div>
 
   <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
-    <a href="my-reservations.html" class="mob-nav-item active"><span>📋</span> Reservas</a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
-    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
+    <a href="calendar.html" class="mob-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <span>Agenda</span>
+    </a>
+    <a href="my-reservations.html" class="mob-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+      <span>Reservas</span>
+    </a>
+    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+      <span>Salas</span>
+    </a>
+    <a href="notifications.html" class="mob-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      <span>Avisos</span>
+    </a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>Admin</span>
+    </a>
   </nav>
 
   <script>
@@ -299,11 +321,17 @@
         div.className = "reservation-card";
         div.innerHTML = `
           <div>
-            <span style="font-size: 11px; font-weight: 700; color: var(--accent-color);">📍 ${reserva.sala || 'Sala 01'} &nbsp;•&nbsp; 📅 ${reserva.data} &nbsp;•&nbsp; ⏰ ${reserva.horarioInicio} - ${reserva.horarioFim || ''}</span>
+            <div class="res-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${reserva.sala || 'Sala 01'} &nbsp;|&nbsp; 
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${reserva.data} &nbsp;|&nbsp; 
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${reserva.horarioInicio} - ${reserva.horarioFim || ''}
+            </div>
             <h4 style="font-size: 16px; color: var(--text-main); margin: 4px 0;">${reserva.titulo}</h4>
             <p style="font-size: 13px; color: var(--text-muted);">Responsável: ${reserva.responsavel || usuarioSessao.nome}</p>
           </div>
-          <button class="btn-delete" onclick="abrirModalConfirmacao('${reserva.id}')">🗑️ Cancelar</button>
+          <button class="btn-delete" onclick="abrirModalConfirmacao('${reserva.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Cancelar
+          </button>
         `;
         container.appendChild(div);
       });
