@@ -375,21 +375,32 @@
       document.getElementById("bgOverlay").style.background = tema.overlay;
     }
 
-    function inicializarSala() {
+        function inicializarSala() {
       const urlParams = new URLSearchParams(window.location.search);
       const salaParam = urlParams.get('sala');
       const container = document.getElementById("containerSalaDisplay");
 
-      if (salaParam) {
-        salaAtualGlobal = salaParam;
-        container.innerHTML = `<h2>${salaAtualGlobal}</h2>`;
-      } else {
-        container.innerHTML = `
-          <select id="selectSalaDisplay" onchange="mudarSalaUrl()" style="background: transparent; color: white; border: none; font-size: 24px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
-            <option value="Sala 01" style="background:#0f172a;">Sala de Reuniões 01</option>
-            <option value="Sala 02" style="background:#0f172a;">Sala de Reuniões 02</option>
-          </select>
-        `;
+      // Mesmo se houver parâmetro na URL, permitimos alternar livremente no select se quisermos, 
+      // ou mantemos o select ativo para mudar de sala a qualquer momento.
+      salaAtualGlobal = salaParam || "Sala 01";
+
+      container.innerHTML = `
+        <select id="selectSalaDisplay" onchange="mudarSalaUrl()" style="background: transparent; color: white; border: none; font-size: 24px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
+          <option value="Sala 01" style="background:#0f172a;" ${salaAtualGlobal === 'Sala 01' ? 'selected' : ''}>Sala de Reuniões 01</option>
+          <option value="Sala 02" style="background:#0f172a;" ${salaAtualGlobal === 'Sala 02' ? 'selected' : ''}>Sala de Reuniões 02</option>
+        </select>
+      `;
+    }
+
+    function mudarSalaUrl() {
+      salaAtualGlobal = document.getElementById("selectSalaDisplay").value;
+      // Atualiza o URL sem recarregar a página para manter o estado limpo
+      const novaUrl = new URL(window.location);
+      novaUrl.searchParams.set('sala', salaAtualGlobal);
+      window.history.pushState({}, '', novaUrl);
+      atualizarPainel();
+    }
+
         document.getElementById("selectSalaDisplay").value = salaAtualGlobal;
       }
     }
