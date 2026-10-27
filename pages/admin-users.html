@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
   <!-- Configurações para PWA e iOS -->
-<link rel="manifest" href="../manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MeetingRoom">
-<link rel="apple-touch-icon" href="../ico.png">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
+  <link rel="apple-touch-icon" href="../ico.png">
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -151,17 +151,17 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8;
+        padding: 10px 12px 10px 8px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
       .brand-logo {
-    max-height: 38px;
-    width: auto;
-    object-fit: contain;
-    margin-right: auto;
-    margin-left: 0;
-}
+        max-height: 38px;
+        width: auto;
+        object-fit: contain;
+        margin-right: auto;
+        margin-left: 0;
+      }
       .btn-sair-mobile {
         color: #e2e8f0;
         font-size: 13px;
@@ -186,8 +186,31 @@
 </head>
 <body>
 
-<div id="sidebar-container"></div>
+  <aside class="sidebar">
+    <div>
+      <div class="brand-area">
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
+      </div>
 
+      <nav class="nav-links">
+        <a href="calendar.html">📅 Agenda</a>
+        <a href="my-reservations.html">📋 Minhas reservas</a>
+        <a href="notifications.html">🔔 Notificações</a>
+        
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
+        <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
+        <a href="admin-users.html" class="active admin-only-item" style="display:none;">👤 Usuários</a>
+      </nav>
+    </div>
+
+    <div class="user-profile-box">
+      <div class="user-info-text">
+        <h4 id="userNameDisplay">Carregando...</h4>
+        <p id="userRoleDisplay">Utilizador</p>
+      </div>
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+    </div>
+  </aside>
 
   <main class="page-wrapper">
     <div class="mobile-topbar-bar">
@@ -250,8 +273,13 @@
     </div>
   </div>
 
-  <div id="mobile-nav-container"></div>
-
+  <nav class="mobile-bottom-nav">
+    <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
+    <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
+    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
+    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
+    <a href="admin-users.html" class="mob-nav-item active admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
+  </nav>
 
   <script>
     let usuarioSessao = null;
@@ -292,7 +320,7 @@
       container.innerHTML = "";
 
       if (usuarios.length === 0) {
-         usuarios = [
+        usuarios = [
           { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador" },
           { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Usuário", cargo: "Usuário" }
         ];
@@ -344,19 +372,19 @@
       const userIdEdit = document.getElementById("editUserId").value;
 
       if (userIdEdit) {
-          usuarios = usuarios.map(u => u.uid === userIdEdit ? { ...u, nome, apelido, email, senha, cargo } : u);
-          alert("Utilizador atualizado com sucesso!");
+        usuarios = usuarios.map(u => u.uid === userIdEdit ? { ...u, nome, apelido, email, senha, cargo } : u);
+        alert("Utilizador atualizado com sucesso!");
       } else {
-          const novoUser = {
-            uid: 'user-' + Date.now(),
-            nome,
-            apelido,
-            email,
-            senha,
-            cargo
-          };
-          usuarios.push(novoUser);
-          alert("Utilizador criado com sucesso!");
+        const novoUser = {
+          uid: 'user-' + Date.now(),
+          nome,
+          apelido,
+          email,
+          senha,
+          cargo
+        };
+        usuarios.push(novoUser);
+        alert("Utilizador criado com sucesso!");
       }
 
       localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
@@ -380,8 +408,6 @@
       localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
       carregarUsuariosLocal();
     }
-<script src="../js/sidebar.js"></script>
-
   </script>
 </body>
 </html>
