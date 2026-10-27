@@ -313,28 +313,9 @@
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
-      .brand-logo {
-    max-height: 38px;
-    width: auto;
-    object-fit: contain;
-    margin-right: auto;
-    margin-left: 0;
-}
-      .btn-sair-mobile {
-        color: #e2e8f0;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        background: rgba(255, 255, 255, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 6px 12px;
-        border-radius: 8px;
-        transition: all 0.2s;
-      }
-      .btn-sair-mobile:hover {
-        background: rgba(255, 255, 255, 0.15);
-        color: #ffffff;
-      }
+      .brand-logo { max-height: 38px; width: auto; object-fit: contain; margin-right: auto; margin-left: 0; }
+      .btn-sair-mobile { color: #e2e8f0; font-size: 13px; font-weight: 600; text-decoration: none; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 8px; transition: all 0.2s; }
+      .btn-sair-mobile:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
       .mob-nav-item.active { color: #2dd4bf; }
@@ -509,6 +490,11 @@
     let dataAtualObj = new Date();
     let tipoVisaoAtual = 'dia';
 
+    // FUNÇÃO CRUCIAL PARA IGNORAR O FUSO HORÁRIO E USAR A DATA LOCAL
+    function formatarDataLocal(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
       if (!sessaoStr) {
@@ -624,13 +610,13 @@
       carregarAgendaLocal();
     }
 
-    // MANTÉM OS SLOTS PADRÃO E RECONHECE QUALQUER HORÁRIO DINÂMICO/QUEBRADO
     function carregarAgendaLocal() {
       const sala = document.getElementById("salaSelect").value;
       const container = document.getElementById("gridHorarios");
       document.getElementById("salaHeaderTitulo").innerText = sala;
 
-      const dataStr = dataAtualObj.toISOString().split('T')[0];
+      // CORREÇÃO: Utiliza formato de data local e nunca UTC
+      const dataStr = formatarDataLocal(dataAtualObj);
       const horariosPadrao = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
 
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
@@ -645,52 +631,44 @@
 
       if (tipoVisaoAtual === 'dia') {
         horariosPadrao.forEach(horaSlot => {
-          // Converte o slot em minutos para verificar sobreposição exata (inclusive horários quebrados)
           const [hSlot, mSlot] = horaSlot.split(':').map(Number);
           const minSlotInicio = hSlot * 60 + mSlot;
-          const minSlotFim = minSlotInicio + 60; // Slot padrão de 1 hora
+          const minSlotFim = minSlotInicio + 60;
 
-          // Procura se existe alguma reunião que ocupe este intervalo (ou que comece exatamente aqui)
+          // CORREÇÃO LOGICA: Busca de forma inteligente qualquer horário que invada este bloco
           const reservaEncontrada = reservasDoDia.find(r => {
             const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
             const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
             if(!strIni) return false;
 
-            const [hIni, mIni] = strIni.split(':').map(Number);
-            const [hFim, mFim] = strFim.split(':').map(Number);
-            const minIni = hIni * 60 + mIni;
-            const minFim = hFim * 60 + mFim;
-
-            // Retorna verdadeiro se houver sobreposição de horários
-            return (minIni < minSlotFim && minFim > minSlotInicio) || (strIni === horaSlot);
+            const minIni = parseInt(strIni.split(':')[0])*60 + parseInt(strIni.split(':')[1]);
+            const minFim = parseInt(strFim.split(':')[0])*60 + parseInt(strFim.split(':')[1]);
+            return (minIni < minSlotFim && minFim > minSlotInicio);
           });
 
           if (reservaEncontrada) {
-            const strIni = reservaEncontrada.horarioInicio || reservaEncontrada.horaInicio || reservaEncontrada.start?.split('T')[1]?.substring(0,5);
-            const strFim = reservaEncontrada.horarioFim || reservaEncontrada.horaFim || reservaEncontrada.end?.split('T')[1]?.substring(0,5) || '??';
-            
-            // Renderiza apenas se for o início exato para evitar duplicados na grelha
-            if (strIni === horaSlot || (minSlotInicio <= (parseInt(strIni.split(':')[0])*60 + parseInt(strIni.split(':')[1])) && minSlotFim > (parseInt(strIni.split(':')[0])*60 + parseInt(strIni.split(':')[1])))) {
-              // Evita renderizar o mesmo card várias vezes se ocupar múltiplos slots
-              if (!reservaEncontrada._renderizado) {
-                reservaEncontrada._renderizado = true;
-                fragmentoHTML += `
-                  <div class="slot-row reserved">
-                    <div>
-                      <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
-                      <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reservaEncontrada.titulo || reservaEncontrada.title || 'Reunião'}</h4>
-                      <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reservaEncontrada.responsavel || reservaEncontrada.usuario || 'Equipa'}</p>
-                    </div>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                      <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${reservaEncontrada.responsavel || reservaEncontrada.usuario || 'Colega'}')">💬 Negociar</button>
-                      ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reservaEncontrada.id}')">🗑️ Excluir</button>` : ''}
-                    </div>
+            // Só renderiza o card inteiro se não foi renderizado num bloco anterior
+            if (!reservaEncontrada._renderizado) {
+              reservaEncontrada._renderizado = true;
+              const strIni = reservaEncontrada.horarioInicio || reservaEncontrada.horaInicio || reservaEncontrada.start?.split('T')[1]?.substring(0,5);
+              const strFim = reservaEncontrada.horarioFim || reservaEncontrada.horaFim || reservaEncontrada.end?.split('T')[1]?.substring(0,5) || '??';
+              
+              fragmentoHTML += `
+                <div class="slot-row reserved">
+                  <div>
+                    <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
+                    <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reservaEncontrada.titulo || reservaEncontrada.title || 'Reunião'}</h4>
+                    <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reservaEncontrada.responsavel || reservaEncontrada.usuario || 'Equipa'}</p>
                   </div>
-                `;
-              }
+                  <div style="display: flex; gap: 6px; align-items: center;">
+                    <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${reservaEncontrada.responsavel || reservaEncontrada.usuario || 'Colega'}')">💬 Negociar</button>
+                    ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reservaEncontrada.id}')">🗑️ Excluir</button>` : ''}
+                  </div>
+                </div>
+              `;
             }
           } else {
-            // Slot livre disponível para agendamento
+            // Horário completamente livre
             fragmentoHTML += `
               <div class="slot-row available" onclick="abrirModalReserva('${horaSlot}', '${dataStr}')">
                 <div>
@@ -703,7 +681,6 @@
           }
         });
 
-        // Limpa a flag de renderização para ciclos futuros
         reservasDoDia.forEach(r => delete r._renderizado);
         container.innerHTML = fragmentoHTML;
       }
@@ -715,7 +692,7 @@
         for (let i = 0; i < 7; i++) {
           let diaAtual = new Date(inicioSemana);
           diaAtual.setDate(diaAtual.getDate() + i);
-          let diaStr = diaAtual.toISOString().split('T')[0];
+          let diaStr = formatarDataLocal(diaAtual);
           let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
 
           gridDivHtml += `
@@ -758,12 +735,12 @@
         let inicioGrid = new Date(primeiroDiaMes);
         inicioGrid.setDate(inicioGrid.getDate() - primeiroDiaMes.getDay());
 
-        let hojeStr = new Date().toISOString().split('T')[0];
+        let hojeStr = formatarDataLocal(new Date());
 
         for (let i = 0; i < 42; i++) {
           let diaAtual = new Date(inicioGrid);
           diaAtual.setDate(diaAtual.getDate() + i);
-          let diaStr = diaAtual.toISOString().split('T')[0];
+          let diaStr = formatarDataLocal(diaAtual);
           let eMesAtual = diaAtual.getMonth() === mes;
           let eHoje = diaStr === hojeStr;
 
@@ -828,7 +805,7 @@
       }
 
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      const hojeStr = window.dataSelecionadaGlobal || new Date().toISOString().split('T')[0];
+      const hojeStr = window.dataSelecionadaGlobal || formatarDataLocal(new Date());
 
       const novaReserva = {
         id: 'res-' + Date.now(),
