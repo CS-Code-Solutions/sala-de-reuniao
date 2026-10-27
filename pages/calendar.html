@@ -764,14 +764,16 @@
       }
     }
 
-    function abrirModalReserva(horaInicio, dataStr) {
+function abrirModalReserva(horaInicio, dataStr) {
       document.getElementById("reservaHorarioInicio").value = horaInicio;
       document.getElementById("inputTituloReserva").value = "";
       document.getElementById("inputHoraInicio").value = horaInicio;
       
-      const [h, m] = horaInicio.split(':');
-      let horaFimNum = (parseInt(h) + 1) % 24;
-      let horaFimStr = (horaFimNum < 10 ? "0" : "") + horaFimNum + ":" + m;
+      // Define 30 minutos como tempo sugerido no formulário em vez de 1 hora
+      const [h, m] = horaInicio.split(':').map(Number);
+      const minFim = (h * 60) + m + 30; 
+      
+      const horaFimStr = String(Math.floor(minFim/60)%24).padStart(2,'0') + ":" + String(minFim%60).padStart(2,'0');
       document.getElementById("inputHoraFim").value = horaFimStr;
 
       window.dataSelecionadaGlobal = dataStr;
