@@ -266,7 +266,6 @@
       background: #f1f5f9;
     }
 
-    /* ESTILO DOS NOVOS BOTÕES COM ÍCONES VETORIAIS (SVG) */
     .btn-action-slot { 
       display: inline-flex; align-items: center; justify-content: center; gap: 6px; 
       padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; 
@@ -301,10 +300,19 @@
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
     .modal-card { background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
+    
     .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
-    .form-group input, .form-group textarea { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-color); }
+    
+    /* MODIFICAÇÃO DO CSS PARA INCLUIR O SELECT BONITO */
+    .form-group input, .form-group textarea, .form-group select { 
+      padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: white; 
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { 
+      border-color: var(--accent-color); 
+    }
+    /* FIM DA MODIFICAÇÃO DO SELECT */
+
     .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
@@ -337,7 +345,8 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8;
+        /* MODIFICAÇÃO DO PADDING DO CABEÇALHO PARA FICAR FINO E ELEGANTE */
+        padding: 4px 12px 4px 8px; 
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
@@ -467,8 +476,9 @@
       <div class="form-group">
         <label>Horário de Início e Fim</label>
         <div style="display: flex; gap: 8px;">
-          <input type="time" id="inputHoraInicio" style="flex:1;" required>
-          <input type="time" id="inputHoraFim" style="flex:1;" required>
+          <!-- MODIFICAÇÃO DO SELECT AQUI COM ONCHANGE PARA AVALIAR O FIM -->
+          <select id="inputHoraInicio" style="flex:1;" onchange="atualizarOpcoesFim(window.dataSelecionadaGlobal, document.getElementById('salaSelect').value)" required></select>
+          <select id="inputHoraFim" style="flex:1;" required></select>
         </div>
       </div>
 
@@ -867,21 +877,6 @@
       }
     }
 
-    function abrirModalReserva(horaInicio, dataStr) {
-      document.getElementById("reservaHorarioInicio").value = horaInicio;
-      document.getElementById("inputTituloReserva").value = "";
-      document.getElementById("inputHoraInicio").value = horaInicio;
-      
-      const [h, m] = horaInicio.split(':').map(Number);
-      const minFim = (h * 60) + m + 30; 
-      
-      const horaFimStr = String(Math.floor(minFim/60)%24).padStart(2,'0') + ":" + String(minFim%60).padStart(2,'0');
-      document.getElementById("inputHoraFim").value = horaFimStr;
-
-      window.dataSelecionadaGlobal = dataStr;
-      document.getElementById("modalNovaReserva").style.display = "flex";
-    }
-
     function abrirModalNegociacao(sala, data, horario, responsavel) {
       const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo.`;
       document.getElementById("inputMsgWhatsapp").value = msgPronta;
@@ -984,6 +979,122 @@
 
       fecharModalConfirmacao();
       mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "success");
+    }
+
+    /* NOVAS FUNÇÕES PARA O BLOQUEIO INTELIGENTE DOS HORÁRIOS */
+    function atualizarOpcoesInicio(dataStr, sala) {
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const reservasDoDia = reservas.filter(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        return rSala === sala && rData === dataStr;
+      });
+      
+      const agora = new Date();
+      const hojeStr = formatarDataLocal(agora);
+      const minAtual = agora.getHours() * 60 + agora.getMinutes();
+
+      const selIni = document.getElementById("inputHoraInicio");
+      selIni.innerHTML = "";
+
+      for (let h = 7; h <= 23; h++) {
+        for (let m of [0, 30]) {
+          if (h === 23 && m === 30) continue; // Último início possível é 23:00
+          
+          let minSlot = h * 60 + m;
+          let horaStr = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
+          
+          // Verifica se o horário já passou (apenas se for o dia de hoje)
+          let isPassado = (dataStr === hojeStr && minSlot <= minAtual);
+          
+          // Verifica se o horário cai dentro de uma reserva existente
+          let isOcupado = reservasDoDia.some(r => {
+            const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
+            const strF = r.horarioFim || r.horaFim || r.end?.split('T')[1];
+            if(!strI || !strF) return false;
+            const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
+            const rF = parseInt(strF.split(':')[0]) * 60 + parseInt(strF.split(':')[1]);
+            return (minSlot >= rI && minSlot < rF);
+          });
+
+          // Cria a opção e bloqueia se for inválida
+          let opt = new Option(horaStr + (isPassado ? " (Passado)" : (isOcupado ? " (Ocupado)" : "")), horaStr);
+          if (isPassado || isOcupado) opt.disabled = true;
+          selIni.add(opt);
+        }
+      }
+    }
+
+    function atualizarOpcoesFim(dataStr, sala) {
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const reservasDoDia = reservas.filter(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        return rSala === sala && rData === dataStr;
+      });
+      
+      const selIni = document.getElementById("inputHoraInicio");
+      const selFim = document.getElementById("inputHoraFim");
+      
+      if (!selIni.value) return;
+      
+      const [hIni, mIni] = selIni.value.split(':').map(Number);
+      const minInicio = hIni * 60 + mIni;
+
+      // Descobrir a próxima reserva para limitar a hora de fim (não pode passar por cima)
+      let proximoLimite = 23 * 60 + 30; // Máximo permitido do dia (23:30)
+      
+      reservasDoDia.forEach(r => {
+        const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
+        if(!strI) return;
+        const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
+        if (rI > minInicio && rI < proximoLimite) {
+          proximoLimite = rI; // Define a barreira
+        }
+      });
+
+      const valorFimAtual = selFim.value;
+      selFim.innerHTML = "";
+
+      // Gera os horários de fim válidos, de 30 em 30 min, apenas até encostar na próxima reserva
+      for (let minSlot = minInicio + 30; minSlot <= proximoLimite; minSlot += 30) {
+        let horaStr = String(Math.floor(minSlot/60)%24).padStart(2,'0') + ":" + String(minSlot%60).padStart(2,'0');
+        selFim.add(new Option(horaStr, horaStr));
+      }
+
+      // Tenta manter o valor anterior, se não for possível, seleciona a primeira opção (+30 min)
+      if (valorFimAtual && Array.from(selFim.options).some(o => o.value === valorFimAtual)) {
+        selFim.value = valorFimAtual;
+      } else if (selFim.options.length > 0) {
+        selFim.selectedIndex = 0;
+      }
+    }
+
+    function abrirModalReserva(horaInicio, dataStr) {
+      window.dataSelecionadaGlobal = dataStr;
+      const sala = document.getElementById("salaSelect").value;
+      
+      document.getElementById("reservaHorarioInicio").value = horaInicio;
+      document.getElementById("inputTituloReserva").value = "";
+      
+      // 1. Gera os horários de início e desativa passados/ocupados
+      atualizarOpcoesInicio(dataStr, sala);
+      
+      const selIni = document.getElementById("inputHoraInicio");
+      
+      // 2. Seleciona o horário clicado se estiver disponível
+      if (Array.from(selIni.options).some(o => o.value === horaInicio && !o.disabled)) {
+        selIni.value = horaInicio;
+      } else {
+        // Se clicar por engano num intervalo inválido, força para o primeiro livre
+        const primeiroDisponivel = Array.from(selIni.options).find(o => !o.disabled);
+        if (primeiroDisponivel) selIni.value = primeiroDisponivel.value;
+      }
+      
+      // 3. Gera os horários de fim restringidos inteligentemente
+      atualizarOpcoesFim(dataStr, sala);
+
+      document.getElementById("modalNovaReserva").style.display = "flex";
     }
   </script>
 </body>
