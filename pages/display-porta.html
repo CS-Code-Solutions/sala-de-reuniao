@@ -2,11 +2,11 @@
 <html lang="pt-BR">
 <head>
   <!-- Configurações para PWA e iOS -->
-<link rel="manifest" href="../manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MeetingRoom">
-<link rel="apple-touch-icon" href="../ico.png">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
+  <link rel="apple-touch-icon" href="../ico.png">
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -90,6 +90,7 @@
       background: transparent; color: white; border: none; font-size: 24px;
       font-weight: 800; outline: none; cursor: pointer; padding: 0; margin: 0;
     }
+    .room-title-box select option { background: #0f172a; color: white; }
 
     .bg-switcher {
       display: inline-flex;
@@ -312,9 +313,9 @@
     let duracaoMinutos = 30;
     let salaAtualGlobal = "Sala 01";
 
-        const temasFundo = [
+    const temasFundo = [
       { url: "", overlay: "rgba(15, 23, 42, 0.82)" }, // Tema padrão escuro
-      { url: "../fundo.jpg", overlay: "rgba(15, 23, 42, 0.75)" }, // O seu novo tema customizado
+      { url: "../fundo.jpg", overlay: "rgba(15, 23, 42, 0.75)" }, // Tema customizado fundo.jpg
       { url: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.75)" },
       { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.78)" },
       { url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.80)" }
@@ -375,38 +376,27 @@
       document.getElementById("bgOverlay").style.background = tema.overlay;
     }
 
-        function inicializarSala() {
+    function inicializarSala() {
       const urlParams = new URLSearchParams(window.location.search);
       const salaParam = urlParams.get('sala');
+      if (salaParam) {
+        salaAtualGlobal = salaParam;
+      }
+
       const container = document.getElementById("containerSalaDisplay");
-
-      // Mesmo se houver parâmetro na URL, permitimos alternar livremente no select se quisermos, 
-      // ou mantemos o select ativo para mudar de sala a qualquer momento.
-      salaAtualGlobal = salaParam || "Sala 01";
-
       container.innerHTML = `
-        <select id="selectSalaDisplay" onchange="mudarSalaUrl()" style="background: transparent; color: white; border: none; font-size: 24px; font-weight: 800; outline: none; cursor: pointer; padding:0; margin:0;">
-          <option value="Sala 01" style="background:#0f172a;" ${salaAtualGlobal === 'Sala 01' ? 'selected' : ''}>Sala de Reuniões 01</option>
-          <option value="Sala 02" style="background:#0f172a;" ${salaAtualGlobal === 'Sala 02' ? 'selected' : ''}>Sala de Reuniões 02</option>
+        <select id="selectSalaDisplay" onchange="mudarSalaUrl()">
+          <option value="Sala 01" ${salaAtualGlobal === 'Sala 01' ? 'selected' : ''}>Sala de Reuniões 01</option>
+          <option value="Sala 02" ${salaAtualGlobal === 'Sala 02' ? 'selected' : ''}>Sala de Reuniões 02</option>
         </select>
       `;
     }
 
     function mudarSalaUrl() {
       salaAtualGlobal = document.getElementById("selectSalaDisplay").value;
-      // Atualiza o URL sem recarregar a página para manter o estado limpo
       const novaUrl = new URL(window.location);
       novaUrl.searchParams.set('sala', salaAtualGlobal);
       window.history.pushState({}, '', novaUrl);
-      atualizarPainel();
-    }
-
-        document.getElementById("selectSalaDisplay").value = salaAtualGlobal;
-      }
-    }
-
-    function mudarSalaUrl() {
-      salaAtualGlobal = document.getElementById("selectSalaDisplay").value;
       atualizarPainel();
     }
 
@@ -439,7 +429,11 @@
 
     function atualizarPainel() {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('sala')) salaAtualGlobal = urlParams.get('sala');
+      if (urlParams.get('sala')) {
+        salaAtualGlobal = urlParams.get('sala');
+        const sel = document.getElementById("selectSalaDisplay");
+        if(sel && sel.value !== salaAtualGlobal) sel.value = salaAtualGlobal;
+      }
 
       let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
       const calendarioExtra = JSON.parse(localStorage.getItem("meetingroom_calendario")) || JSON.parse(localStorage.getItem("calendar_events")) || [];
@@ -559,26 +553,24 @@
       btn.classList.add("active");
     }
 
-   function confirmarReservaPorta() {
+    function confirmarReservaPorta() {
       const responsavel = document.getElementById("selectUsuarioPorta").value;
       const horaSelecionada = document.getElementById("inputHoraInicioPorta").value;
       const titulo = document.getElementById("inputTituloPorta").value.trim() || "Reunião Presencial";
 
       if (!horaSelecionada) return showToast("Por favor, selecione o horário de início.");
 
-      // CALCULA O HORÁRIO EXATO DE INÍCIO E FIM (sem arredondar)
       const [hIni, mIni] = horaSelecionada.split(':').map(Number);
       const minInicioTotal = (hIni * 60) + mIni;
-      const minFimTotal = minInicioTotal + duracaoMinutos; // Soma 15, 30 ou 60 min exatos
+      const minFimTotal = minInicioTotal + duracaoMinutos; 
       
       const horaFimH = String(Math.floor(minFimTotal / 60) % 24).padStart(2, '0');
       const horaFimM = String(minFimTotal % 60).padStart(2, '0');
-      const horaFimStr = `${horaFimH}:${horaFimM}`; // Ex: 13:33
+      const horaFimStr = `${horaFimH}:${horaFimM}`;
 
       const hojeStr = getLocalDateString();
       let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
 
-      // Verifica conflito de horário com precisão de minutos
       const conflito = reservas.some(r => {
         const rSala = r.sala || r.room;
         const rData = r.data || r.date || r.start?.split('T')[0];
@@ -600,9 +592,9 @@
         id: 'res-' + Date.now(),
         titulo: titulo,
         title: titulo,
-        horarioInicio: horaSelecionada, // Salva o horário exato, ex: 13:18
+        horarioInicio: horaSelecionada,
         horaInicio: horaSelecionada,
-        horarioFim: horaFimStr,         // Salva o fim exato, ex: 13:33 (se escolheu 15min)
+        horarioFim: horaFimStr,
         horaFim: horaFimStr,
         start: `${hojeStr}T${horaSelecionada}:00`,
         end: `${hojeStr}T${horaFimStr}:00`,
@@ -632,26 +624,24 @@
       atualizarPainel();
       showToast("✅ Reserva efetuada com sucesso!");
     }
-    // Força o ecrã a manter-se sempre ligado (Screen Wake Lock API)
-let wakeLock = null;
-async function manterEcraLigado() {
-  try {
-    if ('wakeLock' in navigator) {
-      wakeLock = await navigator.wakeLock.request('screen');
-    }
-  } catch (err) {
-    console.log(`Erro no Wake Lock: ${err.message}`);
-  }
-}
 
-// Ativa as proteções assim que o utilizador tocar no ecrã pela primeira vez
-document.addEventListener('click', () => {
-  manterEcraLigado();
-  // Força o ecrã inteiro nativamente
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(e => console.log(e));
-  }
-}, { once: true });
+    let wakeLock = null;
+    async function manterEcraLigado() {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch (err) {
+        console.log(`Erro no Wake Lock: ${err.message}`);
+      }
+    }
+
+    document.addEventListener('click', () => {
+      manterEcraLigado();
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(e => console.log(e));
+      }
+    }, { once: true });
   </script>
 </body>
 </html>
