@@ -312,12 +312,14 @@
     let duracaoMinutos = 30;
     let salaAtualGlobal = "Sala 01";
 
-    const temasFundo = [
-      { url: "", overlay: "rgba(15, 23, 42, 0.82)" },
+        const temasFundo = [
+      { url: "", overlay: "rgba(15, 23, 42, 0.82)" }, // Tema padrão escuro
+      { url: "../fundo.jpg", overlay: "rgba(15, 23, 42, 0.75)" }, // O seu novo tema customizado
       { url: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.75)" },
       { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.78)" },
       { url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.80)" }
     ];
+
     let indiceTemaAtual = 0;
 
     function getLocalDateString() {
