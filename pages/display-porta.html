@@ -540,42 +540,53 @@
       btn.classList.add("active");
     }
 
-    function confirmarReservaPorta() {
+   function confirmarReservaPorta() {
       const responsavel = document.getElementById("selectUsuarioPorta").value;
       const horaSelecionada = document.getElementById("inputHoraInicioPorta").value;
       const titulo = document.getElementById("inputTituloPorta").value.trim() || "Reunião Presencial";
 
       if (!horaSelecionada) return showToast("Por favor, selecione o horário de início.");
 
-      // CORREÇÃO CRUCIAL: Arredonda para a hora cheia exata para encaixar na grelha da Agenda principal
-      const [hIni] = horaSelecionada.split(':').map(Number);
-      const horaCheiaInicio = String(hIni).padStart(2, '0') + ":00";
-      const horaCheiaFim = String((hIni + 1) % 24).padStart(2, '0') + ":00";
+      // CALCULA O HORÁRIO EXATO DE INÍCIO E FIM (sem arredondar)
+      const [hIni, mIni] = horaSelecionada.split(':').map(Number);
+      const minInicioTotal = (hIni * 60) + mIni;
+      const minFimTotal = minInicioTotal + duracaoMinutos; // Soma 15, 30 ou 60 min exatos
+      
+      const horaFimH = String(Math.floor(minFimTotal / 60) % 24).padStart(2, '0');
+      const horaFimM = String(minFimTotal % 60).padStart(2, '0');
+      const horaFimStr = `${horaFimH}:${horaFimM}`; // Ex: 13:33
 
       const hojeStr = getLocalDateString();
       let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
 
+      // Verifica conflito de horário com precisão de minutos
       const conflito = reservas.some(r => {
         const rSala = r.sala || r.room;
         const rData = r.data || r.date || r.start?.split('T')[0];
         if (rSala !== salaAtualGlobal || rData !== hojeStr) return false;
         
         const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-        return strIni === horaCheiaInicio;
+        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
+        if(!strIni) return false;
+
+        const rIni = strIni.split(':').map(Number)[0] * 60 + strIni.split(':').map(Number)[1];
+        const rFim = strFim.split(':').map(Number)[0] * 60 + strFim.split(':').map(Number)[1];
+        
+        return (minInicioTotal < rFim && minFimTotal > rIni);
       });
 
-      if (conflito) return showToast("❌ Conflito de Horário! Já existe uma reunião marcada neste horário exato.");
+      if (conflito) return showToast("❌ Conflito de Horário! Já existe uma reunião marcada neste intervalo.");
 
       const novoEvento = {
         id: 'res-' + Date.now(),
         titulo: titulo,
         title: titulo,
-        horarioInicio: horaCheiaInicio, // Formato exigido pela grelha da Agenda
-        horaInicio: horaCheiaInicio,
-        horarioFim: horaCheiaFim,       // Formato exigido pela grelha da Agenda
-        horaFim: horaCheiaFim,
-        start: `${hojeStr}T${horaCheiaInicio}:00`,
-        end: `${hojeStr}T${horaCheiaFim}:00`,
+        horarioInicio: horaSelecionada, // Salva o horário exato, ex: 13:18
+        horaInicio: horaSelecionada,
+        horarioFim: horaFimStr,         // Salva o fim exato, ex: 13:33 (se escolheu 15min)
+        horaFim: horaFimStr,
+        start: `${hojeStr}T${horaSelecionada}:00`,
+        end: `${hojeStr}T${horaFimStr}:00`,
         sala: salaAtualGlobal,
         room: salaAtualGlobal,
         data: hojeStr,
