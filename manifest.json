@@ -1,7 +1,7 @@
 {
   "name": "MeetingRoom - Viecelli",
   "short_name": "MeetingRoom",
-  "start_url": "pages/display-porta.html?sala=Sala%2001",
+  "start_url": "index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
