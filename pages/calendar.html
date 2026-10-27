@@ -422,8 +422,8 @@
       <div class="form-group">
         <label>Horário de Início e Fim</label>
         <div style="display: flex; gap: 8px;">
-          <input type="time" id="inputHoraInicio" style="flex:1;">
-          <input type="time" id="inputHoraFim" style="flex:1;">
+          <input type="time" id="inputHoraInicio" style="flex:1;" required>
+          <input type="time" id="inputHoraFim" style="flex:1;" required>
         </div>
       </div>
 
@@ -516,6 +516,15 @@
 
       atualizarCabecalhoData();
       mudarSalaSelecionada();
+
+      // ATUALIZAÇÃO AUTOMÁTICA EM TEMPO REAL: Escuta mudanças feitas pelo Painel da Porta
+      window.addEventListener('storage', (e) => {
+        if (e.key === "meetingroom_reservas" || e.key === "meetingroom_calendario") {
+          carregarAgendaLocal();
+        }
+      });
+      // Garante que a agenda faça um check-up silencioso a cada 30 segundos
+      setInterval(carregarAgendaLocal, 30000);
     });
 
     function fazerLogoutLocal() {
@@ -615,10 +624,7 @@
       const container = document.getElementById("gridHorarios");
       document.getElementById("salaHeaderTitulo").innerText = sala;
 
-      // CORREÇÃO: Utiliza formato de data local e nunca UTC
       const dataStr = formatarDataLocal(dataAtualObj);
-      const horariosPadrao = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00"];
-
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
       
       const reservasDoDia = reservas.filter(r => {
@@ -630,58 +636,88 @@
       let fragmentoHTML = "";
 
       if (tipoVisaoAtual === 'dia') {
-        horariosPadrao.forEach(horaSlot => {
-          const [hSlot, mSlot] = horaSlot.split(':').map(Number);
-          const minSlotInicio = hSlot * 60 + mSlot;
-          const minSlotFim = minSlotInicio + 60;
+        // LINHA DO TEMPO CONTÍNUA (Calcula exatamente os minutos que sobram)
+        const inicioDiaMin = 7 * 60; // 07:00
+        const fimDiaMin = 23 * 60;   // 23:00
 
-          // CORREÇÃO LOGICA: Busca de forma inteligente qualquer horário que invada este bloco
-          const reservaEncontrada = reservasDoDia.find(r => {
-            const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-            const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
-            if(!strIni) return false;
+        // Ordena reuniões do dia por horário de início
+        reservasDoDia.sort((a, b) => {
+          const tA = a.horarioInicio || a.horaInicio || a.start?.split('T')[1]?.substring(0,5) || "00:00";
+          const tB = b.horarioInicio || b.horaInicio || b.start?.split('T')[1]?.substring(0,5) || "00:00";
+          return tA.localeCompare(tB);
+        });
 
-            const minIni = parseInt(strIni.split(':')[0])*60 + parseInt(strIni.split(':')[1]);
-            const minFim = parseInt(strFim.split(':')[0])*60 + parseInt(strFim.split(':')[1]);
-            return (minIni < minSlotFim && minFim > minSlotInicio);
-          });
+        let cursorMin = inicioDiaMin;
 
-          if (reservaEncontrada) {
-            // Só renderiza o card inteiro se não foi renderizado num bloco anterior
-            if (!reservaEncontrada._renderizado) {
-              reservaEncontrada._renderizado = true;
-              const strIni = reservaEncontrada.horarioInicio || reservaEncontrada.horaInicio || reservaEncontrada.start?.split('T')[1]?.substring(0,5);
-              const strFim = reservaEncontrada.horarioFim || reservaEncontrada.horaFim || reservaEncontrada.end?.split('T')[1]?.substring(0,5) || '??';
-              
-              fragmentoHTML += `
-                <div class="slot-row reserved">
-                  <div>
-                    <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
-                    <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reservaEncontrada.titulo || reservaEncontrada.title || 'Reunião'}</h4>
-                    <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reservaEncontrada.responsavel || reservaEncontrada.usuario || 'Equipa'}</p>
-                  </div>
-                  <div style="display: flex; gap: 6px; align-items: center;">
-                    <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${reservaEncontrada.responsavel || reservaEncontrada.usuario || 'Colega'}')">💬 Negociar</button>
-                    ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reservaEncontrada.id}')">🗑️ Excluir</button>` : ''}
-                  </div>
-                </div>
-              `;
-            }
-          } else {
-            // Horário completamente livre
+        reservasDoDia.forEach(reserva => {
+          const strIni = reserva.horarioInicio || reserva.horaInicio || reserva.start?.split('T')[1]?.substring(0,5) || "00:00";
+          const strFim = reserva.horarioFim || reserva.horaFim || reserva.end?.split('T')[1]?.substring(0,5) || strIni;
+          
+          const resIniMin = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
+          const resFimMin = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
+
+          // Verifica se sobrou espaço livre entre o fim da última reunião (cursor) e a reunião atual
+          if (cursorMin < resIniMin) {
+            const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
+            const slotLivreFim = String(Math.floor(resIniMin/60)).padStart(2,'0') + ":" + String(resIniMin%60).padStart(2,'0');
+            
             fragmentoHTML += `
-              <div class="slot-row available" onclick="abrirModalReserva('${horaSlot}', '${dataStr}')">
+              <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
                 <div>
-                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${horaSlot} - Disponível</span>
-                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar reunião neste horário.</p>
+                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às ${slotLivreFim} - Disponível</span>
+                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar neste intervalo livre.</p>
                 </div>
                 <button class="btn-action-slot btn-reserve">📅 Agendar</button>
               </div>
             `;
           }
+
+          // Renderiza o card da Reunião Ocupada
+          fragmentoHTML += `
+            <div class="slot-row reserved">
+              <div>
+                <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
+                <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo || reserva.title || 'Reunião'}</h4>
+                <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || reserva.usuario || 'Equipa'}</p>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${reserva.responsavel || reserva.usuario || 'Colega'}')">💬 Negociar</button>
+                ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reserva.id}')">🗑️ Excluir</button>` : ''}
+              </div>
+            </div>
+          `;
+
+          // Avança a "Linha do Tempo" para o fim desta reunião SOMANDO 5 MINUTOS de segurança
+          cursorMin = Math.max(cursorMin, resFimMin + 5); 
         });
 
-        reservasDoDia.forEach(r => delete r._renderizado);
+        // Após listar as reuniões, verifica se sobrou tempo no final do dia
+        if (cursorMin < fimDiaMin) {
+          const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
+          
+          fragmentoHTML += `
+            <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
+              <div>
+                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às 23:00 - Disponível</span>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar no restante do dia.</p>
+              </div>
+              <button class="btn-action-slot btn-reserve">📅 Agendar</button>
+            </div>
+          `;
+        }
+        
+        if(reservasDoDia.length === 0) {
+           fragmentoHTML = `
+            <div class="slot-row available" onclick="abrirModalReserva('08:00', '${dataStr}')">
+              <div>
+                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">07:00 às 23:00 - Disponível</span>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Sem reuniões. Clique para agendar o primeiro horário.</p>
+              </div>
+              <button class="btn-action-slot btn-reserve">📅 Agendar</button>
+            </div>
+          `;
+        }
+
         container.innerHTML = fragmentoHTML;
       }
       else if (tipoVisaoAtual === 'semana') {
@@ -764,12 +800,12 @@
       }
     }
 
-function abrirModalReserva(horaInicio, dataStr) {
+    function abrirModalReserva(horaInicio, dataStr) {
       document.getElementById("reservaHorarioInicio").value = horaInicio;
       document.getElementById("inputTituloReserva").value = "";
       document.getElementById("inputHoraInicio").value = horaInicio;
       
-      // Define 30 minutos como tempo sugerido no formulário em vez de 1 hora
+      // Define 30 minutos como tempo sugerido padrão ao abrir o formulário
       const [h, m] = horaInicio.split(':').map(Number);
       const minFim = (h * 60) + m + 30; 
       
@@ -801,13 +837,43 @@ function abrirModalReserva(horaInicio, dataStr) {
       const fim = document.getElementById("inputHoraFim").value;
       const sala = document.getElementById("salaSelect").value;
 
-      if (!titulo) {
-        mostrarAlerta("Atenção", "Por favor, preencha o nome da reunião.", "⚠️");
+      if (!titulo || !inicio || !fim) {
+        mostrarAlerta("Atenção", "Por favor, preencha todos os campos.", "⚠️");
         return;
       }
 
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
       const hojeStr = window.dataSelecionadaGlobal || formatarDataLocal(new Date());
+
+      // VALIDAR CONFLITOS COM 5 MINUTOS DE SEGURANÇA
+      const minInicioTotal = parseInt(inicio.split(':')[0]) * 60 + parseInt(inicio.split(':')[1]);
+      const minFimTotal = parseInt(fim.split(':')[0]) * 60 + parseInt(fim.split(':')[1]);
+
+      if (minInicioTotal >= minFimTotal) {
+          mostrarAlerta("Erro de Horário", "O horário de fim deve ser depois do início.", "❌");
+          return;
+      }
+
+      const conflito = reservas.some(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        if (rSala !== sala || rData !== hojeStr) return false;
+        
+        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
+        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5);
+        if(!strIni || !strFim) return false;
+
+        const rI = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
+        const rF = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
+        
+        // Bloqueia se a reserva cruzar (incluindo margem de +5 do fim de uma e -5 do início da outra)
+        return (minInicioTotal < (rF + 5) && minFimTotal > (rI - 5));
+      });
+
+      if (conflito) {
+          mostrarAlerta("Conflito de Horário", "Já existe uma reunião ou intervalo de segurança (5 min) neste horário.", "❌");
+          return;
+      }
 
       const novaReserva = {
         id: 'res-' + Date.now(),
