@@ -85,6 +85,13 @@
       transition: all 0.2s;
     }
 
+    .nav-links a svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
     .nav-links a:hover, .nav-links a.active {
       background: rgba(255, 255, 255, 0.08);
       color: white;
@@ -316,6 +323,7 @@
     .room-img { width: 80px; height: 60px; background-color: var(--border-color); border-radius: 8px; object-fit: cover; }
     .room-details h4 { font-size: 14px; color: var(--text-main); margin: 0 0 6px 0; }
     .room-details p { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin: 0 0 4px 0; }
+    .room-details p svg { width: 14px; height: 14px; stroke-width: 2; color: var(--accent-color); }
     
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -338,8 +346,8 @@
       .btn-sair-mobile:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
-      .mob-nav-item.active { color: #2dd4bf; }
-      .mob-nav-item span { font-size: 18px; }
+      .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
+      .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
     }
   </style>
 </head>
@@ -352,13 +360,28 @@
       </div>
 
       <nav class="nav-links">
-        <a href="calendar.html" class="active">📅 Agenda</a>
-        <a href="my-reservations.html">📋 Minhas reservas</a>
-        <a href="notifications.html">🔔 Notificações</a>
+        <a href="calendar.html" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Agenda</span>
+        </a>
+        <a href="my-reservations.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span>Minhas reservas</span>
+        </a>
+        <a href="notifications.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notificações</span>
+        </a>
         
         <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+        <a href="rooms.html" class="admin-only-item" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+          <span>Salas</span>
+        </a>
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Usuários</span>
+        </a>
       </nav>
     </div>
 
@@ -367,7 +390,9 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </a>
     </div>
   </aside>
 
@@ -420,8 +445,8 @@
             <img id="sidebarSalaImg" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
             <div class="room-details">
               <h4 id="sidebarNomeSala">Sala de Reuniões 01</h4>
-              <p id="sidebarCapacidade">👥 Capacidade: 8 pessoas</p>
-              <p id="sidebarEquipamentos">💻 Equipamentos: TV, Videoconferência...</p>
+              <p id="sidebarCapacidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas</p>
+              <p id="sidebarEquipamentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...</p>
             </div>
           </div>
         </div>
@@ -467,7 +492,7 @@
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNegociacao').style.display='none'">Voltar</button>
         <a id="linkEnviarWhatsapp" href="#" target="_blank" class="btn-whatsapp">
-          <span>💬</span> Enviar WhatsApp
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Enviar WhatsApp
         </a>
       </div>
     </div>
@@ -475,7 +500,9 @@
 
   <div class="modal-overlay" id="modalConfirmacaoExclusao">
     <div class="modal-alert-card">
-      <div style="font-size: 32px;">⚠️</div>
+      <div style="display: flex; justify-content: center; color: #dc2626;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
       <h3 class="modal-title">Excluir Reserva</h3>
       <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">Tem certeza que deseja excluir esta reserva?</p>
       <input type="hidden" id="idReservaParaExcluir">
@@ -488,7 +515,7 @@
 
   <div class="modal-overlay" id="modalAlerta">
     <div class="modal-alert-card">
-      <div style="font-size: 32px;" id="modalAlertaIcone">🎉</div>
+      <div style="display: flex; justify-content: center;" id="modalAlertaIcone"></div>
       <h3 class="modal-title" id="modalAlertaTitulo">Sucesso</h3>
       <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
       <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
@@ -496,11 +523,26 @@
   </div>
 
   <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item active"><span>📅</span> Agenda</a>
-    <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
-    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
+    <a href="calendar.html" class="mob-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <span>Agenda</span>
+    </a>
+    <a href="my-reservations.html" class="mob-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+      <span>Reservas</span>
+    </a>
+    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+      <span>Salas</span>
+    </a>
+    <a href="notifications.html" class="mob-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      <span>Avisos</span>
+    </a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>Admin</span>
+    </a>
   </nav>
 
   <script>
@@ -510,7 +552,6 @@
     let dataAtualObj = new Date();
     let tipoVisaoAtual = 'dia';
 
-    // FUNÇÃO CRUCIAL PARA IGNORAR O FUSO HORÁRIO E USAR A DATA LOCAL
     function formatarDataLocal(d) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
@@ -537,13 +578,11 @@
       atualizarCabecalhoData();
       mudarSalaSelecionada();
 
-      // ATUALIZAÇÃO AUTOMÁTICA EM TEMPO REAL: Escuta mudanças feitas pelo Painel da Porta
       window.addEventListener('storage', (e) => {
         if (e.key === "meetingroom_reservas" || e.key === "meetingroom_calendario") {
           carregarAgendaLocal();
         }
       });
-      // Garante que a agenda faça um check-up silencioso a cada 30 segundos
       setInterval(carregarAgendaLocal, 30000);
     });
 
@@ -558,22 +597,32 @@
       document.getElementById("salaHeaderTitulo").innerText = sala;
 
       if (sala === "Sala 01") {
-        document.getElementById("sidebarCapacidade").innerText = "👥 Capacidade: 8 pessoas";
-        document.getElementById("sidebarEquipamentos").innerText = "💻 Equipamentos: TV, Videoconferência...";
+        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas';
+        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...';
         document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
       } else if (sala === "Sala 02") {
-        document.getElementById("sidebarCapacidade").innerText = "👥 Capacidade: 12 pessoas";
-        document.getElementById("sidebarEquipamentos").innerText = "💻 Equipamentos: Projetor, Som, TV 4K";
+        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 12 pessoas';
+        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: Projetor, Som, TV 4K';
         document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
       }
 
       carregarAgendaLocal();
     }
 
-    function mostrarAlerta(titulo, texto, icone = "🎉") {
+    function mostrarAlerta(titulo, texto, tipo = "success") {
       document.getElementById("modalAlertaTitulo").innerText = titulo;
       document.getElementById("modalAlertaTexto").innerText = texto;
-      document.getElementById("modalAlertaIcone").innerText = icone;
+      
+      let iconHtml = "";
+      if (tipo === "success") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      } else if (tipo === "error") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      }
+      
+      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
       document.getElementById("modalAlerta").style.display = "flex";
     }
 
@@ -653,10 +702,9 @@
         return rSala === sala && rData === dataStr;
       });
 
-      // SVG ICONS para os botões
-      const iconeAgendar = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`;
-      const iconeNegociar = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>`;
-      const iconeExcluir = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+      const iconeAgendar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>`;
+      const iconeNegociar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+      const iconeExcluir = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
 
       let fragmentoHTML = "";
 
@@ -679,7 +727,6 @@
           const resIniMin = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
           const resFimMin = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
 
-          // Verifica se sobrou espaço livre
           if (cursorMin < resIniMin) {
             const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
             const slotLivreFim = String(Math.floor(resIniMin/60)).padStart(2,'0') + ":" + String(resIniMin%60).padStart(2,'0');
@@ -695,7 +742,6 @@
             `;
           }
 
-          // Card da Reunião Ocupada
           fragmentoHTML += `
             <div class="slot-row reserved">
               <div>
@@ -710,7 +756,6 @@
             </div>
           `;
 
-          // Avança a "Linha do Tempo" para o fim desta reunião SOMANDO 5 MINUTOS
           cursorMin = Math.max(cursorMin, resFimMin + 5); 
         });
 
@@ -770,7 +815,7 @@
               gridDivHtml += `
                 <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
                   <b>${sIni}</b> - ${r.titulo || r.title || 'Reunião'}
-                  ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" onclick="event.stopPropagation(); confirmarExclusaoLocal('${r.id}')">${iconeExcluir} Excluir</button>` : ''}
+                  ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" style="margin-top:2px;" onclick="event.stopPropagation(); confirmarExclusaoLocal('${r.id}')">${iconeExcluir} Excluir</button>` : ''}
                 </div>
               `;
             });
@@ -859,7 +904,7 @@
       const sala = document.getElementById("salaSelect").value;
 
       if (!titulo || !inicio || !fim) {
-        mostrarAlerta("Atenção", "Por favor, preencha todos os campos.", "⚠️");
+        mostrarAlerta("Atenção", "Por favor, preencha todos os campos.", "warning");
         return;
       }
 
@@ -870,7 +915,7 @@
       const minFimTotal = parseInt(fim.split(':')[0]) * 60 + parseInt(fim.split(':')[1]);
 
       if (minInicioTotal >= minFimTotal) {
-          mostrarAlerta("Erro de Horário", "O horário de fim deve ser depois do início.", "❌");
+          mostrarAlerta("Erro de Horário", "O horário de fim deve ser depois do início.", "error");
           return;
       }
 
@@ -890,7 +935,7 @@
       });
 
       if (conflito) {
-          mostrarAlerta("Conflito de Horário", "Já existe uma reunião ou intervalo de segurança (5 min) neste horário.", "❌");
+          mostrarAlerta("Conflito de Horário", "Já existe uma reunião ou intervalo de segurança (5 min) neste horário.", "error");
           return;
       }
 
@@ -917,7 +962,7 @@
       localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
 
       document.getElementById("modalNovaReserva").style.display = "none";
-      mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso!", "🎉");
+      mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso!", "success");
     }
 
     function confirmarExclusaoLocal(id) {
@@ -938,7 +983,7 @@
       localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
 
       fecharModalConfirmacao();
-      mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
+      mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "success");
     }
   </script>
 </body>
