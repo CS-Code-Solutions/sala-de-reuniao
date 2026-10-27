@@ -567,7 +567,7 @@
       carregarAgendaLocal();
     }
 
-        function atualizarCabecalhoData() {
+    function atualizarCabecalhoData() {
       const spanData = document.getElementById("dataAtualExibicao");
       let textoFormatado = "";
 
@@ -624,56 +624,65 @@
       carregarAgendaLocal();
     }
 
+    // ATUALIZADO: Renderização dinâmica de horários que aceita qualquer minuto exato (ex: 13:18)
     function carregarAgendaLocal() {
       const sala = document.getElementById("salaSelect").value;
       const container = document.getElementById("gridHorarios");
       document.getElementById("salaHeaderTitulo").innerText = sala;
 
       const dataStr = dataAtualObj.toISOString().split('T')[0];
-      const horariosPadrao = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
-
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      let reservasMapa = {};
 
-      reservas.forEach(res => {
-        if (res.sala === sala && res.data === dataStr) {
-          if (!reservasMapa[res.horarioInicio]) reservasMapa[res.horarioInicio] = [];
-          reservasMapa[res.horarioInicio].push(res);
-        }
+      // Filtra todas as reservas do dia para a sala selecionada
+      const reservasDoDia = reservas.filter(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        return rSala === sala && rData === dataStr;
+      });
+
+      // Ordena as reservas por horário de início
+      reservasDoDia.sort((a, b) => {
+        const tA = a.horarioInicio || a.horaInicio || a.start?.split('T')[1]?.substring(0,5) || "";
+        const tB = b.horarioInicio || b.horaInicio || b.start?.split('T')[1]?.substring(0,5) || "";
+        return tA.localeCompare(tB);
       });
 
       let fragmentoHTML = "";
 
       if (tipoVisaoAtual === 'dia') {
-        for (const hora of horariosPadrao) {
-          const listaSlot = reservasMapa[hora] || [];
-
-          if (listaSlot.length > 0) {
-            const reserva = listaSlot[0];
+        if (reservasDoDia.length === 0) {
+          fragmentoHTML = `
+            <div style="text-align: center; padding: 30px; color: var(--text-muted);">
+              <p style="font-size: 15px; margin-bottom: 12px;">Nenhuma reunião agendada para este dia.</p>
+              <button class="btn-action-slot btn-reserve" onclick="abrirModalReserva('08:00', '${dataStr}')" style="padding: 10px 20px; font-size: 14px;">📅 Agendar primeira reunião</button>
+            </div>
+          `;
+        } else {
+          reservasDoDia.forEach(reserva => {
+            const strIni = reserva.horarioInicio || reserva.horaInicio || reserva.start?.split('T')[1]?.substring(0,5) || "00:00";
+            const strFim = reserva.horarioFim || reserva.horaFim || reserva.end?.split('T')[1]?.substring(0,5) || "??";
+            
             fragmentoHTML += `
               <div class="slot-row reserved">
                 <div>
-                  <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
-                  <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo}</h4>
-                  <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || 'Equipa'}</p>
+                  <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
+                  <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo || reserva.title || 'Reunião'}</h4>
+                  <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || reserva.usuario || 'Equipa'}</p>
                 </div>
                 <div style="display: flex; gap: 6px; align-items: center;">
-                  <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${reserva.sala}', '${reserva.data}', '${reserva.horarioInicio}', '${reserva.responsavel || 'Colega'}')">💬 Negociar</button>
+                  <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${reserva.responsavel || reserva.usuario || 'Colega'}')">💬 Negociar</button>
                   ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reserva.id}')">🗑️ Excluir</button>` : ''}
                 </div>
               </div>
             `;
-          } else {
-            fragmentoHTML += `
-              <div class="slot-row available" onclick="abrirModalReserva('${hora}', '${dataStr}')">
-                <div>
-                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
-                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar reunião neste horário.</p>
-                </div>
-                <button class="btn-action-slot btn-reserve">📅 Agendar</button>
-              </div>
-            `;
-          }
+          });
+
+          // Botão opcional para adicionar novo agendamento livre no dia
+          fragmentoHTML += `
+            <div style="margin-top: 10px; text-align: center;">
+              <button class="btn-action-slot btn-reserve" onclick="abrirModalReserva('08:00', '${dataStr}')" style="padding: 10px 20px; font-size: 13px;">+ Adicionar Nova Reunião</button>
+            </div>
+          `;
         }
         container.innerHTML = fragmentoHTML;
       }
@@ -693,12 +702,18 @@
               <strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>
           `;
           
-          let reservasDoDia = reservas.filter(r => r.sala === sala && r.data === diaStr);
-          if (reservasDoDia.length > 0) {
-            reservasDoDia.forEach(r => {
+          let reservasDoDiaSemana = reservas.filter(r => {
+            const rSala = r.sala || r.room;
+            const rData = r.data || r.date || r.start?.split('T')[0];
+            return rSala === sala && rData === diaStr;
+          });
+
+          if (reservasDoDiaSemana.length > 0) {
+            reservasDoDiaSemana.forEach(r => {
+              const sIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5) || "";
               gridDivHtml += `
                 <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
-                  <b>${r.horarioInicio}</b> - ${r.titulo}
+                  <b>${sIni}</b> - ${r.titulo || r.title || 'Reunião'}
                   ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" onclick="event.stopPropagation(); confirmarExclusaoLocal('${r.id}')">Excluir</button>` : ''}
                 </div>
               `;
@@ -720,7 +735,7 @@
         let mes = dataAtualObj.getMonth();
         let primeiroDiaMes = new Date(ano, mes, 1);
         let inicioGrid = new Date(primeiroDiaMes);
-        inicioGrid.setDate(inicioGrid.getDate() - inicioGrid.getDate() + 1 - primeiroDiaMes.getDay());
+        inicioGrid.setDate(inicioGrid.getDate() - primeiroDiaMes.getDay());
 
         let hojeStr = new Date().toISOString().split('T')[0];
 
@@ -731,7 +746,11 @@
           let eMesAtual = diaAtual.getMonth() === mes;
           let eHoje = diaStr === hojeStr;
 
-          let reservasDia = reservas.filter(r => r.sala === sala && r.data === diaStr);
+          let reservasDia = reservas.filter(r => {
+            const rSala = r.sala || r.room;
+            const rData = r.data || r.date || r.start?.split('T')[0];
+            return rSala === sala && rData === diaStr;
+          });
 
           wrapperHtml += `
             <div class="card-dia-mes ${eMesAtual ? '' : 'outro-mes'} ${eHoje ? 'dia-hoje' : ''}" onclick="selecionarDiaEspecifico('${diaStr}')">
@@ -753,7 +772,7 @@
       document.getElementById("inputHoraInicio").value = horaInicio;
       
       const [h, m] = horaInicio.split(':');
-      let horaFimNum = parseInt(h) + 1;
+      let horaFimNum = (parseInt(h) + 1) % 24;
       let horaFimStr = (horaFimNum < 10 ? "0" : "") + horaFimNum + ":" + m;
       document.getElementById("inputHoraFim").value = horaFimStr;
 
@@ -788,14 +807,24 @@
       }
 
       const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const hojeStr = window.dataSelecionadaGlobal || new Date().toISOString().split('T')[0];
+
       const novaReserva = {
         id: 'res-' + Date.now(),
         titulo: titulo,
+        title: titulo,
         horarioInicio: inicio,
+        horaInicio: inicio,
         horarioFim: fim,
+        horaFim: fim,
+        start: `${hojeStr}T${inicio}:00`,
+        end: `${hojeStr}T${fim}:00`,
         sala: sala,
-        data: window.dataSelecionadaGlobal,
+        room: sala,
+        data: hojeStr,
+        date: hojeStr,
         responsavel: apelidoUsuarioGlobal,
+        usuario: apelidoUsuarioGlobal,
         userId: usuarioSessao.uid
       };
 
@@ -803,7 +832,7 @@
       localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
 
       document.getElementById("modalNovaReserva").style.display = "none";
-      mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso no armazenamento local!", "🎉");
+      mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso!", "🎉");
     }
 
     function confirmarExclusaoLocal(id) {
