@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" href="../ico.png" type="image/png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MeetingRoom - Política de Privacidade</title>
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/components.css">
+  <!-- Configurações para PWA e iOS -->
+  <link rel="manifest" href="../manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
+  <link rel="apple-touch-icon" href="../ico.png">
+
+  <style>
+    :root {
+      --sidebar-bg: #0f172a;
+      --accent-color: #0d9488;
+      --accent-hover: #0f766e;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px 24px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+    }
+
+    .brand-logo {
+      max-height: 55px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-links a svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: rgba(13, 148, 136, 0.25);
+      color: #2dd4bf;
+    }
+
+    .user-profile-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
+    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 32px;
+      background-color: var(--bg-main);
+      min-height: 100vh;
+      box-sizing: border-box;
+      max-width: 900px;
+    }
+
+    .policy-container {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    }
+
+    .policy-container h1 {
+      font-size: 24px;
+      color: var(--text-main);
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .policy-container p.subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .policy-container h2 {
+      font-size: 16px;
+      color: var(--text-main);
+      margin-top: 24px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .policy-container p, .policy-container li {
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .policy-container ul {
+      margin-top: 4px;
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+
+    .btn-voltar {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--accent-color);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 20px;
+      transition: background 0.2s;
+    }
+
+    .btn-voltar:hover {
+      background: var(--accent-hover);
+    }
+
+    .mobile-topbar-bar { display: none; }
+
+    @media (max-width: 1024px) {
+      .sidebar { display: none !important; }
+      .main-content { margin-left: 0 !important; padding: 16px; }
+      .mobile-topbar-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #0f172a;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin: -16px -16px 20px -16px;
+      }
+      .brand-logo { max-height: 38px; width: auto; object-fit: contain; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div>
+      <div class="brand-area">
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
+      </div>
+
+      <nav class="nav-links">
+        <a href="calendar.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Agenda</span>
+        </a>
+        <a href="my-reservations.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span>Minhas reservas</span>
+        </a>
+        <a href="notifications.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notificações</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="user-profile-box">
+      <div class="user-info-text">
+        <h4 id="userNameDisplay">MeetingRoom</h4>
+        <p>LGPD & Privacidade</p>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="mobile-topbar-bar">
+      <img src="../cabe.png" alt="Logo" class="brand-logo">
+      <a href="calendar.html" style="color: #2dd4bf; font-size: 13px; font-weight: 600; text-decoration: none;">Voltar à Agenda</a>
+    </div>
+
+    <a href="calendar.html" class="btn-voltar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Voltar para a Agenda
+    </a>
+
+    <div class="policy-container">
+      <h1>Política de Privacidade</h1>
+      <p class="subtitle">Última atualização: Novembro de 2026 | Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)</p>
+
+      <h2>1. Introdução</h2>
+      <p>
+        O <strong>MeetingRoom</strong> ("nós", "nosso" ou "sistema") respeita a sua privacidade e compromete-se a proteger os dados pessoais recolhidos no âmbito da gestão e agendamento de salas de reuniões corporativas. Esta Política de Privacidade explica de forma transparente como recolhemos, utilizamos, armazenamos e protegemos as suas informações, em total conformidade com a Lei Geral de Proteção de Dados (LGPD).
+      </p>
+
+      <h2>2. Dados Recolhidos e Finalidade</h2>
+      <p>Para o funcionamento seguro e eficiente do sistema de reservas, recolhemos estritamente os seguintes dados pessoais:</p>
+      <ul>
+        <li><strong>Nome e Apelido:</strong> Utilizados para identificação do responsável pela reserva e comunicação interna ou negociação de horários entre colaboradores.</li>
+        <li><strong>Cargo / Função:</strong> Utilizado para contextualizar a equipa e facilitar a gestão administrativa das salas.</li>
+        <li><strong>Registos de Utilização (Logs e Reservas):</strong> Histórico de horários agendados, cancelados ou modificados, associados ao seu identificador interno de utilizador.</li>
+      </ul>
+      <p>Nenhum dado sensível (conforme definido pelo Art. 5º, II, da LGPD) é recolhido pelo sistema.</p>
+
+      <h2>3. Base Legal para o Tratamento</h2>
+      <p>
+        O tratamento dos seus dados pessoais baseia-se no <strong>Consentimento</strong> fornecido no primeiro acesso à plataforma (Art. 7º, I, da LGPD) e no <strong>Legítimo Interesse</strong> da organização (Art. 7º, IX, da LGPD) em assegurar a organização eficiente, o uso adequado e a segurança dos espaços de reunião corporativos.
+      </p>
+
+      <h2>4. Armazenamento e Segurança dos Dados</h2>
+      <p>
+        Adotamos medidas técnicas e administrativas aptas a proteger os dados pessoais de acessos não autorizados e de situações de destruição, perda, alteração, comunicação ou difusão. Os dados são armazenados de forma segura utilizando infraestrutura em nuvem e mecanismos de salvaguarda local encriptados.
+      </p>
+
+      <h2>5. Partilha de Informações</h2>
+      <p>
+        Os seus dados de agendamento (nome, cargo e horários) são visíveis apenas para os demais utilizadores e administradores autorizados do sistema na mesma organização, estritamente para fins de visualização de agenda e eventual negociação de horários. Não comercializamos, alugamos ou cedemos dados pessoais a terceiros.
+      </p>
+
+      <h2>6. Direitos do Titular dos Dados</h2>
+      <p>Nos termos da LGPD, o titular dos dados tem direito a:</p>
+      <ul>
+        <li>Confirmação da existência de tratamento de dados;</li>
+        <li>Acesso aos dados recolhidos;</li>
+        <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
+        <li>Eliminação dos dados pessoais tratados com o seu consentimento;</li>
+        <li>Revogação do consentimento a qualquer momento.</li>
+      </ul>
+
+      <h2>7. Alterações a Esta Política</h2>
+      <p>
+        Esta Política de Privacidade pode ser atualizada periodicamente para refletir melhorias no sistema ou exigências legais. Notificaremos os utilizadores através da própria interface da aplicação sempre que houver alterações relevantes.
+      </p>
+
+      <h2>8. Contacto</h2>
+      <p>
+        Em caso de dúvidas, solicitações ou exercício de direitos referentes à proteção de dados e LGPD, por favor contacte o administrador do sistema da sua organização ou através dos canais de suporte providenciados por <strong>CS Code Solutions</strong>.
+      </p>
+    </div>
+  </main>
+
+</body>
+</html>
