@@ -584,6 +584,13 @@
         document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
       }
 
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
       atualizarCabecalhoData();
       mudarSalaSelecionada();
 
@@ -594,6 +601,22 @@
       });
       setInterval(carregarAgendaLocal, 30000);
     });
+
+    
+    function confirmarAceiteLGPD() {
+      const checkbox = document.getElementById('checkAceiteLGPD');
+      if (!checkbox.checked) {
+        alert("Por favor, confirme que leu e aceita a Política de Privacidade marcando a caixa antes de continuar.");
+        return;
+      }
+      
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      localStorage.setItem(chaveLGPD, 'true');
+      document.getElementById('modalTermosLGPD').style.display = 'none';
+      
+      // Opcional: mostrar um alerta de sucesso
+      mostrarAlerta("Obrigado", "As suas preferências de privacidade foram atualizadas com sucesso.", "success");
+    }
 
     function fazerLogoutLocal() {
       localStorage.removeItem("meetingroom_sessao_atual");
@@ -674,6 +697,13 @@
       } else if (tipoVisaoAtual === 'mes') {
         dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
       }
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
       atualizarCabecalhoData();
       carregarAgendaLocal();
     }
@@ -682,6 +712,13 @@
       tipoVisaoAtual = visao;
       document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
       btnElement.classList.add("active");
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
       atualizarCabecalhoData();
       carregarAgendaLocal();
     }
@@ -693,6 +730,13 @@
         if (idx === 0) b.classList.add("active");
         else b.classList.remove("active");
       });
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
       atualizarCabecalhoData();
       carregarAgendaLocal();
     }
@@ -1096,5 +1140,35 @@
       document.getElementById("modalNovaReserva").style.display = "flex";
     }
   </script>
+
+  <!-- Modal de Aceite da LGPD (Obrigatório) -->
+  <div class="modal-overlay" id="modalTermosLGPD" style="z-index: 9999;"> <!-- z-index super alto para ficar por cima de tudo -->
+    <div class="modal-card" style="max-width: 450px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <h3 class="modal-title" style="margin: 0;">Atualização de Privacidade</h3>
+      </div>
+      
+      <p style="font-size: 14px; color: var(--text-main); line-height: 1.5;">
+        Para continuarmos a oferecer uma ferramenta segura para as suas reservas, atualizámos a nossa Política de Privacidade em conformidade com a <strong>LGPD</strong>.
+      </p>
+      
+      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Aceda e leia a nossa <a href="privacy-policy.html" target="_blank" style="color: var(--accent-color); font-weight: 600; text-decoration: underline;">Política de Privacidade completa aqui</a> antes de prosseguir.
+      </div>
+
+      <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+        <input type="checkbox" id="checkAceiteLGPD" style="margin-top: 2px; width: 18px; height: 18px; accent-color: var(--accent-color);">
+        <span style="font-size: 13px; color: var(--text-main); font-weight: 500;">
+          Declaro que li e concordo com a coleta do meu nome e cargo exclusivamente para a gestão de reservas de salas no sistema.
+        </span>
+      </label>
+
+      <div class="modal-actions" style="margin-top: 16px;">
+        <button class="btn-save" style="width: 100%; padding: 12px; font-size: 15px;" onclick="confirmarAceiteLGPD()">Concordar e Continuar</button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
