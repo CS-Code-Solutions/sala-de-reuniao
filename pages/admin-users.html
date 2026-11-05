@@ -176,6 +176,25 @@
       .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
       .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
     }
+
+    /* ESTILOS PARA OS CARDS DO MENU DISPLAY */
+    .display-card-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .display-card-item {
+      display: flex; align-items: center; gap: 16px; padding: 16px; 
+      border: 1px solid var(--border-color); border-radius: 12px;
+      cursor: pointer; transition: all 0.2s; background: var(--bg-main);
+    }
+    .display-card-item:hover { 
+      border-color: var(--accent-color); background: #f0fdfa; transform: translateY(-2px); 
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.1);
+    }
+    .display-card-icon { 
+      width: 48px; height: 48px; border-radius: 10px; background: rgba(13, 148, 136, 0.1); 
+      color: var(--accent-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .display-card-info h4 { margin: 0 0 4px 0; font-size: 15px; color: var(--text-main); font-weight: 700; }
+    .display-card-info p { margin: 0; font-size: 12px; color: var(--text-muted); }
+    
   </style>
 </head>
 <body>
@@ -197,6 +216,10 @@
         <a href="notifications.html">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
           <span>Notificações</span>
+        </a>
+        <a href="#" onclick="abrirModalSelecaoDisplay(); return false;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          <span>Display Porta</span>
         </a>
         
         <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
@@ -298,6 +321,10 @@
     <a href="notifications.html" class="mob-nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
       <span>Avisos</span>
+    </a>
+    <a href="#" onclick="abrirModalSelecaoDisplay(); return false;" class="mob-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+      <span>Display</span>
     </a>
     <a href="admin-users.html" class="mob-nav-item active admin-only-item" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
@@ -434,6 +461,51 @@
       localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
       carregarUsuariosLocal();
     }
+
+    function abrirModalSelecaoDisplay() {
+      document.getElementById('modalSelecaoDisplay').style.display = 'flex';
+    }
+
+    function irParaDisplay(nomeSala) {
+      window.location.href = `display-porta.html?sala=${encodeURIComponent(nomeSala)}`;
+    }
+    
   </script>
+
+  <!-- Modal para Selecionar qual Display de Porta abrir -->
+  <div class="modal-overlay" id="modalSelecaoDisplay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="modal-title">Abrir Display de Porta</h3>
+        <button onclick="document.getElementById('modalSelecaoDisplay').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; padding:0;">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">Selecione qual sala deseja visualizar em modo de ecrã inteiro no tablet/monitor da porta.</p>
+      
+      <div class="display-card-list">
+        <!-- Card Sala 01 -->
+        <div class="display-card-item" onclick="irParaDisplay('Sala 01')">
+          <div class="display-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          </div>
+          <div class="display-card-info">
+            <h4>Sala de Reuniões 01</h4>
+            <p>Capacidade: 8 pessoas</p>
+          </div>
+        </div>
+        
+        <!-- Card Sala 02 -->
+        <div class="display-card-item" onclick="irParaDisplay('Sala 02')">
+          <div class="display-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          </div>
+          <div class="display-card-info">
+            <h4>Sala de Reuniões 02</h4>
+            <p>Capacidade: 12 pessoas</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
