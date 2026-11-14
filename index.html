@@ -255,5 +255,24 @@
       }
     }
   </script>
+  <!-- Scripts essenciais do Firebase e da aplicação -->
+  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-database-compat.js"></script>
+  
+  <!-- O SEU FICHEIRO DE TERMOS -->
+  <script src="../js/termos.js"></script>
+
+  <script>
+    // Exemplo de chamada logo após validar a sessão do utilizador no carregamento da página
+    document.addEventListener("DOMContentLoaded", () => {
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (sessaoStr) {
+        const usuarioSessao = JSON.parse(sessaoStr);
+        
+        // Dispara a verificação dos Termos de Uso no Firebase
+        verificarAceiteTermosUtilizador(usuarioSessao);
+      }
+    });
+  </script>
 </body>
 </html>
