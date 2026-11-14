@@ -1169,6 +1169,26 @@
       </div>
     </div>
   </div>
+  <!-- Script de Termos de Uso e LGPD -->
+  <script src="../js/termos.js"></script>
+
+  <script>
+    // Registo do Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../sw.js').catch(err => console.error(err));
+      });
+    }
+
+    // Validação do aceite no carregamento da agenda
+    document.addEventListener("DOMContentLoaded", () => {
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (sessaoStr) {
+        const usuarioSessao = JSON.parse(sessaoStr);
+        verificarAceiteTermosUtilizador(usuarioSessao);
+      }
+    });
+  </script>
 
 </body>
 </html>
