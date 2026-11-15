@@ -22,11 +22,15 @@ document.addEventListener("DOMContentLoaded", () => {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
               <span>Notificações</span>
             </a>
+            <a href="privacy-policy.html" id="nav-privacy">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+              <span>Privacidade e LGPD</span>
+            </a>
             
-            <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
+            <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px; display:none;" class="admin-only-item">Administração</div>
             <a href="rooms.html" id="nav-rooms" class="admin-only-item" style="display:none;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
-              <span>Salas</span>
+              <span>Salas & Display</span>
             </a>
             <a href="admin-users.html" id="nav-admin-users" class="admin-only-item" style="display:none;">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
@@ -38,9 +42,9 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="user-profile-box">
           <div class="user-info-text">
             <h4 id="userNameDisplay">Carregando...</h4>
-            <p id="userRoleDisplay">Utilizador</p>
+            <p id="userRoleDisplay">Usuário</p>
           </div>
-          <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; display: flex; align-items: center;">
+          <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; display: flex; align-items: center;">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           </a>
         </div>
@@ -77,7 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
-  // Marca o item ativo automaticamente com base no nome do ficheiro atual na URL
+  // Marca o item ativo automaticamente com base na URL atual
   const pathAtual = window.location.pathname.split("/").pop() || "calendar.html";
   
   if (pathAtual.includes("calendar")) {
@@ -89,6 +93,8 @@ document.addEventListener("DOMContentLoaded", () => {
   } else if (pathAtual.includes("notifications")) {
     document.getElementById("nav-notifications")?.classList.add("active");
     document.getElementById("mob-notifications")?.classList.add("active");
+  } else if (pathAtual.includes("privacy-policy")) {
+    document.getElementById("nav-privacy")?.classList.add("active");
   } else if (pathAtual.includes("rooms")) {
     document.getElementById("nav-rooms")?.classList.add("active");
     document.getElementById("mob-rooms")?.classList.add("active");
