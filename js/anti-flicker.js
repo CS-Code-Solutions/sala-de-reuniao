@@ -1,91 +1,76 @@
-// ==========================================
-// BLINDAGEM ANTI-PISCADA (js/anti-flicker.js)
-// Carregamento síncrono no <head> antes do DOM
-// ==========================================
+/**
+ * Blindagem Anti-Piscada (Anti-Flicker Shield) - MeetingRoom
+ * Bloqueia a renderização inicial até a validação de sessão/permissões (Firebase Auth)
+ * e aplica transições suaves na liberação da interface.
+ */
 (function () {
-  const CACHE_KEY = "mr_perfil_ui";
+  const MAX_LOCK_TIME_MS = 3500; // Fail-safe: libera a tela em no máximo 3.5s
+  let isRevealed = false;
 
-  // 1. Injeta regras CSS imediatas para evitar salto nos menus e suavizar troca de aba
-  const style = document.createElement("style");
+  // 1. Injeta o estilo de bloqueio imediatamente antes do primeiro paint
+  const style = document.createElement('style');
+  style.id = 'anti-flicker-style';
   style.textContent = `
-    @view-transition { navigation: auto; }
-    html.is-admin .admin-only-item { display: flex !important; }
-    html.is-admin div.admin-only-item { display: block !important; }
-    .sidebar, .mobile-topbar-bar, .mobile-bottom-nav {
-      view-transition-name: app-shell;
+    html.af-locked body {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
     }
-    .page-wrapper > header, .page-wrapper > section {
-      animation: mrFadeContent 0.16s ease-out;
-    }
-    @keyframes mrFadeContent {
-      from { opacity: 0.65; transform: translateY(2px); }
-      to { opacity: 1; transform: translateY(0); }
+    html.af-ready body {
+      opacity: 1 !important;
+      visibility: visible !important;
+      transition: opacity 0.22s ease-out;
     }
   `;
   document.head.appendChild(style);
 
-  // 2. Lê o cache visual da sessão atual antes da pintura da tela
-  let perfil = null;
+  // 2. Ativa o bloqueio na tag <html>
+  document.documentElement.classList.add('af-locked');
+
+  // 3. Aplica tema salvo localmente antes da renderização (evita piscada de cores)
   try {
-    const salvo = sessionStorage.getItem(CACHE_KEY);
-    if (salvo) perfil = JSON.parse(salvo);
-  } catch (e) {}
-
-  if (perfil && perfil.ehAdmin) {
-    document.documentElement.classList.add("is-admin");
+    const savedTheme = localStorage.getItem('meetingroom_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+  } catch (e) {
+    // Ignora bloqueios de storage em modo privado restrito
   }
 
-  // 3. Preenche nome e cargo no instante em que os elementos surgem no HTML
-  function aplicarDadosUI(dados) {
-    if (!dados || !dados.apelido) return;
-    const elNome = document.getElementById("userNameDisplay");
-    const elCargo = document.getElementById("userRoleDisplay");
-    const elMob = document.getElementById("userAvatarMobile");
+  // 4. Função global para liberar a tela após validação de Auth/Firestore
+  function reveal() {
+    if (isRevealed) return;
+    isRevealed = true;
 
-    if (elNome && elNome.innerText !== dados.apelido) {
-      elNome.innerText = dados.apelido;
-    }
-    if (elCargo) {
-      elCargo.innerText = dados.ehAdmin ? "Administrador" : "Usuário";
-    }
-    if (elMob && elMob.innerText !== "Olá, " + dados.apelido) {
-      elMob.innerText = "Olá, " + dados.apelido;
-    }
+    const root = document.documentElement;
+    root.classList.remove('af-locked');
+    root.classList.add('af-ready');
+
+    // Remove o <style> temporário após a transição para manter o DOM limpo
+    setTimeout(() => {
+      const lockStyle = document.getElementById('anti-flicker-style');
+      if (lockStyle) lockStyle.remove();
+    }, 300);
   }
 
-  if (perfil) {
-    const observer = new MutationObserver(() => {
-      aplicarDadosUI(perfil);
-      if (
-        document.getElementById("userNameDisplay") &&
-        document.getElementById("userAvatarMobile")
-      ) {
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-    document.addEventListener("DOMContentLoaded", () => aplicarDadosUI(perfil));
-  }
-
-  // 4. Funções globais para atualizar ou limpar o cache ao autenticar/sair
-  window.salvarPerfilUICache = function (apelido, ehAdmin) {
-    const dados = { apelido: apelido, ehAdmin: !!ehAdmin };
-    try {
-      sessionStorage.setItem(CACHE_KEY, JSON.stringify(dados));
-    } catch (e) {}
-
-    if (dados.ehAdmin) {
-      document.documentElement.classList.add("is-admin");
-    } else {
-      document.documentElement.classList.remove("is-admin");
-    }
-    aplicarDadosUI(dados);
+  // 5. API pública para o auth.js e demais módulos
+  window.AntiFlicker = {
+    reveal,
+    isLocked: () => !isRevealed
   };
 
-  window.limparPerfilUICache = function () {
-    try {
-      sessionStorage.removeItem(CACHE_KEY);
-    } catch (e) {}
-    document.documentElement.classList.remove("is-admin");
-  };
+  // 6. Fail-safe: garante desbloqueio caso o Firebase demore ou fique offline
+  setTimeout(() => {
+    if (!isRevealed) {
+      console.warn('[AntiFlicker] Tempo limite atingido. Liberando interface por segurança.');
+      reveal();
+    }
+  }, MAX_LOCK_TIME_MS);
+
+  // 7. Páginas marcadas como públicas liberam assim que o DOM estiver pronto
+  document.addEventListener('DOMContentLoaded', () => {
+    if (document.documentElement.hasAttribute('data-public-page')) {
+      reveal();
+    }
+  });
 })();
