@@ -1,511 +1,115 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!-- Configurações para PWA e iOS -->
-  <link rel="manifest" href="../manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
-  <link rel="apple-touch-icon" href="../ico.png">
-  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeetingRoom - Gestão de Utilizadores</title>
+  <title>MeetingRoom - Administração de Usuários</title>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" href="../ico.png" type="image/png">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    :root {
-      --sidebar-bg: #0f172a;
-      --accent-color: #0d9488;
-      --accent-hover: #0f766e;
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-    }
-
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 260px;
-      background-color: var(--sidebar-bg);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 24px 16px;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 100;
-    }
-
-    .brand-area {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 12px 24px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 12px;
-    }
-
-    .brand-logo {
-      max-height: 55px;
-      width: 100%;
-      object-fit: contain;
-    }
-
-    .nav-links {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 10px;
-      flex: 1;
-    }
-
-    .nav-links a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-    
-    .nav-links a svg {
-      width: 18px;
-      height: 18px;
-      stroke-width: 2;
-      flex-shrink: 0;
-    }
-
-    .nav-links a:hover, .nav-links a.active {
-      background: rgba(255, 255, 255, 0.08);
-      color: white;
-    }
-
-    .nav-links a.active {
-      background: rgba(13, 148, 136, 0.25);
-      color: #2dd4bf;
-    }
-
-    .user-profile-box {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 12px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
-    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
-
-    .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; }
-    
-    .user-card {
-      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;
-    }
-    
-    .badge {
-      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px;
-    }
-    .badge.admin { background: #f0fdfa; color: var(--accent-color); border: 1px solid #ccfbf1; }
-    .badge.user { background: #f1f5f9; color: var(--text-muted); }
-
-    .action-btns { display: flex; gap: 8px; }
-    .btn-icon {
-      background: white; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px;
-      cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
-      color: #64748b;
-    }
-    .btn-icon svg { width: 14px; height: 14px; stroke-width: 2.5; }
-    .btn-icon.delete:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
-    
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; }
-    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
-    
-    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
-    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-    .form-group input, .form-group select { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
-
-    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
-    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-    .mobile-topbar-bar { display: none; }
+    .brand-logo { max-width: 150px; height: auto; }
+    .nav-links a { display: flex; align-items: center; gap: 10px; }
+    .nav-links svg { width: 18px; height: 18px; stroke-width: 2; }
+    .user-profile-box { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-color); }
+    .user-info-text h4 { font-size: 14px; color: var(--text-main); }
+    .user-info-text p { font-size: 12px; color: var(--text-muted); }
     .mobile-bottom-nav { display: none; }
-
-    @media (max-width: 1024px) {
-      .sidebar { display: none !important; }
-      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      .mobile-topbar-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #0f172a;
-        padding: 10px 12px 10px 8;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        margin: -16px -16px 20px -16px;
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .mobile-bottom-nav {
+        display: flex; justify-content: space-around; align-items: center;
+        position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+        background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000;
       }
-      .brand-logo { max-height: 38px; width: auto; object-fit: contain; margin-right: auto; margin-left: 0; }
-      .btn-sair-mobile {
-        color: #e2e8f0; font-size: 13px; font-weight: 600; text-decoration: none;
-        background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 6px 12px; border-radius: 8px; transition: all 0.2s;
-      }
-      .btn-sair-mobile:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
+      .mob-nav-item.active { color: var(--primary); font-weight: 600; }
       .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
-      .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
+      .main-content { padding-bottom: 72px; }
     }
-
-    /* ESTILOS PARA OS CARDS DO MENU DISPLAY */
-    .display-card-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-    .display-card-item {
-      display: flex; align-items: center; gap: 16px; padding: 16px; 
-      border: 1px solid var(--border-color); border-radius: 12px;
-      cursor: pointer; transition: all 0.2s; background: var(--bg-main);
-    }
-    .display-card-item:hover { 
-      border-color: var(--accent-color); background: #f0fdfa; transform: translateY(-2px); 
-      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.1);
-    }
-    .display-card-icon { 
-      width: 48px; height: 48px; border-radius: 10px; background: rgba(13, 148, 136, 0.1); 
-      color: var(--accent-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-    }
-    .display-card-info h4 { margin: 0 0 4px 0; font-size: 15px; color: var(--text-main); font-weight: 700; }
-    .display-card-info p { margin: 0; font-size: 12px; color: var(--text-muted); }
-    
   </style>
 </head>
 <body>
+  <div id="sidebar-container"></div>
 
-  <aside class="sidebar">
-    <div>
-      <div class="brand-area">
-        <img src="../cabe.png" alt="Logo" class="brand-logo">
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1>Usuários & Permissões</h1>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Gerencie cargos e acessos registrados no Firebase</p>
       </div>
-      <nav class="nav-links">
-        <a href="calendar.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span>Agenda</span>
-        </a>
-        <a href="my-reservations.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-          <span>Minhas reservas</span>
-        </a>
-        <a href="notifications.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span>Notificações</span>
-        </a>
-        <a href="#" onclick="abrirModalSelecaoDisplay(); return false;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-          <span>Display Porta</span>
-        </a>
-        
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
-          <span>Salas</span>
-        </a>
-        <a href="admin-users.html" class="active admin-only-item" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          <span>Usuários</span>
-        </a>
-      </nav>
-    </div>
-    <div class="user-profile-box">
-      <div class="user-info-text">
-        <h4 id="userNameDisplay">Carregando...</h4>
-        <p id="userRoleDisplay">Utilizador</p>
-      </div>
-      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; display: flex; align-items: center;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      </a>
-    </div>
-  </aside>
-
-  <main class="page-wrapper">
-    <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="Logo" class="brand-logo">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
-        <a href="#" onclick="fazerLogoutLocal(); return false;" class="btn-sair-mobile">Sair</a>
-      </div>
-    </div>
-
-    <header class="page-header">
-      <h1>Gerenciamento de Utilizadores</h1>
-      <button onclick="abrirModalUsuario()" style="padding: 10px 16px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Novo Utilizador</button>
+      <button onclick="abrirModalNovoUsuario()" style="padding: 10px 18px; background: #0d9488; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Novo Usuário</button>
     </header>
 
-    <section>
-      <div id="listaUtilizadores" style="display: flex; flex-direction: column; gap: 16px;">
-        <p style="color: var(--text-muted); font-size: 14px;">A carregar utilizadores...</p>
-      </div>
+    <section class="schedule-grid-container">
+      <div class="time-slots" id="listaUtilizadores"></div>
     </section>
+
+    <footer style="text-align: center; padding: 16px; font-size: 12px; color: #64748b; margin-top: auto;">
+      Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank" style="color: #0d9488; text-decoration: none; font-weight: 600;">CS Code Solutions</a>
+    </footer>
   </main>
 
-  <div class="modal-overlay" id="modalUsuario">
-    <div class="modal-card">
-      <h3 class="modal-title" id="modalTitleText">Novo Utilizador</h3>
-      <input type="hidden" id="editUserId">
-      
-      <div class="form-group">
-        <label>Nome Completo</label>
-        <input type="text" id="inputNome" placeholder="Ex: João Silva">
-      </div>
+  <div id="mobile-nav-container"></div>
 
-      <div class="form-group">
-        <label>Apelido</label>
-        <input type="text" id="inputApelido" placeholder="Ex: João">
-      </div>
+  <script src="../js/sidebar.js"></script>
+  <script src="../termos.js"></script>
+  <script type="module" src="../js/users.js"></script>
+  <script type="module">
+    import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { db } from "../js/firebase-config.js";
 
-      <div class="form-group">
-        <label>E-mail</label>
-        <input type="email" id="inputEmail" placeholder="joao@viecelli.com">
-      </div>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+      authDomain: "reuniao-d1b29.firebaseapp.com",
+      projectId: "reuniao-d1b29",
+      storageBucket: "reuniao-d1b29.firebasestorage.app",
+      messagingSenderId: "887897617950",
+      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+    };
 
-      <div class="form-group">
-        <label>Senha</label>
-        <input type="password" id="inputSenha" placeholder="••••••••">
-      </div>
+    // Instância secundária para criar usuário no Auth sem deslogar o administrador atual
+    const secondaryApp = getApps().find(a => a.name === "Secondary") || initializeApp(firebaseConfig, "Secondary");
+    const secondaryAuth = getAuth(secondaryApp);
 
-      <div class="form-group">
-        <label>Cargo / Perfil</label>
-        <select id="inputCargo">
-          <option value="Usuário">Usuário Comum</option>
-          <option value="Administrador">Administrador</option>
-        </select>
-      </div>
+    window.abrirModalNovoUsuario = async function () {
+      const nome = prompt("Nome completo do novo usuário:");
+      if (!nome || !nome.trim()) return;
 
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="document.getElementById('modalUsuario').style.display='none'">Cancelar</button>
-        <button class="btn-save" onclick="salvarUtilizadorLocal()">Guardar</button>
-      </div>
-    </div>
-  </div>
+      const email = prompt("E-mail corporativo:");
+      if (!email || !email.trim()) return;
 
-  <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      <span>Agenda</span>
-    </a>
-    <a href="my-reservations.html" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-      <span>Reservas</span>
-    </a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
-      <span>Salas</span>
-    </a>
-    <a href="notifications.html" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-      <span>Avisos</span>
-    </a>
-    <a href="#" onclick="abrirModalSelecaoDisplay(); return false;" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-      <span>Display</span>
-    </a>
-    <a href="admin-users.html" class="mob-nav-item active admin-only-item" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      <span>Admin</span>
-    </a>
-  </nav>
-
-  <script>
-    let usuarioSessao = null;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
-      if (!sessaoStr) {
-        window.location.href = "../index.html";
+      const senha = prompt("Senha inicial (mínimo 6 caracteres):", "123456");
+      if (!senha || senha.length < 6) {
+        alert("A senha deve ter pelo menos 6 caracteres.");
         return;
       }
 
-      usuarioSessao = JSON.parse(sessaoStr);
-      let nomeBase = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
-      let usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
+      const tipo = prompt("Cargo (1 = Usuário, 2 = Administrador, 3 = Recepcionista):", "1");
+      let cargo = "Usuário";
+      if (tipo === "2") cargo = "Administrador";
+      if (tipo === "3") cargo = "Recepcionista";
 
-      document.getElementById("userNameDisplay").innerText = nomeBase;
-      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
-      document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
-
-      if (usuarioEhAdmin) {
-        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-      } else {
-        window.location.href = "calendar.html";
-        return;
+      try {
+        const cred = await createUserWithEmailAndPassword(secondaryAuth, email.trim().toLowerCase(), senha);
+        await setDoc(doc(db, "usuarios", cred.user.uid), {
+          uid: cred.user.uid,
+          nome: nome.trim(),
+          apelido: nome.trim().split(" ")[0],
+          email: email.trim().toLowerCase(),
+          cargo,
+          criadoEm: serverTimestamp()
+        });
+        await secondaryAuth.signOut();
+        alert(`Usuário ${nome} (${cargo}) cadastrado com sucesso!`);
+      } catch (error) {
+        console.error("Erro ao criar usuário:", error);
+        alert("Erro ao cadastrar usuário: " + error.message);
       }
-
-      carregarUsuariosLocal();
-    });
-
-    function fazerLogoutLocal() {
-      localStorage.removeItem("meetingroom_sessao_atual");
-      window.location.href = "../index.html";
-    }
-
-    function carregarUsuariosLocal() {
-      const container = document.getElementById("listaUtilizadores");
-      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
-      container.innerHTML = "";
-
-      if (usuarios.length === 0) {
-        usuarios = [
-          { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador" },
-          { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Usuário", cargo: "Usuário" }
-        ];
-        localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
-      }
-
-      usuarios.forEach(user => {
-        const isAd = user.cargo === 'Administrador';
-        const div = document.createElement("div");
-        div.className = "user-card";
-        div.innerHTML = `
-          <div style="flex: 1;">
-            <strong style="color: var(--text-main); font-size: 16px;">${user.nome}</strong> <span style="color: var(--text-muted); font-size: 13px;">(Apelido: <b>${user.apelido || ''}</b>)</span>
-            <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0;">${user.email}</p>
-            <span class="badge ${isAd ? 'admin' : 'user'}">${user.cargo}</span>
-          </div>
-          <div class="action-btns">
-            <button class="btn-icon delete" onclick="excluirUsuarioLocal('${user.uid}')" title="Excluir">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
-          </div>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function abrirModalUsuario() {
-      document.getElementById("editUserId").value = "";
-      document.getElementById("inputNome").value = "";
-      document.getElementById("inputApelido").value = "";
-      document.getElementById("inputEmail").value = "";
-      document.getElementById("inputSenha").value = "";
-      document.getElementById("inputCargo").value = "Usuário";
-      document.getElementById("modalTitleText").innerText = "Novo Utilizador";
-      document.getElementById("modalUsuario").style.display = "flex";
-    }
-
-    function salvarUtilizadorLocal() {
-      const nome = document.getElementById("inputNome").value.trim();
-      const apelido = document.getElementById("inputApelido").value.trim();
-      const email = document.getElementById("inputEmail").value.trim();
-      const senha = document.getElementById("inputSenha").value.trim();
-      const cargo = document.getElementById("inputCargo").value;
-
-      if (!nome || !email || !senha) {
-        alert("Preencha todos os campos obrigatórios (Nome, E-mail, Senha).");
-        return;
-      }
-
-      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
-      const userIdEdit = document.getElementById("editUserId").value;
-
-      if (userIdEdit) {
-        usuarios = usuarios.map(u => u.uid === userIdEdit ? { ...u, nome, apelido, email, senha, cargo } : u);
-        alert("Utilizador atualizado com sucesso!");
-      } else {
-        const novoUser = {
-          uid: 'user-' + Date.now(),
-          nome,
-          apelido,
-          email,
-          senha,
-          cargo
-        };
-        usuarios.push(novoUser);
-        alert("Utilizador criado com sucesso!");
-      }
-
-      localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
-      document.getElementById("modalUsuario").style.display = "none";
-      carregarUsuariosLocal();
-    }
-
-    function excluirUsuarioLocal(uid) {
-      if (uid === 'admin-1') {
-        alert("Não é possível excluir o administrador principal Programador.");
-        return;
-      }
-      if (uid === usuarioSessao.uid) {
-        alert("Não é possível excluir o seu próprio utilizador enquanto está logado.");
-        return;
-      }
-      if(!confirm("Tem certeza que deseja excluir este utilizador?")) return;
-
-      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
-      usuarios = usuarios.filter(u => u.uid !== uid);
-      localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
-      carregarUsuariosLocal();
-    }
-
-    function abrirModalSelecaoDisplay() {
-      document.getElementById('modalSelecaoDisplay').style.display = 'flex';
-    }
-
-    function irParaDisplay(nomeSala) {
-      window.location.href = `display-porta.html?sala=${encodeURIComponent(nomeSala)}`;
-    }
-    
+    };
   </script>
-
-  <!-- Modal para Selecionar qual Display de Porta abrir -->
-  <div class="modal-overlay" id="modalSelecaoDisplay">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="modal-title">Abrir Display de Porta</h3>
-        <button onclick="document.getElementById('modalSelecaoDisplay').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; padding:0;">&times;</button>
-      </div>
-      <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">Selecione qual sala deseja visualizar em modo de ecrã inteiro no tablet/monitor da porta.</p>
-      
-      <div class="display-card-list">
-        <!-- Card Sala 01 -->
-        <div class="display-card-item" onclick="irParaDisplay('Sala 01')">
-          <div class="display-card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-          </div>
-          <div class="display-card-info">
-            <h4>Sala de Reuniões 01</h4>
-            <p>Capacidade: 8 pessoas</p>
-          </div>
-        </div>
-        
-        <!-- Card Sala 02 -->
-        <div class="display-card-item" onclick="irParaDisplay('Sala 02')">
-          <div class="display-card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-          </div>
-          <div class="display-card-info">
-            <h4>Sala de Reuniões 02</h4>
-            <p>Capacidade: 12 pessoas</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
 </body>
 </html>
