@@ -1,16 +1,47 @@
 /**
  * Blindagem Anti-Piscada (Anti-Flicker Shield) - MeetingRoom
- * Bloqueia a renderização inicial até a validação de sessão/permissões (Firebase Auth)
- * e aplica transições suaves na liberação da interface.
+ * Hidrata cabeçalho, menus e tema via localStorage em 0ms (sem tela branca)
+ * e mantém a trava apenas quando não há sessão em cache nas rotas privadas.
  */
 (function () {
-  const MAX_LOCK_TIME_MS = 3500; // Fail-safe: libera a tela em no máximo 3.5s
+  const STORAGE_KEY = 'mr_perfil_ui';
+  const THEME_KEY = 'meetingroom_theme';
+  const MAX_LOCK_TIME_MS = 3000;
   let isRevealed = false;
 
-  // 1. Injeta o estilo de bloqueio imediatamente antes do primeiro paint
+  const root = document.documentElement;
+  const path = window.location.pathname;
+  const isLoginOrPublic =
+    root.hasAttribute('data-public-page') ||
+    path.endsWith('login.html') ||
+    path.endsWith('index.html') ||
+    path === '/' ||
+    path.endsWith('/sala-de-reuniao/');
+
+  // 1. Aplica tema salvo localmente antes da renderização
+  try {
+    const savedTheme = localStorage.getItem(THEME_KEY);
+    if (savedTheme) {
+      root.setAttribute('data-theme', savedTheme);
+    }
+  } catch (e) {}
+
+  // 2. Lê cache de interface do usuário logado
+  let cachedProfile = null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) cachedProfile = JSON.parse(raw);
+  } catch (e) {}
+
+  // 3. Injeta regras CSS de controle instantâneo (menus admin e proteção sem sessão)
   const style = document.createElement('style');
   style.id = 'anti-flicker-style';
   style.textContent = `
+    /* Oculta itens admin imediatamente se o perfil em cache não for Administrador */
+    html.mr-not-admin .admin-only-item {
+      display: none !important;
+    }
+    /* Bloqueia o body APENAS se for rota privada sem sessão em cache */
     html.af-locked body {
       opacity: 0 !important;
       visibility: hidden !important;
@@ -19,58 +50,77 @@
     html.af-ready body {
       opacity: 1 !important;
       visibility: visible !important;
-      transition: opacity 0.22s ease-out;
+      transition: opacity 0.15s ease-out;
     }
   `;
   document.head.appendChild(style);
 
-  // 2. Ativa o bloqueio na tag <html>
-  document.documentElement.classList.add('af-locked');
+  // 4. Decide entre renderização instantânea (com cache) ou bloqueio preventivo (sem cache)
+  if (cachedProfile && cachedProfile.uid) {
+    root.classList.add('mr-has-session');
+    root.classList.add(cachedProfile.ehAdmin ? 'mr-is-admin' : 'mr-not-admin');
+    isRevealed = true; // Não esconde o body: cabeçalho e menus abrem na hora
 
-  // 3. Aplica tema salvo localmente antes da renderização (evita piscada de cores)
-  try {
-    const savedTheme = localStorage.getItem('meetingroom_theme');
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-  } catch (e) {
-    // Ignora bloqueios de storage em modo privado restrito
+    // Preenche nome/avatar assim que os elementos surgirem no DOM (antes de piscar)
+    const aplicarDadosCache = () => {
+      if (!cachedProfile.nome) return;
+      const userNameDisplay = document.getElementById('userNameDisplay');
+      const userAvatarMobile = document.getElementById('userAvatarMobile');
+
+      if (userNameDisplay && userNameDisplay.textContent.trim() !== cachedProfile.nome) {
+        userNameDisplay.textContent = cachedProfile.nome;
+      }
+      if (userAvatarMobile && !userAvatarMobile.textContent.includes(cachedProfile.nome)) {
+        userAvatarMobile.textContent = 'Olá, ' + cachedProfile.nome;
+      }
+    };
+
+    const observer = new MutationObserver(() => {
+      aplicarDadosCache();
+      if (document.getElementById('userNameDisplay') && document.getElementById('userAvatarMobile')) {
+        observer.disconnect();
+      }
+    });
+    observer.observe(root, { childList: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', () => {
+      aplicarDadosCache();
+      observer.disconnect();
+    });
+  } else if (!isLoginOrPublic) {
+    // Sem sessão salva em página protegida: oculta até o Firebase confirmar ou redirecionar
+    root.classList.add('af-locked');
   }
 
-  // 4. Função global para liberar a tela após validação de Auth/Firestore
-  function reveal() {
+  // 5. Função global para liberar a tela e atualizar classes de permissão
+  function reveal(perfilAtualizado) {
+    if (perfilAtualizado && typeof perfilAtualizado.ehAdmin === 'boolean') {
+      root.classList.toggle('mr-is-admin', perfilAtualizado.ehAdmin);
+      root.classList.toggle('mr-not-admin', !perfilAtualizado.ehAdmin);
+    }
+
     if (isRevealed) return;
     isRevealed = true;
 
-    const root = document.documentElement;
     root.classList.remove('af-locked');
     root.classList.add('af-ready');
 
-    // Remove o <style> temporário após a transição para manter o DOM limpo
     setTimeout(() => {
       const lockStyle = document.getElementById('anti-flicker-style');
-      if (lockStyle) lockStyle.remove();
-    }, 300);
+      if (lockStyle && !root.classList.contains('mr-not-admin')) {
+        lockStyle.remove();
+      }
+    }, 250);
   }
 
-  // 5. API pública para o auth.js e demais módulos
   window.AntiFlicker = {
     reveal,
     isLocked: () => !isRevealed
   };
 
-  // 6. Fail-safe: garante desbloqueio caso o Firebase demore ou fique offline
+  // Fail-safe caso o Firebase demore ou fique offline
   setTimeout(() => {
     if (!isRevealed) {
-      console.warn('[AntiFlicker] Tempo limite atingido. Liberando interface por segurança.');
       reveal();
     }
   }, MAX_LOCK_TIME_MS);
-
-  // 7. Páginas marcadas como públicas liberam assim que o DOM estiver pronto
-  document.addEventListener('DOMContentLoaded', () => {
-    if (document.documentElement.hasAttribute('data-public-page')) {
-      reveal();
-    }
-  });
 })();
