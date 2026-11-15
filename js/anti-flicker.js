@@ -1,7 +1,7 @@
 /**
- * Blindagem Anti-Piscada (Anti-Flicker Shield) - MeetingRoom
- * Hidrata cabeçalho, menus e tema via localStorage em 0ms (sem tela branca)
- * e mantém a trava apenas quando não há sessão em cache nas rotas privadas.
+ * Blindagem Anti-Piscada (Anti-Flicker Shield / Ant Pisc) - MeetingRoom
+ * Hidrata tema, cabeçalho, menus, permissoes e White-Label via localStorage em 0ms
+ * e aplica trava condicional apenas quando nao ha sessao em cache nas rotas privadas.
  */
 (function () {
   const STORAGE_KEY = 'mr_perfil_ui';
@@ -11,37 +11,41 @@
 
   const root = document.documentElement;
   const path = window.location.pathname;
+  const paginaAtual = path.split('/').pop() || 'index.html';
   const isLoginOrPublic =
     root.hasAttribute('data-public-page') ||
-    path.endsWith('login.html') ||
-    path.endsWith('index.html') ||
+    paginaAtual === 'login.html' ||
+    paginaAtual === 'index.html' ||
     path === '/' ||
     path.endsWith('/sala-de-reuniao/');
 
-  // 1. Aplica tema salvo localmente antes da renderização
+  // 1. Aplica tema salvo localmente antes da renderizacao
   try {
     const savedTheme = localStorage.getItem(THEME_KEY);
-    if (savedTheme) {
-      root.setAttribute('data-theme', savedTheme);
-    }
+    if (savedTheme) root.setAttribute('data-theme', savedTheme);
   } catch (e) {}
 
-  // 2. Lê cache de interface do usuário logado
+  // 2. Le cache de interface e permissoes do usuario
   let cachedProfile = null;
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) cachedProfile = JSON.parse(raw);
   } catch (e) {}
 
-  // 3. Injeta regras CSS de controle instantâneo (menus admin e proteção sem sessão)
-  const style = document.createElement('style');
-  style.id = 'anti-flicker-style';
-  style.textContent = `
-    /* Oculta itens admin imediatamente se o perfil em cache não for Administrador */
-    html.mr-not-admin .admin-only-item {
-      display: none !important;
-    }
-    /* Bloqueia o body APENAS se for rota privada sem sessão em cache */
+  // 3. Redirecionamento imediato se a rota atual estiver bloqueada no cache
+  const modulosNegados = (cachedProfile && Array.isArray(cachedProfile.modulosNegados))
+    ? cachedProfile.modulosNegados
+    : [];
+
+  if (cachedProfile && cachedProfile.uid && !cachedProfile.ehAdmin && modulosNegados.includes(paginaAtual)) {
+    const destinoPadrao = path.includes('/pages/') ? 'calendar.html' : 'pages/calendar.html';
+    window.location.replace(cachedProfile.paginaInicial || destinoPadrao);
+    return;
+  }
+
+  // 4. Injeta regras CSS via CSSOM antes do <body> existir
+  let dynamicCss = `
+    html.af-not-admin .admin-only-item { display: none !important; }
     html.af-locked body {
       opacity: 0 !important;
       visibility: hidden !important;
@@ -53,15 +57,39 @@
       transition: opacity 0.15s ease-out;
     }
   `;
+
+  if (cachedProfile && !cachedProfile.ehAdmin) {
+    modulosNegados.forEach((rota) => {
+      const rotaLimpa = String(rota).replace(/[^a-zA-Z0-9_.-]/g, '');
+      if (rotaLimpa) {
+        dynamicCss += `a[href$="${rotaLimpa}"], [data-route="${rotaLimpa}"] { display: none !important; }\n`;
+      }
+    });
+  }
+
+  // White-Label instantaneo (suporta <img> e containers com background)
+  let logoSalva = null;
+  try {
+    logoSalva = (cachedProfile && cachedProfile.logoBase64) || localStorage.getItem('mr_logo_base64');
+  } catch (e) {}
+
+  if (logoSalva && /^data:image\/(png|jpeg|jpg|webp|svg\+xml);base64,/i.test(logoSalva)) {
+    dynamicCss += `img#logo-cliente { content: url("${logoSalva}"); }\n`;
+    dynamicCss += `.logo-cliente-bg { background-image: url("${logoSalva}") !important; }\n`;
+  }
+
+  const style = document.createElement('style');
+  style.id = 'anti-flicker-style';
+  style.textContent = dynamicCss;
   document.head.appendChild(style);
 
-  // 4. Decide entre renderização instantânea (com cache) ou bloqueio preventivo (sem cache)
+  // 5. Decide entre renderizacao instantanea (com cache) ou bloqueio preventivo (sem cache)
   if (cachedProfile && cachedProfile.uid) {
-    root.classList.add('mr-has-session');
-    root.classList.add(cachedProfile.ehAdmin ? 'mr-is-admin' : 'mr-not-admin');
-    isRevealed = true; // Não esconde o body: cabeçalho e menus abrem na hora
+    root.classList.add('af-has-session');
+    root.classList.add(cachedProfile.ehAdmin ? 'af-is-admin' : 'af-not-admin');
+    isRevealed = true;
 
-    // Preenche nome/avatar assim que os elementos surgirem no DOM (antes de piscar)
+    // Hidrata nome/avatar no exato milissegundo em que surgirem no DOM
     const aplicarDadosCache = () => {
       if (!cachedProfile.nome) return;
       const userNameDisplay = document.getElementById('userNameDisplay');
@@ -87,15 +115,14 @@
       observer.disconnect();
     });
   } else if (!isLoginOrPublic) {
-    // Sem sessão salva em página protegida: oculta até o Firebase confirmar ou redirecionar
     root.classList.add('af-locked');
   }
 
-  // 5. Função global para liberar a tela e atualizar classes de permissão
+  // 6. Funcao global para liberar a tela e atualizar classes apos validacao no Firebase
   function reveal(perfilAtualizado) {
     if (perfilAtualizado && typeof perfilAtualizado.ehAdmin === 'boolean') {
-      root.classList.toggle('mr-is-admin', perfilAtualizado.ehAdmin);
-      root.classList.toggle('mr-not-admin', !perfilAtualizado.ehAdmin);
+      root.classList.toggle('af-is-admin', perfilAtualizado.ehAdmin);
+      root.classList.toggle('af-not-admin', !perfilAtualizado.ehAdmin);
     }
 
     if (isRevealed) return;
@@ -104,9 +131,15 @@
     root.classList.remove('af-locked');
     root.classList.add('af-ready');
 
+    // Mantem #anti-flicker-style se houver regras ativas de permissao ou White-Label
     setTimeout(() => {
       const lockStyle = document.getElementById('anti-flicker-style');
-      if (lockStyle && !root.classList.contains('mr-not-admin')) {
+      if (
+        lockStyle &&
+        !root.classList.contains('af-not-admin') &&
+        modulosNegados.length === 0 &&
+        !logoSalva
+      ) {
         lockStyle.remove();
       }
     }, 250);
@@ -117,10 +150,8 @@
     isLocked: () => !isRevealed
   };
 
-  // Fail-safe caso o Firebase demore ou fique offline
+  // Fail-safe para evitar tela presa caso o Firebase demore ou fique offline
   setTimeout(() => {
-    if (!isRevealed) {
-      reveal();
-    }
+    if (!isRevealed) reveal();
   }, MAX_LOCK_TIME_MS);
 })();
