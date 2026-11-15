@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <script src="js/anti-flicker.js"></script>
   <!-- Configurações para PWA e iOS -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -135,7 +136,9 @@
 
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        window.location.href = "pages/calendar.html";
+        window.location.replace("pages/calendar.html");
+      } else {
+        window.AntiFlicker?.reveal();
       }
     });
 
