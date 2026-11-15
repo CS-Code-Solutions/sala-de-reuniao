@@ -1,6 +1,6 @@
 /**
- * Navegação Instantânea sem Tela Branca (Zero-Flicker SPA Router) - MeetingRoom
- * Mantém o cabeçalho e o menu inferior imóveis na tela e troca apenas o <main>.
+ * Navegação Instantânea SPA Router (Atualizado) - MeetingRoom
+ * Troca apenas o <main> e reinicia os scripts de dados da página correspondente.
  */
 (function () {
   const PAGE_CACHE = new Map();
@@ -19,6 +19,21 @@
         link.removeAttribute('aria-current');
       }
     });
+  }
+
+  // Dispara funções globais de inicialização dependendo da página carregada
+  function reexecutarLogicaDaPagina(url) {
+    if (url.includes('calendar.html')) {
+      if (typeof window.carregarAgenda === 'function') window.carregarAgenda();
+    } else if (url.includes('reservations.html')) {
+      if (typeof window.carregarReservas === 'function') window.carregarReservas();
+    } else if (url.includes('rooms.html')) {
+      if (typeof window.carregarSalas === 'function') window.carregarSalas();
+    } else if (url.includes('notifications.html')) {
+      if (typeof window.carregarNotificacoes === 'function') window.carregarNotificacoes();
+    } else if (url.includes('admin-users.html')) {
+      if (typeof window.carregarUsuariosAdmin === 'function') window.carregarUsuariosAdmin();
+    }
   }
 
   async function carregarPagina(url, empurrarHistorico = true) {
@@ -46,7 +61,6 @@
         return;
       }
 
-      // Atualiza título e substitui APENAS o <main> (cabeçalho e menu não piscam)
       document.title = novoDoc.title || document.title;
       mainAtual.replaceWith(novoMain);
 
@@ -57,7 +71,7 @@
       atualizarMenuAtivo(url);
       window.scrollTo({ top: 0, behavior: 'instant' });
 
-      // Reexecuta scripts específicos da página carregada (exceto anti-flicker e o próprio router)
+      // Executa scripts inline ou externos da nova página
       const scripts = novoDoc.querySelectorAll('body script');
       for (const oldScript of scripts) {
         const src = oldScript.getAttribute('src') || '';
@@ -73,12 +87,15 @@
         document.body.appendChild(newScript);
         newScript.remove();
       }
+
+      // Garante chamada das funções de dados
+      setTimeout(() => reexecutarLogicaDaPagina(url), 100);
+
     } catch (err) {
       window.location.href = url;
     }
   }
 
-  // Pré-carrega as páginas do menu em segundo plano para troca em 0ms
   function preCarregarAbas() {
     document.querySelectorAll('nav a, .bottom-nav a').forEach((link) => {
       const href = link.getAttribute('href');
@@ -93,7 +110,6 @@
     });
   }
 
-  // Intercepta cliques nos links internos de navegação
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href]');
     if (!link) return;
