@@ -2,7 +2,7 @@
 // SERVICE WORKER - MEETINGROOM (js/sw.js)
 // ==========================================
 
-const CACHE_NAME = 'meetingroom-firebase-v1.1.0';
+const CACHE_NAME = 'meetingroom-firebase-v1.2.0';
 
 const ASSETS_TO_CACHE = [
   '../index.html',
@@ -21,6 +21,7 @@ const ASSETS_TO_CACHE = [
   '../pages/rooms.html',
   '../pages/admin-users.html',
   '../pages/display-porta.html'
+  '../js/anti-flicker.js'
 ];
 
 self.addEventListener('install', (event) => {
