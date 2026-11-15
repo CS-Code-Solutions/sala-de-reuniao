@@ -15,14 +15,26 @@
     .user-profile-box { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-color); }
     .user-info-text h4 { font-size: 14px; color: var(--text-main); }
     .user-info-text p { font-size: 12px; color: var(--text-muted); }
+
+    .notification-card {
+      background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px;
+      max-width: 540px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+    }
+    .notif-item {
+      display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;
+    }
+    .notif-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1; transition: .3s; border-radius: 26px; }
+    .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: #0d9488; }
+    input:checked + .slider:before { transform: translateX(22px); }
+
     .mobile-bottom-nav { display: none; }
     @media (max-width: 768px) {
       .sidebar { display: none; }
-      .mobile-bottom-nav {
-        display: flex; justify-content: space-around; align-items: center;
-        position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
-        background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000;
-      }
+      .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000; }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
       .mob-nav-item.active { color: var(--primary); font-weight: 600; }
       .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
@@ -36,14 +48,55 @@
   <main class="main-content">
     <header class="topbar">
       <div>
-        <h1>Notificações & Avisos</h1>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Lembretes de reuniões próximas e comunicados do sistema</p>
+        <h1>Configurações de Notificações</h1>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Configure o envio de confirmações por e-mail e alertas na tela</p>
       </div>
     </header>
 
     <section class="schedule-grid-container">
-      <div class="time-slots" id="listaNotificacoes">
-        <p style="color: var(--text-muted); font-size: 14px;">A verificar lembretes...</p>
+      <div class="notification-card">
+        <div>
+          <h2 style="font-size: 18px; color: var(--text-main);">Preferências de Avisos</h2>
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Defina onde deseja receber as confirmações das suas reservas.</p>
+        </div>
+
+        <div class="notif-item">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h4 style="font-size: 14px; color: var(--text-main);">Notificações por E-mail</h4>
+              <p style="font-size: 12px; color: var(--text-muted);">Receba comprovativos automáticos ao agendar salas.</p>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="toggleEmail" onchange="toggleCampoEmailReal(this)">
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div id="grupoEmailReal" style="display: none; flex-direction: column; gap: 8px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">E-mail real para receber os avisos:</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="email" id="inputEmailReal" placeholder="seu.email@dominio.com" style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; background: white;">
+              <button onclick="salvarEmailReal()" style="padding: 8px 14px; background: #0d9488; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Guardar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="notif-item">
+          <div>
+            <h4 style="font-size: 14px; color: var(--text-main);">Aviso de reunião próxima na tela</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">Disparar alerta flutuante antes da reunião começar.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Antecedência:</label>
+            <select id="selectTempoAntecedencia" onchange="salvarPreferenciaNotificacao()" style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white;">
+              <option value="5">5 minutos</option>
+              <option value="10" selected>10 minutos</option>
+              <option value="15">15 minutos</option>
+              <option value="30">30 minutos</option>
+              <option value="60">1 hora</option>
+            </select>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -59,53 +112,75 @@
   <script type="module">
     import { db } from "../js/firebase-config.js";
     import { verificarAutenticacao } from "../js/auth.js";
-    import { collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    verificarAutenticacao((user) => {
-      const container = document.getElementById("listaNotificacoes");
-      const hoje = new Date();
-      const hojeISO = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}-${String(hoje.getDate()).padStart(2, "0")}`;
+    let usuarioAtualId = null;
 
-      const q = query(collection(db, "reservas"), where("data", ">=", hojeISO));
-      onSnapshot(q, (snapshot) => {
-        const avisos = [];
-        snapshot.forEach((docSnap) => {
-          const r = docSnap.data();
-          if (user.ehAdmin || r.userId === user.uid) {
-            avisos.push(r);
+    verificarAutenticacao(async (user) => {
+      usuarioAtualId = user.uid;
+      document.getElementById("inputEmailReal").value = user.email || "";
+
+      try {
+        const snap = await getDoc(doc(db, "usuarios", user.uid));
+        if (snap.exists()) {
+          const dados = snap.data();
+          const emailAtivo = dados.notificacoes ? !!dados.notificacoes.email : true;
+          document.getElementById("toggleEmail").checked = emailAtivo;
+          if (emailAtivo) {
+            document.getElementById("grupoEmailReal").style.display = "flex";
+          }
+          if (dados.emailRealNotificacao) {
+            document.getElementById("inputEmailReal").value = dados.emailRealNotificacao;
+          }
+          if (dados.notificacoes?.tempoAntecedencia) {
+            document.getElementById("selectTempoAntecedencia").value = dados.notificacoes.tempoAntecedencia;
+          }
+        } else {
+          document.getElementById("toggleEmail").checked = true;
+          document.getElementById("grupoEmailReal").style.display = "flex";
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    });
+
+    window.toggleCampoEmailReal = function (checkbox) {
+      document.getElementById("grupoEmailReal").style.display = checkbox.checked ? "flex" : "none";
+      window.salvarPreferenciaNotificacao();
+    };
+
+    window.salvarEmailReal = async function () {
+      const emailReal = document.getElementById("inputEmailReal").value.trim();
+      if (!emailReal || !emailReal.includes("@")) {
+        alert("Por favor, insira um e-mail válido.");
+        return;
+      }
+      if (!usuarioAtualId) return;
+
+      try {
+        await updateDoc(doc(db, "usuarios", usuarioAtualId), {
+          emailRealNotificacao: emailReal,
+          "notificacoes.email": true
+        });
+        alert("E-mail de notificação guardado com sucesso!");
+      } catch (err) {
+        alert("Erro ao guardar e-mail: " + err.message);
+      }
+    };
+
+    window.salvarPreferenciaNotificacao = async function () {
+      if (!usuarioAtualId) return;
+      try {
+        await updateDoc(doc(db, "usuarios", usuarioAtualId), {
+          notificacoes: {
+            email: document.getElementById("toggleEmail").checked,
+            tempoAntecedencia: parseInt(document.getElementById("selectTempoAntecedencia").value) || 10
           }
         });
-
-        avisos.sort((a, b) => `${a.data} ${a.inicio}`.localeCompare(`${b.data} ${b.inicio}`));
-
-        container.innerHTML = `
-          <div class="slot-item disponivel">
-            <div>
-              <strong>Conformidade LGPD & Segurança Ativa</strong>
-              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Seu acesso está protegido e sincronizado via Firebase Cloud.</p>
-            </div>
-            <span style="font-size: 12px; color: #059669; font-weight: 600;">Sistema</span>
-          </div>
-        `;
-
-        avisos.forEach((r) => {
-          const dataBr = r.data.split("-").reverse().join("/");
-          const item = document.createElement("div");
-          item.className = "slot-item";
-          item.style.borderLeft = "5px solid var(--primary)";
-          item.innerHTML = `
-            <div>
-              <strong>Lembrete: ${r.titulo}</strong>
-              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
-                Agendada para ${dataBr} das ${r.inicio} às ${r.fim} • ${r.sala || "Sala de Reuniões 01"}
-              </p>
-            </div>
-            <span style="font-size: 12px; color: var(--primary); font-weight: 600;">Confirmada</span>
-          `;
-          container.appendChild(item);
-        });
-      });
-    });
+      } catch (err) {
+        console.error("Erro ao guardar preferências:", err);
+      }
+    };
   </script>
 </body>
 </html>
