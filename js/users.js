@@ -1,61 +1,98 @@
+import { db } from "./firebase-config.js";
+import { verificarAutenticacao } from "./auth.js";
+import {
+  collection,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
 document.addEventListener("DOMContentLoaded", () => {
-    verificarAutenticacao();
-    carregarUtilizadores();
+  verificarAutenticacao((user) => {
+    if (user.ehAdmin) {
+      carregarUtilizadores();
+    }
+  });
 });
 
 function carregarUtilizadores() {
-    const container = document.getElementById("listaUtilizadores");
-    if (!container) return;
+  const container = document.getElementById("listaUtilizadores");
+  if (!container) return;
 
-    // Lista simulada de utilizadores cadastrados no sistema
-    const utilizadores = [
-        { id: 1, nome: "Ana Costa", email: "ana@empresa.com", perfil: "Administrador" },
-        { id: 2, nome: "Bruno Lima", email: "bruno@empresa.com", perfil: "Usuário" },
-        { id: 3, nome: "Carla Souza", email: "carla@empresa.com", perfil: "Usuário" },
-        { id: 4, nome: "Diego Ferreira", email: "diego@empresa.com", perfil: "Usuário" },
-        { id: 5, nome: "Fernanda Alves", email: "fernanda@empresa.com", perfil: "Recepcionista" }
-    ];
+  container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">A carregar utilizadores...</p>`;
 
-    container.innerHTML = "";
+  onSnapshot(
+    collection(db, "usuarios"),
+    (snapshot) => {
+      container.innerHTML = "";
 
-    utilizadores.forEach(user => {
+      if (snapshot.empty) {
+        container.innerHTML = `<p style="color: var(--text-muted);">Nenhum utilizador registado no Firestore.</p>`;
+        return;
+      }
+
+      snapshot.forEach((docSnap) => {
+        const user = { id: docSnap.id, ...docSnap.data() };
+        const perfil = user.cargo || "Usuário";
+        let corPerfil = "var(--text-muted)";
+        if (perfil === "Administrador") corPerfil = "var(--primary)";
+        if (perfil === "Recepcionista") corPerfil = "#10b981";
+
         const div = document.createElement("div");
         div.className = "slot-item";
-        
-        let corPerfil = "var(--text-muted)";
-        if (user.perfil === "Administrador") corPerfil = "var(--primary)";
-        if (user.perfil === "Recepcionista") corPerfil = "#10b981";
-
         div.innerHTML = `
-            <div>
-                <strong>${user.nome}</strong>
-                <p style="font-size: 13px; color: var(--text-muted);">${user.email}</p>
-            </div>
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <span style="color: ${corPerfil}; font-weight: 600;">${user.perfil}</span>
-                <button onclick="editarUtilizador(${user.id})" style="padding: 6px 12px; background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">Gerir</button>
-            </div>
+          <div>
+            <strong>${user.nome || user.apelido || "Sem nome"}</strong>
+            <p style="font-size: 13px; color: var(--text-muted);">${user.email || ""}</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="color: ${corPerfil}; font-weight: 600; font-size: 13px;">${perfil}</span>
+            <button onclick="alterarCargoUtilizador('${user.id}', '${perfil}')" style="padding: 6px 12px; background: #f1f5f9; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer;">Alterar Cargo</button>
+            <button onclick="removerUtilizadorFirestore('${user.id}', '${user.email || ""}')" style="padding: 6px 12px; background: #fee2e2; color: #b91c1c; border: none; border-radius: 6px; cursor: pointer;">Remover</button>
+          </div>
         `;
         container.appendChild(div);
+      });
+    },
+    (error) => {
+      console.error("Erro ao listar utilizadores:", error);
+    }
+  );
+}
+
+window.alterarCargoUtilizador = async function (uid, cargoAtual) {
+  const novoCargo = prompt(
+    `Cargo atual: ${cargoAtual}\nDigite o novo cargo (Administrador, Usuário ou Recepcionista):`,
+    cargoAtual
+  );
+  if (!novoCargo) return;
+
+  const cargosValidos = ["Administrador", "Usuário", "Recepcionista"];
+  if (!cargosValidos.includes(novoCargo.trim())) {
+    alert("Cargo inválido. Utilize: Administrador, Usuário ou Recepcionista.");
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, "usuarios", uid), {
+      cargo: novoCargo.trim()
     });
-}
+    alert("Cargo atualizado com sucesso!");
+  } catch (error) {
+    console.error("Erro ao atualizar cargo:", error);
+    alert("Erro ao atualizar cargo no Firestore.");
+  }
+};
 
-function abrirNovoUsuario() {
-    const nome = prompt("Digite o nome completo do novo utilizador:");
-    if (!nome) return;
-    
-    const email = prompt("Digite o e-mail corporativo:");
-    if (!email) return;
+window.removerUtilizadorFirestore = async function (uid, email) {
+  if (!confirm(`Deseja remover o registo de perfil de ${email}?`)) return;
 
-    const perfilTipo = prompt("Defina o perfil (1 para Usuário, 2 para Administrador, 3 para Recepcionista):");
-    let perfil = "Usuário";
-    if (perfilTipo === "2") perfil = "Administrador";
-    if (perfilTipo === "3") perfil = "Recepcionista";
-
-    alert(`Utilizador ${nome} (${perfil}) cadastrado com sucesso!`);
-    carregarUtilizadores(); // Atualiza a lista na tela
-}
-
-function editarUtilizador(id) {
-    alert(`Abrindo painel de edição para o utilizador ID: ${id}`);
-}
+  try {
+    await deleteDoc(doc(db, "usuarios", uid));
+    alert("Perfil removido da base de dados.");
+  } catch (error) {
+    console.error("Erro ao remover perfil:", error);
+    alert("Erro ao remover perfil.");
+  }
+};
