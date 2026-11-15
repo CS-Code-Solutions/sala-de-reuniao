@@ -25,13 +25,6 @@
 
   document.documentElement.classList.add('af-locked');
 
-  try {
-    const savedTheme = localStorage.getItem('meetingroom_theme') || localStorage.getItem('door_theme');
-    if (savedTheme) {
-      document.documentElement.setAttribute('data-theme', savedTheme);
-    }
-  } catch (e) {}
-
   function reveal() {
     if (isRevealed) return;
     isRevealed = true;
