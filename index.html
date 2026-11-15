@@ -4,11 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Entrar</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
-  <link rel="apple-touch-icon" href="ico.png">
   <link rel="icon" href="ico.png" type="image/png">
   <style>
     body {
@@ -36,9 +31,11 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
       text-align: center;
       box-sizing: border-box;
+      /* Borda inicial sutil e transição suave */
       border: 2px solid #e2e8f0;
       transition: all 0.3s ease-in-out;
     }
+    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima */
     .login-card:hover {
       border-color: #d4af37;
       box-shadow: 0 20px 40px rgba(212, 175, 55, 0.35);
@@ -103,10 +100,6 @@
     .btn-login:active {
       transform: scale(0.98);
     }
-    .btn-login:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
     .login-footer {
       margin-top: 24px;
       padding-top: 16px;
@@ -117,136 +110,62 @@
       color: #64748b;
       margin: 0;
     }
-    .login-footer a {
-      color: #0d9488;
-      text-decoration: none;
-      font-weight: 600;
-    }
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
-      z-index: 2000;
-      justify-content: center;
-      align-items: center;
-      padding: 16px;
-    }
-    .modal-alert-card {
-      background: white;
-      width: 100%;
-      max-width: 380px;
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      text-align: center;
-    }
-    .modal-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #1e293b;
-      margin: 0;
-    }
-    .btn-modal-ok {
-      width: 100%;
-      padding: 10px;
-      background: #0d9488;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-modal-ok:hover {
-      background: #0f766e;
-    }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <div class="login-card">
-    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.src='cabe.png';">
-
-    <form id="formLogin" onsubmit="event.preventDefault(); fazerLoginFirebase();">
-      <div class="form-group">
-        <label for="emailLogin">E-mail</label>
-        <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" autocomplete="email" required>
-      </div>
-      <div class="form-group">
-        <label for="senhaLogin">Senha</label>
-        <input type="password" id="senhaLogin" placeholder="••••••••" autocomplete="current-password" required>
-      </div>
-      <button type="submit" class="btn-login" id="btnEntrar">Entrar</button>
-    </form>
+    <img src="login.png" alt="MeetingRoom" class="login-logo" onerror="this.onerror=function(){this.style.display='none'; document.getElementById('fallback-title').style.display='block';}; this.src='cabe.png';">
+    <h2 id="fallback-title" style="display:none; color: #1e293b; margin-bottom: 24px; font-size: 22px;">MeetingRoom</h2>
+    
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" required>
+    </div>
+    <div class="form-group">
+      <label>Senha</label>
+      <input type="password" id="senhaLogin" placeholder="••••••••" required>
+    </div>
+    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
 
     <div class="login-footer">
-      <p>&copy; 2026 Viecelli | Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank">CS Code Solutions</a></p>
+      <p>&copy; 2026 Viecelli | Powered by <strong>CS Code Solutions</strong></p>
     </div>
   </div>
 
-  <!-- Modal de Alerta Personalizado -->
-  <div class="modal-overlay" id="modalAlertaLogin">
-    <div class="modal-alert-card">
-      <div style="font-size: 32px;" id="modalAlertaIcone">⚠️</div>
-      <h3 class="modal-title" id="modalAlertaTitulo">Atenção</h3>
-      <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;" id="modalAlertaTexto">Mensagem aqui</p>
-      <button class="btn-modal-ok" onclick="document.getElementById('modalAlertaLogin').style.display='none'">OK</button>
-    </div>
-  </div>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+      authDomain: "reuniao-d1b29.firebaseapp.com",
+      projectId: "reuniao-d1b29",
+      storageBucket: "reuniao-d1b29.firebasestorage.app",
+      messagingSenderId: "887897617950",
+      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+    };
 
-  <script type="module">
-    import { auth } from "./js/firebase-config.js";
-    import { verificarAutenticacao } from "./js/auth.js";
-    import { signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-
-    // Se já estiver autenticado, redireciona automaticamente para pages/calendar.html
-    verificarAutenticacao();
-
-    function mostrarAlertaLogin(titulo, texto, icone = "⚠️") {
-      document.getElementById("modalAlertaTitulo").innerText = titulo;
-      document.getElementById("modalAlertaTexto").innerText = texto;
-      document.getElementById("modalAlertaIcone").innerText = icone;
-      document.getElementById("modalAlertaLogin").style.display = "flex";
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
     }
 
-    window.fazerLoginFirebase = async function () {
-      const email = document.getElementById("emailLogin").value.trim().toLowerCase();
+    function fazerLogin() {
+      const email = document.getElementById("emailLogin").value.trim();
       const senha = document.getElementById("senhaLogin").value.trim();
-      const btn = document.getElementById("btnEntrar");
 
       if (!email || !senha) {
-        mostrarAlertaLogin("Atenção", "Por favor, preencha o e-mail e a senha.", "⚠️");
+        alert("Por favor, preencha o e-mail e a senha.");
         return;
       }
 
-      btn.disabled = true;
-      btn.innerText = "Autenticando...";
-
-      try {
-        await signInWithEmailAndPassword(auth, email, senha);
-        window.location.replace("pages/calendar.html");
-      } catch (error) {
-        btn.disabled = false;
-        btn.innerText = "Entrar";
-
-        let msg = "E-mail ou senha incorretos.";
-        if (error.code === "auth/too-many-requests") {
-          msg = "Muitas tentativas seguidas. Aguarde alguns instantes e tente novamente.";
-        } else if (error.code === "auth/network-request-failed") {
-          msg = "Falha de conexão com a internet. Verifique sua rede.";
-        }
-        mostrarAlertaLogin("Erro no Acesso", msg, "❌");
-      }
-    };
-
-    // Registra o Service Worker para suporte PWA
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("js/sw.js").catch(() => {});
-      });
+      firebase.auth().signInWithEmailAndPassword(email, senha)
+        .then(() => {
+          window.location.href = "pages/calendar.html";
+        })
+        .catch((error) => {
+          console.error("Erro no login:", error);
+          alert("Erro ao entrar (" + error.code + "): " + error.message);
+        });
     }
   </script>
 </body>

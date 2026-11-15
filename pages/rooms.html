@@ -1,125 +1,503 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeetingRoom - Salas & Display de Porta</title>
-  <link rel="manifest" href="../manifest.json">
-  <link rel="icon" href="../ico.png" type="image/png">
+  <title>MeetingRoom - Salas</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .brand-logo { max-width: 150px; height: auto; }
-    .nav-links a { display: flex; align-items: center; gap: 10px; }
-    .nav-links svg { width: 18px; height: 18px; stroke-width: 2; }
-    .user-profile-box { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-color); }
-    .user-info-text h4 { font-size: 14px; color: var(--text-main); }
-    .user-info-text p { font-size: 12px; color: var(--text-muted); }
+    :root {
+      --sidebar-bg: #0f172a;
+      --accent-color: #0d9488;
+      --accent-hover: #0f766e;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px 24px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+    }
+
+    .brand-logo {
+      max-height: 55px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: rgba(13, 148, 136, 0.25);
+      color: #2dd4bf;
+    }
+
+    .user-profile-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-text h4 {
+      font-size: 13px;
+      color: white;
+      margin: 0;
+    }
+
+    .user-info-text p {
+      font-size: 11px;
+      color: #94a3b8;
+      margin: 2px 0 0 0;
+    }
+
+    .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; }
+    
+    .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .room-card-item { background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; display: flex; flex-direction: column; gap: 16px; border-left: 5px solid var(--accent-color); }
+    .room-card-item.inativa { border-left-color: #94a3b8; opacity: 0.7; }
+    .room-card-item.embreve { border-left-color: #d97706; }
+
+    .room-info-box { display: flex; gap: 16px; }
+    .room-card-img { width: 100px; height: 80px; border-radius: 8px; object-fit: cover; background: var(--border-color); }
+    .room-details h3 { font-size: 16px; color: var(--text-main); margin-bottom: 4px; }
+    .room-details p { font-size: 13px; color: var(--text-muted); margin-bottom: 2px; }
+
+    .room-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; }
+    
+    .badge-status { font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; }
+    .badge-status.ativa { background: #dcfce7; color: #15803d; }
+    .badge-status.inativa { background: #f1f5f9; color: var(--text-muted); }
+    .badge-status.embreve { background: #fef3c7; color: #b45309; }
+
+    .btn-edit-room { background: #f1f5f9; border: 1px solid var(--border-color); color: var(--text-main); padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; }
+    .btn-edit-room:hover { background: #e2e8f0; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
+    .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+    .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
+    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-ok:hover { background: var(--accent-hover); }
+
+    .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
-    @media (max-width: 768px) {
+
+    @media (max-width: 1024px) {
       .sidebar { display: none; }
-      .mobile-bottom-nav {
-        display: flex; justify-content: space-around; align-items: center;
-        position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
-        background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000;
-      }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
-      .mob-nav-item.active { color: var(--primary); font-weight: 600; }
-      .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
-      .main-content { padding-bottom: 72px; }
+      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
+      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
+      .mob-nav-item.active { color: #2dd4bf; }
+      .mob-nav-item span { font-size: 18px; }
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div id="sidebar-container"></div>
 
-  <main class="main-content">
-    <header class="topbar">
-      <div>
-        <h1>Salas & Display de Porta</h1>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Gerencie as salas cadastradas e abra o painel interativo para tablets na porta</p>
+  <aside class="sidebar">
+    <div>
+      <div class="brand-area">
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
       </div>
-      <button onclick="cadastrarNovaSala()" style="padding: 10px 18px; background: #0d9488; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Nova Sala</button>
+      <nav class="nav-links">
+        <a href="calendar.html">📅 Agenda</a>
+        <a href="my-reservations.html">📋 Minhas reservas</a>
+        <a href="notifications.html">🔔 Notificações</a>
+        
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
+        <a href="rooms.html" class="active admin-only-item" style="display:none;">🚪 Salas</a>
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+      </nav>
+    </div>
+    <div class="user-profile-box">
+      <div class="user-info-text">
+        <h4 id="userNameDisplay">Carregando...</h4>
+        <p id="userRoleDisplay">Utilizador</p>
+      </div>
+      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+    </div>
+  </aside>
+
+  <main class="page-wrapper">
+    <div class="mobile-topbar-bar">
+      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 42px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #ffffff;">Perfil</span>
+    </div>
+
+    <header class="page-header">
+      <h1>Salas Disponíveis</h1>
+      <button id="btnNovaSala" onclick="abrirModalSala()" style="display:none; padding: 10px 16px; background: var(--accent-color); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">+ Nova Sala</button>
     </header>
 
-    <section class="schedule-grid-container">
-      <div class="time-slots" id="listaSalas"></div>
+    <section>
+      <div id="listaSalasContainer" class="rooms-grid">
+        <p style="color: var(--text-muted); font-size: 14px;">A carregar salas...</p>
+      </div>
     </section>
-
-    <footer style="text-align: center; padding: 16px; font-size: 12px; color: #64748b; margin-top: auto;">
-      Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank" style="color: #0d9488; text-decoration: none; font-weight: 600;">CS Code Solutions</a>
-    </footer>
   </main>
 
-  <div id="mobile-nav-container"></div>
+  <div class="modal-overlay" id="modalSala">
+    <div class="modal-card">
+      <h3 class="modal-title" id="modalSalaTitulo">Editar Sala</h3>
+      <input type="hidden" id="editSalaId">
+      <input type="hidden" id="inputImagemBase64">
+      
+      <div class="form-group">
+        <label>Nome da Sala</label>
+        <input type="text" id="inputNomeSala" placeholder="Ex: Sala de Reuniões 01">
+      </div>
 
-  <script src="../js/sidebar.js"></script>
-  <script src="../termos.js"></script>
-  <script type="module">
-    import { db } from "../js/firebase-config.js";
-    import { verificarAutenticacao } from "../js/auth.js";
-    import { collection, onSnapshot, addDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      <div class="form-group">
+        <label>Capacidade (pessoas)</label>
+        <input type="number" id="inputCapacidade" placeholder="Ex: 8">
+      </div>
 
-    verificarAutenticacao((user) => {
-      if (!user.ehAdmin) return;
+      <div class="form-group">
+        <label>Equipamentos</label>
+        <input type="text" id="inputEquipamentos" placeholder="Ex: TV, Videoconferência, Quadro">
+      </div>
 
-      const container = document.getElementById("listaSalas");
-      onSnapshot(collection(db, "salas"), (snapshot) => {
-        const salas = [];
-        snapshot.forEach((d) => salas.push({ id: d.id, ...d.data() }));
+      <div class="form-group">
+        <label>Status da Sala</label>
+        <select id="inputStatusSala">
+          <option value="Ativa">Ativa</option>
+          <option value="Inativa">Inativa</option>
+          <option value="Em breve">Em breve</option>
+        </select>
+      </div>
 
-        if (salas.length === 0) {
-          salas.push(
-            { id: "padrao-1", nome: "Sala de Reuniões 01", capacidade: 10, recursos: "TV 65\", Videoconferência, Quadro Branco", fixa: true },
-            { id: "padrao-2", nome: "Sala Executiva 02", capacidade: 6, recursos: "Projetor HDMI, Ar-condicionado", fixa: true }
-          );
+      <div class="form-group">
+        <label>Imagem da Sala (Dispositivo)</label>
+        <input type="file" id="inputFileSala" accept="image/*" onchange="converterImagemParaBase64(event)">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharModalSala()">Cancelar</button>
+        <button class="btn-save" onclick="salvarSalaFirebase()">Guardar Alterações</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;" id="modalAlertaIcone">✨</div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Aviso</h3>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
+
+  <nav class="mobile-bottom-nav">
+    <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
+    <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
+    <a href="rooms.html" class="mob-nav-item active admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
+    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
+  </nav>
+
+  <script>
+    let usuarioEhAdmin = false;
+    let listaSalasGlobal = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+        authDomain: "reuniao-d1b29.firebaseapp.com",
+        projectId: "reuniao-d1b29",
+        storageBucket: "reuniao-d1b29.firebasestorage.app",
+        messagingSenderId: "887897617950",
+        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          const emailUsuario = user.email.toLowerCase();
+          let nomeBase = emailUsuario.split('@')[0];
+          let cargoTexto = "Utilizador";
+
+          try {
+            const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
+            if (doc.exists) {
+              const dados = doc.data();
+              if (dados.apelido && dados.apelido.trim() !== "") {
+                nomeBase = dados.apelido;
+              }
+              if (dados.cargo === "Administrador") {
+                usuarioEhAdmin = true;
+                cargoTexto = "Administrador";
+              }
+            }
+          } catch(e) {}
+
+          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
+            usuarioEhAdmin = true;
+            cargoTexto = "Administrador";
+          }
+
+          document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userRoleDisplay").innerText = cargoTexto;
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
+
+          if (usuarioEhAdmin) {
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+            document.getElementById("btnNovaSala").style.display = "block";
+          }
+
+          carregarSalas();
+        } else {
+          window.location.href = "../index.html";
+        }
+      });
+    });
+
+    function mostrarAlerta(titulo, texto, icone = "✨") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      document.getElementById("modalAlertaIcone").innerText = icone;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+    }
+
+    function carregarSalas() {
+      const container = document.getElementById("listaSalasContainer");
+      container.innerHTML = "<p style='color: var(--text-muted);'>A carregar salas...</p>";
+
+      firebase.firestore().collection("salas").get().then((snapshot) => {
+        container.innerHTML = "";
+        listaSalasGlobal = [];
+
+        if (snapshot.empty) {
+          criarSalasPadrao();
+          return;
         }
 
-        container.innerHTML = "";
-        salas.forEach((sala) => {
-          const urlDisplay = `display-porta.html?sala=${encodeURIComponent(sala.nome)}`;
+        snapshot.forEach(doc => {
+          const sala = doc.data();
+          listaSalasGlobal.push({ id: doc.id, ...sala });
+          
+          const status = sala.status || "Ativa";
+          let classeStatus = "ativa";
+          let textoStatus = "Ativa";
+          let classeCard = "";
+
+          if (status === "Inativa") {
+            classeStatus = "inativa";
+            textoStatus = "Inativa";
+            classeCard = "inativa";
+          } else if (status === "Em breve") {
+            classeStatus = "embreve";
+            textoStatus = "Em breve";
+            classeCard = "embreve";
+          }
+
           const div = document.createElement("div");
-          div.className = "slot-item disponivel";
+          div.className = `room-card-item ${classeCard}`;
           div.innerHTML = `
-            <div>
-              <strong>${sala.nome}</strong>
-              <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">
-                Capacidade: ${sala.capacidade || 8} pessoas • ${sala.recursos || "Equipamento padrão"}
-              </p>
+            <div class="room-info-box">
+              <img src="${sala.imagem || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80'}" alt="Sala" class="room-card-img">
+              <div class="room-details">
+                <h3>${sala.nome}</h3>
+                <p>👥 Capacidade: ${sala.capacidade || 8} pessoas</p>
+                <p>💻 Equipamentos: ${sala.equipamentos || 'TV, Videoconferência...'}</p>
+              </div>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <a href="${urlDisplay}" target="_blank" style="padding: 8px 14px; background: #0f172a; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: 600;">Abrir Display de Porta</a>
-              ${!sala.fixa ? `<button onclick="excluirSala('${sala.id}')" style="background: #fee2e2; color: #b91c1c;">Excluir</button>` : ""}
+            <div class="room-actions">
+              <span class="badge-status ${classeStatus}">${textoStatus}</span>
+              ${usuarioEhAdmin ? `<button class="btn-edit-room" onclick="abrirModalEdicao('${doc.id}')">✏️ Editar</button>` : ''}
             </div>
           `;
           container.appendChild(div);
         });
+      }).catch(err => {
+        container.innerHTML = `<p style="color: #ef4444;">Erro ao carregar salas: ${err.message}</p>`;
       });
-    });
+    }
 
-    window.cadastrarNovaSala = async function () {
-      const nome = prompt("Nome da nova sala (ex: Sala de Inovação 03):");
-      if (!nome || !nome.trim()) return;
+    function criarSalasPadrao() {
+      const db = firebase.firestore();
+      db.collection("salas").add({
+        nome: "Sala de Reuniões 01",
+        capacidade: 8,
+        equipamentos: "TV, Videoconferência, Quadro",
+        status: "Ativa",
+        imagem: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
+      });
+      db.collection("salas").add({
+        nome: "Sala de Reuniões 02",
+        capacidade: 6,
+        equipamentos: "TV, Quadro",
+        status: "Em breve",
+        imagem: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80"
+      }).then(() => {
+        carregarSalas();
+      });
+    }
 
-      const capacidade = prompt("Capacidade máxima de pessoas:", "8");
-      const recursos = prompt("Recursos disponíveis (ex: TV, HDMI, Café):", "TV Smart, Wi-Fi");
-
-      try {
-        await addDoc(collection(db, "salas"), {
-          nome: nome.trim(),
-          capacidade: Number(capacidade) || 8,
-          recursos: recursos || "Padrão"
-        });
-        alert("Sala cadastrada com sucesso!");
-      } catch (e) {
-        alert("Erro ao cadastrar sala: " + e.message);
+    function converterImagemParaBase64(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById("inputImagemBase64").value = e.target.result;
+        };
+        reader.readAsDataURL(file);
       }
-    };
+    }
 
-    window.excluirSala = async function (id) {
-      if (!confirm("Deseja remover esta sala?")) return;
-      await deleteDoc(doc(db, "salas", id));
-    };
+    function abrirModalSala() {
+      document.getElementById("modalSalaTitulo").innerText = "Nova Sala";
+      document.getElementById("editSalaId").value = "";
+      document.getElementById("inputNomeSala").value = "";
+      document.getElementById("inputCapacidade").value = "";
+      document.getElementById("inputEquipamentos").value = "";
+      document.getElementById("inputStatusSala").value = "Ativa";
+      document.getElementById("inputFileSala").value = "";
+      document.getElementById("inputImagemBase64").value = "";
+      document.getElementById("modalSala").style.display = "flex";
+    }
+
+    function abrirModalEdicao(id) {
+      const sala = listaSalasGlobal.find(s => s.id === id);
+      if (!sala) return;
+
+      document.getElementById("modalSalaTitulo").innerText = "Editar Sala";
+      document.getElementById("editSalaId").value = sala.id;
+      document.getElementById("inputNomeSala").value = sala.nome || "";
+      document.getElementById("inputCapacidade").value = sala.capacidade || "";
+      document.getElementById("inputEquipamentos").value = sala.equipamentos || "";
+      document.getElementById("inputStatusSala").value = sala.status || "Ativa";
+      document.getElementById("inputFileSala").value = "";
+      document.getElementById("inputImagemBase64").value = sala.imagem || "";
+      document.getElementById("modalSala").style.display = "flex";
+    }
+
+    function fecharModalSala() {
+      document.getElementById("modalSala").style.display = "none";
+    }
+
+    function salvarSalaFirebase() {
+      const id = document.getElementById("editSalaId").value;
+      const nome = document.getElementById("inputNomeSala").value.trim();
+      const capacidade = document.getElementById("inputCapacidade").value;
+      const equipamentos = document.getElementById("inputEquipamentos").value.trim();
+      const status = document.getElementById("inputStatusSala").value;
+      let imagem = document.getElementById("inputImagemBase64").value.trim();
+
+      if (!nome) {
+        mostrarAlerta("Atenção", "Preencha o nome da sala.", "⚠️");
+        return;
+      }
+
+      if (!imagem) {
+        imagem = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
+      }
+
+      const dadosSala = {
+        nome: nome,
+        capacidade: capacidade ? parseInt(capacidade) : 8,
+        equipamentos: equipamentos,
+        status: status,
+        imagem: imagem
+      };
+
+      const db = firebase.firestore();
+
+      if (id) {
+        db.collection("salas").doc(id).update(dadosSala).then(() => {
+          fecharModalSala();
+          mostrarAlerta("Sucesso", "Sala atualizada com sucesso!", "🎉");
+          carregarSalas();
+        }).catch(err => mostrarAlerta("Erro", "Erro ao atualizar: " + err.message, "❌"));
+      } else {
+        db.collection("salas").add(dadosSala).then(() => {
+          fecharModalSala();
+          mostrarAlerta("Sucesso", "Sala criada com sucesso!", "🎉");
+          carregarSalas();
+        }).catch(err => mostrarAlerta("Erro", "Erro ao criar: " + err.message, "❌"));
+      }
+    }
+  </script>
+
+  <script type="module">
+    import { verificarAutenticacao } from "../js/auth.js";
+    verificarAutenticacao();
   </script>
 </body>
 </html>

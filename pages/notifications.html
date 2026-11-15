@@ -1,94 +1,234 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Notificações</title>
-  <link rel="manifest" href="../manifest.json">
-  <link rel="icon" href="../ico.png" type="image/png">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    .brand-logo { max-width: 150px; height: auto; }
-    .nav-links a { display: flex; align-items: center; gap: 10px; }
-    .nav-links svg { width: 18px; height: 18px; stroke-width: 2; }
-    .user-profile-box { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-color); }
-    .user-info-text h4 { font-size: 14px; color: var(--text-main); }
-    .user-info-text p { font-size: 12px; color: var(--text-muted); }
+    :root {
+      --sidebar-bg: #0f172a;
+      --accent-color: #0d9488;
+      --accent-hover: #0f766e;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px 24px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+    }
+
+    .brand-logo {
+      max-height: 55px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: rgba(13, 148, 136, 0.25);
+      color: #2dd4bf;
+    }
+
+    .user-profile-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-text h4 {
+      font-size: 13px;
+      color: white;
+      margin: 0;
+    }
+
+    .user-info-text p {
+      font-size: 11px;
+      color: #94a3b8;
+      margin: 2px 0 0 0;
+    }
+
+    .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
+    .page-header { margin-bottom: 24px; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); margin-bottom: 4px; font-weight: 700; }
 
     .notification-card {
       background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 24px;
-      max-width: 540px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+      max-width: 500px; display: flex; flex-direction: column; gap: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
+    .notif-header h2 { font-size: 18px; color: var(--text-main); margin-bottom: 4px; }
+    .notif-header p { font-size: 13px; color: var(--text-muted); }
+
     .notif-item {
-      display: flex; flex-direction: column; gap: 10px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9;
+      display: flex; justify-content: space-between; align-items: center; padding-top: 12px; padding-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9; gap: 16px;
     }
-    .notif-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .notif-item:last-child { border-bottom: none; }
+    .notif-info h4 { font-size: 14px; color: var(--text-main); margin-bottom: 2px; }
+    .notif-info p { font-size: 12px; color: var(--text-muted); }
+
     .switch { position: relative; display: inline-block; width: 48px; height: 26px; flex-shrink: 0; }
     .switch input { opacity: 0; width: 0; height: 0; }
-    .slider { position: absolute; cursor: pointer; inset: 0; background-color: #cbd5e1; transition: .3s; border-radius: 26px; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .3s; border-radius: 26px; }
     .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
-    input:checked + .slider { background-color: #0d9488; }
+    input:checked + .slider { background-color: var(--accent-color); }
     input:checked + .slider:before { transform: translateX(22px); }
 
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+
+    .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
-    @media (max-width: 768px) {
+
+    @media (max-width: 1024px) {
       .sidebar { display: none; }
-      .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000; }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
-      .mob-nav-item.active { color: var(--primary); font-weight: 600; }
-      .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
-      .main-content { padding-bottom: 72px; }
+      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
+      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
+      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
+      .mob-nav-item.active { color: #2dd4bf; }
+      .mob-nav-item span { font-size: 18px; }
     }
   </style>
+
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-  <div id="sidebar-container"></div>
 
-  <main class="main-content">
-    <header class="topbar">
-      <div>
-        <h1>Configurações de Notificações</h1>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Configure o envio de confirmações por e-mail e alertas na tela</p>
+  <aside class="sidebar">
+    <div>
+      <div class="brand-area">
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
       </div>
+      <nav class="nav-links">
+        <a href="calendar.html">📅 Agenda</a>
+        <a href="my-reservations.html">📋 Minhas reservas</a>
+        <a href="notifications.html" class="active">🔔 Notificações</a>
+        
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
+        <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+      </nav>
+    </div>
+    <div class="user-profile-box">
+      <div class="user-info-text">
+        <h4 id="userNameDisplay">Carregando...</h4>
+        <p id="userRoleDisplay">Utilizador</p>
+      </div>
+      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+    </div>
+  </aside>
+
+  <main class="page-wrapper">
+    <div class="mobile-topbar-bar">
+      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 42px;">
+      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #ffffff;">Perfil</span>
+    </div>
+
+    <header class="page-header">
+      <h1>Configurações de Notificações</h1>
     </header>
 
-    <section class="schedule-grid-container">
+    <section>
       <div class="notification-card">
-        <div>
-          <h2 style="font-size: 18px; color: var(--text-main);">Preferências de Avisos</h2>
-          <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Defina onde deseja receber as confirmações das suas reservas.</p>
+        <div class="notif-header">
+          <h2>Preferências de Avisos</h2>
+          <p>Configure como deseja receber os alertas das reuniões.</p>
         </div>
 
-        <div class="notif-item">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h4 style="font-size: 14px; color: var(--text-main);">Notificações por E-mail</h4>
-              <p style="font-size: 12px; color: var(--text-muted);">Receba comprovativos automáticos ao agendar salas.</p>
+        <div class="notif-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div class="notif-info">
+              <h4>E-mail</h4>
+              <p>Confirmações e cancelamentos.</p>
             </div>
             <label class="switch">
               <input type="checkbox" id="toggleEmail" onchange="toggleCampoEmailReal(this)">
               <span class="slider"></span>
             </label>
           </div>
-
-          <div id="grupoEmailReal" style="display: none; flex-direction: column; gap: 8px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
+          
+          <div id="grupoEmailReal" style="display: none; margin-top: 4px; flex-direction: column; gap: 6px; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);">
             <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">E-mail real para receber os avisos:</label>
             <div style="display: flex; gap: 8px;">
-              <input type="email" id="inputEmailReal" placeholder="seu.email@dominio.com" style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; background: white;">
-              <button onclick="salvarEmailReal()" style="padding: 8px 14px; background: #0d9488; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Guardar</button>
+              <input type="email" id="inputEmailReal" placeholder="seu.email@real.com" style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; outline: none; background: white;">
+              <button onclick="salvarEmailReal()" style="padding: 8px 14px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Salvar</button>
             </div>
           </div>
         </div>
 
-        <div class="notif-item">
-          <div>
-            <h4 style="font-size: 14px; color: var(--text-main);">Aviso de reunião próxima na tela</h4>
-            <p style="font-size: 12px; color: var(--text-muted);">Disparar alerta flutuante antes da reunião começar.</p>
+        <div class="notif-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div class="notif-info">
+            <h4>Aviso de reunião próxima na tela</h4>
+            <p>Disparar alerta flutuante antes da reunião começar.</p>
           </div>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Antecedência:</label>
-            <select id="selectTempoAntecedencia" onchange="salvarPreferenciaNotificacao()" style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white;">
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-muted);">Avisar com antecedência de:</label>
+            <select id="selectTempoAntecedencia" onchange="salvarPreferenciaNotificacao()" style="padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; background: white; outline: none;">
               <option value="5">5 minutos</option>
               <option value="10" selected>10 minutos</option>
               <option value="15">15 minutos</option>
@@ -99,88 +239,154 @@
         </div>
       </div>
     </section>
-
-    <footer style="text-align: center; padding: 16px; font-size: 12px; color: #64748b; margin-top: auto;">
-      Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank" style="color: #0d9488; text-decoration: none; font-weight: 600;">CS Code Solutions</a>
-    </footer>
   </main>
 
-  <div id="mobile-nav-container"></div>
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-alert-card">
+      <div style="font-size: 32px;" id="modalAlertaIcone">🔔</div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Preferências</h3>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Configurações guardadas com sucesso!</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
 
-  <script src="../js/sidebar.js"></script>
-  <script src="../termos.js"></script>
-  <script type="module">
-    import { db } from "../js/firebase-config.js";
-    import { verificarAutenticacao } from "../js/auth.js";
-    import { doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  <nav class="mobile-bottom-nav">
+    <a href="calendar.html" class="mob-nav-item"><span>📅</span> Agenda</a>
+    <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
+    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
+    <a href="notifications.html" class="mob-nav-item active"><span>🔔</span> Avisos</a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
+  </nav>
 
+  <script>
     let usuarioAtualId = null;
+    let usuarioEhAdmin = false;
 
-    verificarAutenticacao(async (user) => {
-      usuarioAtualId = user.uid;
-      document.getElementById("inputEmailReal").value = user.email || "";
+    document.addEventListener("DOMContentLoaded", () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+        authDomain: "reuniao-d1b29.firebaseapp.com",
+        projectId: "reuniao-d1b29",
+        storageBucket: "reuniao-d1b29.firebasestorage.app",
+        messagingSenderId: "887897617950",
+        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+      };
+      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
-      try {
-        const snap = await getDoc(doc(db, "usuarios", user.uid));
-        if (snap.exists()) {
-          const dados = snap.data();
-          const emailAtivo = dados.notificacoes ? !!dados.notificacoes.email : true;
-          document.getElementById("toggleEmail").checked = emailAtivo;
-          if (emailAtivo) {
-            document.getElementById("grupoEmailReal").style.display = "flex";
+      firebase.auth().onAuthStateChanged(async (user) => {
+        if (user) {
+          usuarioAtualId = user.uid;
+          const emailUsuario = user.email.toLowerCase();
+          let nomeBase = emailUsuario.split('@')[0];
+          let cargoTexto = "Utilizador";
+
+          try {
+            const doc = await firebase.firestore().collection("usuarios").doc(user.uid).get();
+            if (doc.exists) {
+              const dados = doc.data();
+              if (dados.apelido && dados.apelido.trim() !== "") {
+                nomeBase = dados.apelido;
+              }
+              if (dados.cargo === "Administrador") {
+                usuarioEhAdmin = true;
+                cargoTexto = "Administrador";
+              }
+
+              if (dados.notificacoes) {
+                const emailAtivo = !!dados.notificacoes.email;
+                document.getElementById("toggleEmail").checked = emailAtivo;
+                if (dados.notificacoes.tempoAntecedencia) {
+                  document.getElementById("selectTempoAntecedencia").value = dados.notificacoes.tempoAntecedencia;
+                }
+
+                if (emailAtivo) {
+                  document.getElementById("grupoEmailReal").style.display = "flex";
+                }
+              }
+
+              if (dados.emailRealNotificacao) {
+                document.getElementById("inputEmailReal").value = dados.emailRealNotificacao;
+              }
+            }
+          } catch(e) {}
+
+          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
+            usuarioEhAdmin = true;
+            cargoTexto = "Administrador";
           }
-          if (dados.emailRealNotificacao) {
-            document.getElementById("inputEmailReal").value = dados.emailRealNotificacao;
-          }
-          if (dados.notificacoes?.tempoAntecedencia) {
-            document.getElementById("selectTempoAntecedencia").value = dados.notificacoes.tempoAntecedencia;
+
+          document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userRoleDisplay").innerText = cargoTexto;
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
+
+          if (usuarioEhAdmin) {
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
           }
         } else {
-          document.getElementById("toggleEmail").checked = true;
-          document.getElementById("grupoEmailReal").style.display = "flex";
+          window.location.href = "../index.html";
         }
-      } catch (e) {
-        console.error(e);
-      }
+      });
     });
 
-    window.toggleCampoEmailReal = function (checkbox) {
-      document.getElementById("grupoEmailReal").style.display = checkbox.checked ? "flex" : "none";
-      window.salvarPreferenciaNotificacao();
-    };
+    function mostrarAlerta(titulo, texto, icone = "🔔") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      document.getElementById("modalAlertaIcone").innerText = icone;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
 
-    window.salvarEmailReal = async function () {
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+    }
+
+    function toggleCampoEmailReal(checkbox) {
+      const grupoEmail = document.getElementById("grupoEmailReal");
+      if (checkbox.checked) {
+        grupoEmail.style.display = "flex";
+      } else {
+        grupoEmail.style.display = "none";
+        salvarPreferenciaNotificacao();
+      }
+    }
+
+    function salvarEmailReal() {
       const emailReal = document.getElementById("inputEmailReal").value.trim();
       if (!emailReal || !emailReal.includes("@")) {
-        alert("Por favor, insira um e-mail válido.");
+        mostrarAlerta("Atenção", "Por favor, insira um e-mail válido.", "⚠️");
         return;
       }
+
       if (!usuarioAtualId) return;
 
-      try {
-        await updateDoc(doc(db, "usuarios", usuarioAtualId), {
-          emailRealNotificacao: emailReal,
-          "notificacoes.email": true
-        });
-        alert("E-mail de notificação guardado com sucesso!");
-      } catch (err) {
-        alert("Erro ao guardar e-mail: " + err.message);
-      }
-    };
+      firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
+        emailRealNotificacao: emailReal,
+        "notificacoes.email": true
+      }).then(() => {
+        mostrarAlerta("Sucesso", "E-mail de notificação guardado com sucesso!", "🎉");
+      }).catch(err => {
+        mostrarAlerta("Erro", "Erro ao salvar e-mail: " + err.message, "❌");
+      });
+    }
 
-    window.salvarPreferenciaNotificacao = async function () {
+    function salvarPreferenciaNotificacao() {
       if (!usuarioAtualId) return;
-      try {
-        await updateDoc(doc(db, "usuarios", usuarioAtualId), {
-          notificacoes: {
-            email: document.getElementById("toggleEmail").checked,
-            tempoAntecedencia: parseInt(document.getElementById("selectTempoAntecedencia").value) || 10
-          }
-        });
-      } catch (err) {
+
+      const notificacoes = {
+        email: document.getElementById("toggleEmail").checked,
+        tempoAntecedencia: parseInt(document.getElementById("selectTempoAntecedencia").value) || 10
+      };
+
+      firebase.firestore().collection("usuarios").doc(usuarioAtualId).update({
+        notificacoes: notificacoes
+      }).catch(err => {
         console.error("Erro ao guardar preferências:", err);
-      }
-    };
+      });
+    }
+  </script>
+
+  <script type="module">
+    import { verificarAutenticacao } from "../js/auth.js";
+    verificarAutenticacao();
   </script>
 </body>
 </html>
