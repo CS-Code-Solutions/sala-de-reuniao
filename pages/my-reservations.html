@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <script src="../js/anti-flicker.js"></script>
   <!-- Configurações para PWA e iOS -->
   <link rel="manifest" href="../manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -11,6 +10,7 @@
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="../js/anti-flicker.js"></script>
   <title>MeetingRoom - Minhas Reservas</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
@@ -297,7 +297,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       firebase.auth().onAuthStateChanged(async (user) => {
         if (!user) {
-          window.location.replace("../index.html");
+          window.location.href = "../index.html";
           return;
         }
 
@@ -324,8 +324,8 @@
           document.getElementById("subtituloMinhasReservas").innerText = "Como Administrador, visualiza e gerencia todas as reservas agendadas no sistema.";
         }
 
-        window.AntiFlicker?.reveal();
         carregarMinhasReservasFirebase();
+        window.AntiFlicker?.reveal();
       });
     });
 
