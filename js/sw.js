@@ -2,7 +2,7 @@
 // SERVICE WORKER - MEETINGROOM (js/sw.js)
 // ==========================================
 
-const CACHE_NAME = 'meetingroom-firebase-v1.2.0';
+const CACHE_NAME = 'meetingroom-firebase-v1.4.0';
 
 const ASSETS_TO_CACHE = [
   '../index.html',
