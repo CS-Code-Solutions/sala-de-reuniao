@@ -9,6 +9,7 @@
   <link rel="icon" href="../ico.png" type="image/png">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     .brand-logo { max-width: 150px; height: auto; }
     .nav-links a { display: flex; align-items: center; gap: 10px; }
@@ -45,25 +46,25 @@
     .up-title { font-size: 13px; font-weight: 600; color: var(--text-main); }
     .up-meta { font-size: 11px; color: var(--text-muted); }
 
-    /* Modal Nova Reserva */
+    /* Toasts Flutuantes */
+    #floatingToastContainer { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 360px; width: 100%; pointer-events: none; }
+    .toast-alert { background: #ffffff; border-left: 5px solid #0d9488; border: 1px solid #e2e8f0; padding: 14px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.12); pointer-events: auto; display: flex; gap: 12px; align-items: flex-start; transition: opacity 0.3s; }
+    .toast-alert.warning { border-left: 5px solid #d97706; background: #fffbeb; }
+    .toast-alert.danger { border-left: 5px solid #dc2626; background: #fef2f2; }
+
+    /* Modais */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-box { background: #ffffff; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
     .modal-box label { font-size: 12px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px; }
-    .modal-box input, .modal-box select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
+    .modal-box input, .modal-box select, .modal-box textarea { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
 
     .mobile-bottom-nav { display: none; }
-    @media (max-width: 960px) {
-      .cal-layout { grid-template-columns: 1fr; padding: 16px; }
-    }
+    @media (max-width: 960px) { .cal-layout { grid-template-columns: 1fr; padding: 16px; } }
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .topbar { padding: 16px; }
       .cal-controls { padding: 12px 16px; }
-      .mobile-bottom-nav {
-        display: flex; justify-content: space-around; align-items: center;
-        position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
-        background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000;
-      }
+      .mobile-bottom-nav { display: flex; justify-content: space-around; align-items: center; position: fixed; bottom: 0; left: 0; right: 0; height: 64px; background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000; }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
       .mob-nav-item.active { color: var(--primary); font-weight: 600; }
       .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
@@ -72,6 +73,7 @@
   </style>
 </head>
 <body>
+  <div id="floatingToastContainer"></div>
   <div id="sidebar-container"></div>
 
   <main class="main-content">
@@ -124,13 +126,13 @@
     </footer>
   </main>
 
-  <!-- Modal de Nova Reserva -->
+  <!-- Modal Nova Reserva -->
   <div class="modal-overlay" id="modalNovaReserva">
     <div class="modal-box">
       <h3 style="font-size: 18px; color: #1e293b;">Agendar Reunião</h3>
       <div>
         <label>Título da Reunião</label>
-        <input type="text" id="resTitulo" placeholder="Ex: Alinhamento Semanal">
+        <input type="text" id="resTitulo" placeholder="Ex: Planeamento Estratégico">
       </div>
       <div>
         <label>Sala</label>
@@ -155,7 +157,23 @@
       </div>
       <div style="display: flex; gap: 10px; margin-top: 8px;">
         <button onclick="document.getElementById('modalNovaReserva').style.display='none'" style="flex:1; padding: 10px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer;">Cancelar</button>
-        <button onclick="confirmarReservaModal()" style="flex:1; padding: 10px; border: none; background: #0d9488; color: white; font-weight: 600; border-radius: 8px; cursor: pointer;">Confirmar</button>
+        <button id="btnConfirmarReservaModal" onclick="confirmarReservaModal()" style="flex:1; padding: 10px; border: none; background: #0d9488; color: white; font-weight: 600; border-radius: 8px; cursor: pointer;">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Negociar Horário via WhatsApp -->
+  <div class="modal-overlay" id="modalNegociacao">
+    <div class="modal-box">
+      <h3 style="font-size: 18px; color: #1e293b;">Negociar Horário</h3>
+      <p style="font-size: 13px; color: #64748b;">Personalize a mensagem para enviar ao responsável:</p>
+      <div>
+        <label>Mensagem</label>
+        <textarea id="inputMsgWhatsapp" rows="4"></textarea>
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button onclick="document.getElementById('modalNegociacao').style.display='none'" style="flex:1; padding: 10px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer;">Voltar</button>
+        <a id="linkEnviarWhatsapp" href="#" target="_blank" style="flex:1; padding: 10px; background: #16a34a; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; text-align: center;">💬 Enviar WhatsApp</a>
       </div>
     </div>
   </div>
@@ -172,13 +190,19 @@
       const data = document.getElementById("resData").value;
       const inicio = document.getElementById("resInicio").value;
       const fim = document.getElementById("resFim").value;
+      const btn = document.getElementById("btnConfirmarReservaModal");
 
       if (!titulo || !data || !inicio || !fim) {
         alert("Preencha todos os campos da reserva.");
         return;
       }
 
+      btn.disabled = true;
+      btn.innerText = "A guardar...";
       const ok = await window.salvarReservaFirestore({ titulo, data, inicio, fim, sala });
+      btn.disabled = false;
+      btn.innerText = "Confirmar";
+
       if (ok) {
         document.getElementById("resTitulo").value = "";
         document.getElementById("modalNovaReserva").style.display = "none";
