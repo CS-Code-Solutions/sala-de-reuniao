@@ -1,44 +1,38 @@
 // ==========================================
-// SERVICE WORKER - MEETINGROOM (js/sw.js)
+// SERVICE WORKER - MEETINGROOM (sw.js)
 // ==========================================
 
-const CACHE_NAME = 'meetingroom-firebase-v1.4.0';
+const CACHE_NAME = 'meetingroom-cache-v1.0.0';
 
+// Ficheiros essenciais a guardar em cache para carregamento rápido
 const ASSETS_TO_CACHE = [
-  '../index.html',
-  '../manifest.json',
-  '../termos.js',
-  '../ico.png',
-  '../cabe.png',
-  '../login.png',
-  '../fundo.jpg',
-  '../css/global.css',
-  '../css/components.css',
-  '../pages/calendar.html',
-  '../pages/my-reservations.html',
-  '../pages/notifications.html',
-  '../pages/privacy-policy.html',
-  '../pages/rooms.html',
-  '../pages/admin-users.html',
-  '../pages/display-porta.html'
-  '../js/anti-flicker.js'
+  './calendar.html',
+  './admin-users.html',
+  './privacy-policy.html',
+  './js/termos.js',
+  './ico.png',
+  './cabe.png'
 ];
 
+// Instalação do Service Worker e armazenamento dos assets em cache
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      console.log('[Service Worker] A guardar ficheiros em cache...');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
+// Ativação e limpeza de caches antigos
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log('[Service Worker] A remover cache antigo:', key);
             return caches.delete(key);
           }
         })
@@ -48,14 +42,10 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Interceção de pedidos de rede (estratégia: Cache primeiro, depois rede)
 self.addEventListener('fetch', (event) => {
-  // Ignora chamadas externas do Firebase, Firestore e Google APIs para manter tempo real
-  if (
-    event.request.method !== 'GET' ||
-    event.request.url.includes('firebase') ||
-    event.request.url.includes('googleapis.com') ||
-    event.request.url.includes('gstatic.com')
-  ) {
+  // Ignora pedidos que não sejam GET ou ligações externas do Firebase/APIs
+  if (event.request.method !== 'GET' || event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com')) {
     return;
   }
 
@@ -64,7 +54,9 @@ self.addEventListener('fetch', (event) => {
       if (cachedResponse) {
         return cachedResponse;
       }
-      return fetch(event.request).catch(() => {});
+      return fetch(event.request).catch(() => {
+        // Se falhar e estiver offline, podes retornar uma página de fallback se desejado
+      });
     })
   );
 });

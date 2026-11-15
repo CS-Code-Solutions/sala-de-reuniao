@@ -2,15 +2,14 @@
 <html lang="pt-BR">
 <head>
   <!-- Configurações para PWA e iOS -->
-  <link rel="manifest" href="../manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
-  <link rel="apple-touch-icon" href="../ico.png">
+<link rel="manifest" href="../manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MeetingRoom">
+<link rel="apple-touch-icon" href="../ico.png">
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="../js/anti-flicker.js"></script>
   <title>MeetingRoom - Minhas Reservas</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
@@ -124,7 +123,7 @@
       border-left: 5px solid var(--accent-color);
     }
     
-    .res-meta { font-size: 12px; font-weight: 600; color: var(--accent-color); display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+    .res-meta { font-size: 12px; font-weight: 600; color: var(--accent-color); display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
     .res-meta svg { width: 14px; height: 14px; stroke-width: 2; }
     
     .btn-delete {
@@ -153,7 +152,7 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8px;
+        padding: 10px 12px 10px 8;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
@@ -170,10 +169,6 @@
       .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
     }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -196,7 +191,7 @@
           <span>Notificações</span>
         </a>
         
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px; display:none;" class="admin-only-item">Administração</div>
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
         <a href="rooms.html" class="admin-only-item" style="display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
           <span>Salas</span>
@@ -212,7 +207,7 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; display: flex; align-items: center;">
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; display: flex; align-items: center;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
       </a>
     </div>
@@ -223,13 +218,13 @@
       <img src="../cabe.png" alt="Logo" class="brand-logo">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
-        <a href="#" onclick="fazerLogoutReal(); return false;" class="btn-sair-mobile">Sair</a>
+        <a href="#" onclick="fazerLogoutLocal(); return false;" class="btn-sair-mobile">Sair</a>
       </div>
     </div>
 
     <header class="page-header">
       <h1>Minhas Reservas</h1>
-      <p style="color: var(--text-muted); font-size: 14px;" id="subtituloMinhasReservas">Consulte e gerencie as reuniões marcadas por si.</p>
+      <p style="color: var(--text-muted); font-size: 14px;">Consulte e gerencie as reuniões marcadas por si.</p>
     </header>
 
     <section>
@@ -249,7 +244,7 @@
       <input type="hidden" id="reservaParaExcluirId">
       <div class="modal-actions">
         <button class="btn-modal-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
-        <button class="btn-modal-confirm" onclick="executarCancelamentoFirebase()">Sim, Cancelar</button>
+        <button class="btn-modal-confirm" onclick="executarCancelamentoLocal()">Sim, Cancelar</button>
       </div>
     </div>
   </div>
@@ -278,116 +273,67 @@
   </nav>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-      authDomain: "reuniao-d1b29.firebaseapp.com",
-      projectId: "reuniao-d1b29",
-      storageBucket: "reuniao-d1b29.firebasestorage.app",
-      messagingSenderId: "887897617950",
-      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-    };
-
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-
-    let usuarioLogadoUid = null;
-    let usuarioApelido = "";
+    let usuarioSessao = null;
     let usuarioEhAdmin = false;
 
     document.addEventListener("DOMContentLoaded", () => {
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (!user) {
-          window.location.href = "../index.html";
-          return;
-        }
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (!sessaoStr) {
+        window.location.href = "../index.html";
+        return;
+      }
 
-        usuarioLogadoUid = user.uid;
-        const emailLower = (user.email || "").toLowerCase();
-        usuarioApelido = emailLower.split('@')[0];
-        usuarioEhAdmin = emailLower.includes("admin") || emailLower.includes("teste");
+      usuarioSessao = JSON.parse(sessaoStr);
+      let nomeBase = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
+      usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
 
-        try {
-          const doc = await db.collection("usuarios").doc(user.uid).get();
-          if (doc.exists) {
-            const dados = doc.data();
-            if (dados.apelido) usuarioApelido = dados.apelido;
-            if (dados.cargo === "Administrador") usuarioEhAdmin = true;
-          }
-        } catch (e) {}
+      document.getElementById("userNameDisplay").innerText = nomeBase;
+      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
+      document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
 
-        document.getElementById("userNameDisplay").innerText = usuarioApelido;
-        document.getElementById("userRoleDisplay").innerText = usuarioEhAdmin ? "Administrador" : "Usuário";
-        document.getElementById("userAvatarMobile").innerText = "Olá, " + usuarioApelido;
+      if (usuarioEhAdmin) {
+        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+      }
 
-        if (usuarioEhAdmin) {
-          document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-          document.getElementById("subtituloMinhasReservas").innerText = "Como Administrador, visualiza e gerencia todas as reservas agendadas no sistema.";
-        }
-
-        carregarMinhasReservasFirebase();
-        window.AntiFlicker?.reveal();
-      });
+      carregarMinhasReservasLocal();
     });
 
-    function fazerLogoutReal() {
-      firebase.auth().signOut().then(() => {
-        window.location.href = "../index.html";
-      });
+    function fazerLogoutLocal() {
+      localStorage.removeItem("meetingroom_sessao_atual");
+      window.location.href = "../index.html";
     }
 
-    function formatarDataPt(dataStr) {
-      if (!dataStr || !dataStr.includes("-")) return dataStr || "";
-      const partes = dataStr.split("-");
-      return `${partes[2]}/${partes[1]}/${partes[0]}`;
-    }
-
-    function carregarMinhasReservasFirebase() {
+    function carregarMinhasReservasLocal() {
       const container = document.getElementById("listaMinhasReservas");
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      
+      container.innerHTML = "";
 
-      db.collection("reservas").onSnapshot((snapshot) => {
-        container.innerHTML = "";
-        let reservasFiltradas = [];
+      let minhasReservas = reservas.filter(r => usuarioEhAdmin || r.userId === usuarioSessao.uid);
 
-        snapshot.forEach(doc => {
-          const r = { id: doc.id, ...doc.data() };
-          if (usuarioEhAdmin || r.userId === usuarioLogadoUid) {
-            reservasFiltradas.push(r);
-          }
-        });
+      if (minhasReservas.length === 0) {
+        container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">Ainda não tem nenhuma reserva registada.</p>`;
+        return;
+      }
 
-        // Ordena por data e hora mais recentes/próximas
-        reservasFiltradas.sort((a, b) => {
-          const da = `${a.data || ""} ${a.horarioInicio || ""}`;
-          const dbStr = `${b.data || ""} ${b.horarioInicio || ""}`;
-          return dbStr.localeCompare(da);
-        });
-
-        if (reservasFiltradas.length === 0) {
-          container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">Ainda não tem nenhuma reserva registada.</p>`;
-          return;
-        }
-
-        reservasFiltradas.forEach(reserva => {
-          const div = document.createElement("div");
-          div.className = "reservation-card";
-          div.innerHTML = `
-            <div>
-              <div class="res-meta">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${reserva.sala || 'Sala 01'} &nbsp;|&nbsp; 
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${formatarDataPt(reserva.data)} &nbsp;|&nbsp; 
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${reserva.horarioInicio || ''} - ${reserva.horarioFim || ''}
-              </div>
-              <h4 style="font-size: 16px; color: var(--text-main); margin: 4px 0;">${reserva.titulo || 'Reunião'}</h4>
-              <p style="font-size: 13px; color: var(--text-muted);">Responsável: ${reserva.responsavel || usuarioApelido}</p>
+      minhasReservas.forEach(reserva => {
+        const div = document.createElement("div");
+        div.className = "reservation-card";
+        div.innerHTML = `
+          <div>
+            <div class="res-meta">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${reserva.sala || 'Sala 01'} &nbsp;|&nbsp; 
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${reserva.data} &nbsp;|&nbsp; 
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${reserva.horarioInicio} - ${reserva.horarioFim || ''}
             </div>
-            <button class="btn-delete" onclick="abrirModalConfirmacao('${reserva.id}')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Cancelar
-            </button>
-          `;
-          container.appendChild(div);
-        });
-      }, (err) => {
-        container.innerHTML = `<p style="color: #ef4444; font-size: 14px;">Erro ao carregar reservas: ${err.message}</p>`;
+            <h4 style="font-size: 16px; color: var(--text-main); margin: 4px 0;">${reserva.titulo}</h4>
+            <p style="font-size: 13px; color: var(--text-muted);">Responsável: ${reserva.responsavel || usuarioSessao.nome}</p>
+          </div>
+          <button class="btn-delete" onclick="abrirModalConfirmacao('${reserva.id}')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Cancelar
+          </button>
+        `;
+        container.appendChild(div);
       });
     }
 
@@ -400,21 +346,17 @@
       document.getElementById("modalConfirmacao").style.display = "none";
     }
 
-    async function executarCancelamentoFirebase() {
+    function executarCancelamentoLocal() {
       const id = document.getElementById("reservaParaExcluirId").value;
       if (!id) return;
 
-      try {
-        await db.collection("reservas").doc(id).delete();
-        fecharModalConfirmacao();
-      } catch (err) {
-        alert("Erro ao cancelar reserva: " + err.message);
-        fecharModalConfirmacao();
-      }
+      let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      reservas = reservas.filter(r => r.id !== id);
+      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
+
+      fecharModalConfirmacao();
+      carregarMinhasReservasLocal();
     }
   </script>
-<!-- Seus scripts da página -->
-    <script type="module" src="../js/auth.js"></script>
-    <script src="../js/spa-router.js"></script>
-  </body>
+</body>
 </html>

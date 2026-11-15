@@ -2,29 +2,28 @@
 <html lang="pt-BR">
 <head>
   <!-- Configurações para PWA e iOS -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
-  <link rel="apple-touch-icon" href="ico.png">
+<link rel="manifest" href="../manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MeetingRoom">
+<link rel="apple-touch-icon" href="../ico.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="js/anti-flicker.js"></script>
   <title>MeetingRoom - Entrar</title>
   <link rel="stylesheet" href="css/global.css">
   <link rel="icon" href="ico.png" type="image/png">
   <style>
     body {
       margin: 0;
-      padding: 16px;
+      padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      /* Removemos qualquer máscara/degradê escuro, exibindo apenas a imagem de fundo pura */
       background: url('fundo.jpg') no-repeat center center fixed;
       background-size: cover;
       display: flex;
       justify-content: center;
       align-items: center;
-      min-height: 100vh;
-      box-sizing: border-box;
+      height: 100vh;
     }
     .login-card {
       background: #ffffff;
@@ -34,7 +33,6 @@
       max-width: 400px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
       text-align: center;
-      box-sizing: border-box;
     }
     .login-logo {
       max-width: 180px;
@@ -76,47 +74,29 @@
       font-size: 15px;
       cursor: pointer;
       margin-top: 10px;
-      transition: background 0.2s;
     }
     .btn-login:hover {
       background: #1d4ed8;
-    }
-    .btn-login:disabled {
-      background: #94a3b8;
-      cursor: not-allowed;
-    }
-    .erro-box {
-      display: none;
-      background: #fef2f2;
-      color: #dc2626;
-      border: 1px solid #fecaca;
-      padding: 10px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 14px;
-      text-align: left;
     }
   </style>
 
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <div class="login-card">
+    <!-- Logótipo fixo exclusivamente como login.png -->
     <img src="login.png" alt="Logo MeetingRoom" class="login-logo">
     
-    <div id="erroLoginBox" class="erro-box"></div>
-
     <div class="form-group">
       <label>E-mail</label>
-      <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" required onkeydown="if(event.key==='Enter') fazerLogin()">
+      <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" required>
     </div>
     <div class="form-group">
       <label>Senha</label>
-      <input type="password" id="senhaLogin" placeholder="••••••••" required onkeydown="if(event.key==='Enter') fazerLogin()">
+      <input type="password" id="senhaLogin" placeholder="••••••••" required>
     </div>
-    <button class="btn-login" id="btnEntrar" onclick="fazerLogin()">Entrar</button>
+    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
   </div>
 
   <script>
@@ -132,68 +112,24 @@
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
-    const db = firebase.firestore();
 
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        window.location.replace("pages/calendar.html");
-      } else {
-        window.AntiFlicker?.reveal();
-      }
-    });
-
-    function mostrarErroLogin(msg) {
-      const box = document.getElementById("erroLoginBox");
-      box.innerText = msg;
-      box.style.display = "block";
-    }
-
-    async function fazerLogin() {
-      const email = document.getElementById("emailLogin").value.trim().toLowerCase();
+    function fazerLogin() {
+      const email = document.getElementById("emailLogin").value.trim();
       const senha = document.getElementById("senhaLogin").value.trim();
-      const btn = document.getElementById("btnEntrar");
-      document.getElementById("erroLoginBox").style.display = "none";
 
       if (!email || !senha) {
-        mostrarErroLogin("Por favor, preencha o e-mail e a senha.");
+        alert("Por favor, preencha o e-mail e a senha.");
         return;
       }
 
-      btn.disabled = true;
-      btn.innerText = "A entrar...";
-
-      try {
-        const cred = await firebase.auth().signInWithEmailAndPassword(email, senha);
-        const user = cred.user;
-
-        // Garante que existe registo do utilizador no Firestore
-        const userRef = db.collection("usuarios").doc(user.uid);
-        const docSnap = await userRef.get();
-        if (!docSnap.exists) {
-          const prefixo = email.split('@')[0];
-          const ehAdmin = email.includes("admin") || email.includes("teste");
-          await userRef.set({
-            nome: prefixo.charAt(0).toUpperCase() + prefixo.slice(1),
-            apelido: prefixo.charAt(0).toUpperCase() + prefixo.slice(1),
-            email: email,
-            cargo: ehAdmin ? "Administrador" : "Usuário",
-            ativo: true
-          });
-        }
-
-        window.location.href = "pages/calendar.html";
-      } catch (error) {
-        console.error("Erro no login:", error);
-        let msg = "E-mail ou senha inválidos.";
-        if (error.code === "auth/too-many-requests") {
-          msg = "Muitas tentativas seguidas. Aguarde alguns minutos e tente novamente.";
-        } else if (error.code === "auth/network-request-failed") {
-          msg = "Sem ligação à internet. Verifique a sua rede.";
-        }
-        mostrarErroLogin(msg);
-        btn.disabled = false;
-        btn.innerText = "Entrar";
-      }
+      firebase.auth().signInWithEmailAndPassword(email, senha)
+        .then(() => {
+          window.location.href = "pages/calendar.html";
+        })
+        .catch((error) => {
+          console.error("Erro no login:", error);
+          alert("Erro ao entrar (" + error.code + "): " + error.message);
+        });
     }
   </script>
 </body>
