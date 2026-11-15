@@ -68,19 +68,26 @@ function iniciarAuth() {
       if (userNameDisplay) userNameDisplay.innerText = nomeBase;
       if (userAvatarMobile) userAvatarMobile.innerText = "Olá, " + nomeBase;
 
-      // Recupera permissão prévia do cache enquanto consulta o Firestore
       let ehAdmin = false;
+      let modulosNegados = [];
+      let logoBase64 = null;
+
       try {
         const cacheAtual = JSON.parse(localStorage.getItem(UI_CACHE_KEY) || "null");
         if (cacheAtual && cacheAtual.uid === user.uid) {
           ehAdmin = Boolean(cacheAtual.ehAdmin);
+          modulosNegados = Array.isArray(cacheAtual.modulosNegados) ? cacheAtual.modulosNegados : [];
+          logoBase64 = cacheAtual.logoBase64 || null;
         }
       } catch (e) {}
 
       try {
         const userDoc = await db.collection("usuarios").doc(user.uid).get();
         if (userDoc.exists) {
-          ehAdmin = userDoc.data().cargo === "Administrador";
+          const dados = userDoc.data();
+          ehAdmin = dados.cargo === "Administrador";
+          if (Array.isArray(dados.modulosNegados)) modulosNegados = dados.modulosNegados;
+          if (dados.logoBase64) logoBase64 = dados.logoBase64;
         }
       } catch (e) {
         console.error("Erro ao verificar cargo:", e);
@@ -90,11 +97,16 @@ function iniciarAuth() {
         ehAdmin = true;
       }
 
-      // Atualiza cache no localStorage para as próximas trocas de aba
+      if (ehAdmin) {
+        modulosNegados = [];
+      }
+
       salvarCacheUI({
         uid: user.uid,
         nome: nomeBase,
-        ehAdmin
+        ehAdmin,
+        modulosNegados,
+        logoBase64
       });
 
       const adminItems = document.querySelectorAll(".admin-only-item");
