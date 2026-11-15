@@ -1,362 +1,60 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <!-- Configurações para PWA e iOS -->
-<link rel="manifest" href="../manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MeetingRoom">
-<link rel="apple-touch-icon" href="../ico.png">
-  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Minhas Reservas</title>
+  <link rel="manifest" href="../manifest.json">
+  <link rel="icon" href="../ico.png" type="image/png">
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
   <style>
-    :root {
-      --sidebar-bg: #0f172a;
-      --accent-color: #0d9488;
-      --accent-hover: #0f766e;
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-    }
-
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      display: flex;
-      min-height: 100vh;
-    }
-
-    .sidebar {
-      width: 260px;
-      background-color: var(--sidebar-bg);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 24px 16px;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 100;
-    }
-
-    .brand-area {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 12px 24px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 12px;
-    }
-
-    .brand-logo {
-      max-height: 55px;
-      width: 100%;
-      object-fit: contain;
-    }
-
-    .nav-links {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 10px;
-      flex: 1;
-    }
-
-    .nav-links a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .nav-links a svg {
-      width: 18px;
-      height: 18px;
-      stroke-width: 2;
-      flex-shrink: 0;
-    }
-
-    .nav-links a:hover, .nav-links a.active {
-      background: rgba(255, 255, 255, 0.08);
-      color: white;
-    }
-
-    .nav-links a.active {
-      background: rgba(13, 148, 136, 0.25);
-      color: #2dd4bf;
-    }
-
-    .user-profile-box {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 12px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
-    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
-
-    .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
-    .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 26px; color: var(--text-main); margin-bottom: 4px; font-weight: 700; }
-    
-    .reservation-card {
-      background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
-      display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
-      border-left: 5px solid var(--accent-color);
-    }
-    
-    .res-meta { font-size: 12px; font-weight: 600; color: var(--accent-color); display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-    .res-meta svg { width: 14px; height: 14px; stroke-width: 2; }
-    
-    .btn-delete {
-      background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px;
-      font-weight: 600; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
-    }
-    .btn-delete svg { width: 14px; height: 14px; }
-    .btn-delete:hover { background: #fecaca; }
-
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 400px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
-    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
-    .modal-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
-    .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
-    .btn-modal-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-confirm { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-    .mobile-topbar-bar { display: none; }
+    .brand-logo { max-width: 150px; height: auto; }
+    .nav-links a { display: flex; align-items: center; gap: 10px; }
+    .nav-links svg { width: 18px; height: 18px; stroke-width: 2; }
+    .user-profile-box { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-color); }
+    .user-info-text h4 { font-size: 14px; color: var(--text-main); }
+    .user-info-text p { font-size: 12px; color: var(--text-muted); }
     .mobile-bottom-nav { display: none; }
-
-    @media (max-width: 1024px) {
+    @media (max-width: 768px) {
       .sidebar { display: none; }
-      .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      .mobile-topbar-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #0f172a;
-        padding: 10px 12px 10px 8;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        margin: -16px -16px 20px -16px;
+      .mobile-bottom-nav {
+        display: flex; justify-content: space-around; align-items: center;
+        position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+        background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000;
       }
-      .brand-logo { max-height: 38px; width: auto; object-fit: contain; margin-right: auto; margin-left: 0; }
-      .btn-sair-mobile {
-        color: #e2e8f0; font-size: 13px; font-weight: 600; text-decoration: none;
-        background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
-        padding: 6px 12px; border-radius: 8px; transition: all 0.2s;
-      }
-      .btn-sair-mobile:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
+      .mob-nav-item.active { color: var(--primary); font-weight: 600; }
       .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
-      .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
+      .main-content { padding-bottom: 72px; }
     }
   </style>
 </head>
 <body>
+  <div id="sidebar-container"></div>
 
-  <aside class="sidebar">
-    <div>
-      <div class="brand-area">
-        <img src="../cabe.png" alt="Logo" class="brand-logo">
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1>Minhas Reservas</h1>
+        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Acompanhe e gerencie seus agendamentos sincronizados em tempo real</p>
       </div>
-      <nav class="nav-links">
-        <a href="calendar.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span>Agenda</span>
-        </a>
-        <a href="my-reservations.html" class="active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-          <span>Minhas reservas</span>
-        </a>
-        <a href="notifications.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span>Notificações</span>
-        </a>
-        
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
-          <span>Salas</span>
-        </a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          <span>Usuários</span>
-        </a>
-      </nav>
-    </div>
-    <div class="user-profile-box">
-      <div class="user-info-text">
-        <h4 id="userNameDisplay">Carregando...</h4>
-        <p id="userRoleDisplay">Utilizador</p>
-      </div>
-      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; display: flex; align-items: center;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      </a>
-    </div>
-  </aside>
-
-  <main class="page-wrapper">
-    <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="Logo" class="brand-logo">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
-        <a href="#" onclick="fazerLogoutLocal(); return false;" class="btn-sair-mobile">Sair</a>
-      </div>
-    </div>
-
-    <header class="page-header">
-      <h1>Minhas Reservas</h1>
-      <p style="color: var(--text-muted); font-size: 14px;">Consulte e gerencie as reuniões marcadas por si.</p>
+      <a href="calendar.html" style="padding: 10px 18px; background: #0d9488; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">+ Nova Reserva</a>
     </header>
 
-    <section>
-      <div id="listaMinhasReservas" style="display: flex; flex-direction: column; gap: 12px;">
-        <p style="color: var(--text-muted); font-size: 14px;">A carregar as suas reservas...</p>
-      </div>
+    <section class="schedule-grid-container">
+      <div class="time-slots" id="listaMinhasReservas"></div>
     </section>
+
+    <footer style="text-align: center; padding: 16px; font-size: 12px; color: #64748b; margin-top: auto;">
+      Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank" style="color: #0d9488; text-decoration: none; font-weight: 600;">CS Code Solutions</a>
+    </footer>
   </main>
 
-  <div class="modal-overlay" id="modalConfirmacao">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: center; color: #dc2626;">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-      </div>
-      <h3 class="modal-title">Cancelar Reserva</h3>
-      <p class="modal-text">Tem certeza que deseja cancelar e excluir esta reunião agendada?</p>
-      <input type="hidden" id="reservaParaExcluirId">
-      <div class="modal-actions">
-        <button class="btn-modal-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
-        <button class="btn-modal-confirm" onclick="executarCancelamentoLocal()">Sim, Cancelar</button>
-      </div>
-    </div>
-  </div>
+  <div id="mobile-nav-container"></div>
 
-  <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      <span>Agenda</span>
-    </a>
-    <a href="my-reservations.html" class="mob-nav-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-      <span>Reservas</span>
-    </a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
-      <span>Salas</span>
-    </a>
-    <a href="notifications.html" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-      <span>Avisos</span>
-    </a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      <span>Admin</span>
-    </a>
-  </nav>
-
-  <script>
-    let usuarioSessao = null;
-    let usuarioEhAdmin = false;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
-      if (!sessaoStr) {
-        window.location.href = "../index.html";
-        return;
-      }
-
-      usuarioSessao = JSON.parse(sessaoStr);
-      let nomeBase = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
-      usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
-
-      document.getElementById("userNameDisplay").innerText = nomeBase;
-      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
-      document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
-
-      if (usuarioEhAdmin) {
-        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-      }
-
-      carregarMinhasReservasLocal();
-    });
-
-    function fazerLogoutLocal() {
-      localStorage.removeItem("meetingroom_sessao_atual");
-      window.location.href = "../index.html";
-    }
-
-    function carregarMinhasReservasLocal() {
-      const container = document.getElementById("listaMinhasReservas");
-      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      
-      container.innerHTML = "";
-
-      let minhasReservas = reservas.filter(r => usuarioEhAdmin || r.userId === usuarioSessao.uid);
-
-      if (minhasReservas.length === 0) {
-        container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">Ainda não tem nenhuma reserva registada.</p>`;
-        return;
-      }
-
-      minhasReservas.forEach(reserva => {
-        const div = document.createElement("div");
-        div.className = "reservation-card";
-        div.innerHTML = `
-          <div>
-            <div class="res-meta">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${reserva.sala || 'Sala 01'} &nbsp;|&nbsp; 
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${reserva.data} &nbsp;|&nbsp; 
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${reserva.horarioInicio} - ${reserva.horarioFim || ''}
-            </div>
-            <h4 style="font-size: 16px; color: var(--text-main); margin: 4px 0;">${reserva.titulo}</h4>
-            <p style="font-size: 13px; color: var(--text-muted);">Responsável: ${reserva.responsavel || usuarioSessao.nome}</p>
-          </div>
-          <button class="btn-delete" onclick="abrirModalConfirmacao('${reserva.id}')">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Cancelar
-          </button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function abrirModalConfirmacao(id) {
-      document.getElementById("reservaParaExcluirId").value = id;
-      document.getElementById("modalConfirmacao").style.display = "flex";
-    }
-
-    function fecharModalConfirmacao() {
-      document.getElementById("modalConfirmacao").style.display = "none";
-    }
-
-    function executarCancelamentoLocal() {
-      const id = document.getElementById("reservaParaExcluirId").value;
-      if (!id) return;
-
-      let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      reservas = reservas.filter(r => r.id !== id);
-      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
-
-      fecharModalConfirmacao();
-      carregarMinhasReservasLocal();
-    }
-  </script>
+  <script src="../js/sidebar.js"></script>
+  <script src="../termos.js"></script>
+  <script type="module" src="../js/reservations.js"></script>
 </body>
 </html>
