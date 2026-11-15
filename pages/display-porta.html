@@ -209,6 +209,7 @@
     .modal-actions { display: flex; gap: 8px; margin-top: 4px; }
     .btn-cancel { flex: 1; padding: 9px; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
     .btn-confirm { flex: 1; padding: 9px; background: var(--green-status); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 13px; }
+    .btn-confirm:disabled { background: #475569; cursor: not-allowed; }
 
     .toast-container {
       position: fixed; top: 16px; right: 16px; z-index: 3000;
@@ -219,6 +220,7 @@
       font-size: 13px; font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
       transform: translateX(120%); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
+    .toast.success { background: var(--green-status); }
     .toast.show { transform: translateX(0); }
 
     @media (orientation: portrait) {
@@ -232,16 +234,20 @@
       .btn-reserva-rapida { width: 100%; justify-content: center; }
     }
   </style>
+
+  <!-- Firebase Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
   <div class="bg-overlay" id="bgOverlay"></div>
-
   <div id="toastContainer" class="toast-container"></div>
 
   <div class="display-container">
     <div class="left-col">
-      <img src="../login.png" alt="Logo" class="brand-logo-porta">
+      <img src="../login.png" alt="Logo" class="brand-logo-porta" onerror="this.src='../cabe.png';">
       
       <div class="clock-box">
         <div class="clock-time" id="clockTime">12:00</div>
@@ -271,7 +277,9 @@
 
       <div class="schedule-box">
         <h3>Próximas reuniões de hoje</h3>
-        <div id="listaReunioesHoje"></div>
+        <div id="listaReunioesHoje">
+          <p style="color: var(--text-muted); font-size: 13px;">Sincronizando agenda...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -282,7 +290,9 @@
 
       <div class="form-group">
         <label>Selecione o Utilizador</label>
-        <select id="selectUsuarioPorta"></select>
+        <select id="selectUsuarioPorta">
+          <option value="Visitante">Carregando utilizadores...</option>
+        </select>
       </div>
 
       <div class="form-group" style="display: flex; flex-direction: row; gap: 12px;">
@@ -308,18 +318,33 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalReservaPorta').style.display='none'">Cancelar</button>
-        <button class="btn-confirm" onclick="confirmarReservaPorta()">Confirmar</button>
+        <button class="btn-confirm" id="btnConfirmarPorta" onclick="confirmarReservaPorta()">Confirmar</button>
       </div>
     </div>
   </div>
 
   <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
+      authDomain: "reuniao-d1b29.firebaseapp.com",
+      projectId: "reuniao-d1b29",
+      storageBucket: "reuniao-d1b29.firebasestorage.app",
+      messagingSenderId: "887897617950",
+      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
+    };
+
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
     let duracaoMinutos = 30;
     let salaAtualGlobal = "Sala 01";
+    let reservasHojeCache = [];
+    let unsubscribeDisplay = null;
+    let dataMonitoradaAtual = "";
 
     const temasFundo = [
-      { url: "", overlay: "rgba(15, 23, 42, 0.82)" }, // Tema padrão escuro
-      { url: "../fundo.jpg", overlay: "rgba(15, 23, 42, 0.75)" }, // Tema customizado fundo.jpg
+      { url: "", overlay: "rgba(15, 23, 42, 0.82)" },
+      { url: "../fundo.jpg", overlay: "rgba(15, 23, 42, 0.75)" },
       { url: "https://images.unsplash.com/photo-1542224566-6e85f2e6772f?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.75)" },
       { url: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.78)" },
       { url: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80", overlay: "rgba(15, 23, 42, 0.80)" }
@@ -332,10 +357,10 @@
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 
-    function showToast(message) {
+    function showToast(message, isSuccess = false) {
       const container = document.getElementById("toastContainer");
       const toast = document.createElement("div");
-      toast.className = "toast";
+      toast.className = "toast" + (isSuccess ? " success" : "");
       toast.innerText = message;
       container.appendChild(toast);
       
@@ -350,14 +375,18 @@
       carregarTemaSalvo();
       inicializarSala();
       iniciarRelogio();
-      carregarUsuariosDrop();
-      atualizarPainel();
+      carregarUsuariosFirebaseDrop();
+      escutarReservasSalaFirebase();
       
-      window.addEventListener('storage', (e) => {
-        if(e.key === "meetingroom_reservas" || e.key === "meetingroom_calendario") atualizarPainel();
-      });
-      
-      setInterval(atualizarPainel, 10000);
+      // Atualiza o status (Em andamento / Próxima / Concluída) a cada 10s e verifica virada de dia
+      setInterval(() => {
+        const hojeAgora = getLocalDateString();
+        if (hojeAgora !== dataMonitoradaAtual) {
+          escutarReservasSalaFirebase();
+        } else {
+          renderizarPainel();
+        }
+      }, 10000);
     });
 
     function carregarTemaSalvo() {
@@ -401,7 +430,7 @@
       const novaUrl = new URL(window.location);
       novaUrl.searchParams.set('sala', salaAtualGlobal);
       window.history.pushState({}, '', novaUrl);
-      atualizarPainel();
+      escutarReservasSalaFirebase();
     }
 
     function iniciarRelogio() {
@@ -414,48 +443,51 @@
       setInterval(atualizar, 1000);
     }
 
-    function carregarUsuariosDrop() {
+    async function carregarUsuariosFirebaseDrop() {
       const select = document.getElementById("selectUsuarioPorta");
-      const usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || 
-                       JSON.parse(localStorage.getItem("usuarios")) || [
-        { nome: "Programador", apelido: "Programador" },
-        { nome: "Utilizador Teste", apelido: "Usuário" }
-      ];
-
-      select.innerHTML = "";
-      usuarios.forEach(u => {
-        const opt = document.createElement("option");
-        opt.value = u.apelido || u.nome.split(' ')[0];
-        opt.innerText = `${u.nome} (${u.apelido || ''})`;
-        select.appendChild(opt);
-      });
+      try {
+        const snapshot = await db.collection("usuarios").get();
+        select.innerHTML = "";
+        if (snapshot.empty) {
+          select.innerHTML = `<option value="Equipa Viecelli">Equipa Viecelli</option>`;
+          return;
+        }
+        snapshot.forEach(doc => {
+          const u = doc.data();
+          const nomeExibicao = u.apelido || (u.nome ? u.nome.split(' ')[0] : "Utilizador");
+          const opt = document.createElement("option");
+          opt.value = nomeExibicao;
+          opt.dataset.uid = doc.id;
+          opt.innerText = u.nome ? `${u.nome} (${nomeExibicao})` : nomeExibicao;
+          select.appendChild(opt);
+        });
+      } catch (e) {
+        select.innerHTML = `<option value="Reunião Rápida">Reunião Rápida</option>`;
+      }
     }
 
-    function atualizarPainel() {
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get('sala')) {
-        salaAtualGlobal = urlParams.get('sala');
-        const sel = document.getElementById("selectSalaDisplay");
-        if(sel && sel.value !== salaAtualGlobal) sel.value = salaAtualGlobal;
-      }
+    function escutarReservasSalaFirebase() {
+      if (unsubscribeDisplay) unsubscribeDisplay();
+      dataMonitoradaAtual = getLocalDateString();
 
-      let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      const calendarioExtra = JSON.parse(localStorage.getItem("meetingroom_calendario")) || JSON.parse(localStorage.getItem("calendar_events")) || [];
-      
-      const idsExistentes = new Set(reservas.map(r => r.id));
-      calendarioExtra.forEach(ev => {
-        if(ev && !idsExistentes.has(ev.id)) {
-          reservas.push(ev);
-        }
-      });
+      unsubscribeDisplay = db.collection("reservas")
+        .where("sala", "==", salaAtualGlobal)
+        .onSnapshot((snapshot) => {
+          const hojeStr = getLocalDateString();
+          reservasHojeCache = [];
+          snapshot.forEach(doc => {
+            const dados = doc.data();
+            if (dados.data === hojeStr) {
+              reservasHojeCache.push({ id: doc.id, ...dados });
+            }
+          });
+          renderizarPainel();
+        }, (err) => {
+          console.error("Erro no Display de Porta:", err);
+        });
+    }
 
-      const hojeStr = getLocalDateString();
-      const reservasHoje = reservas.filter(r => {
-        const rSala = r.sala || r.room || r.local;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        return rSala === salaAtualGlobal && rData === hojeStr;
-      });
-      
+    function renderizarPainel() {
       const agora = new Date();
       const horaAtualNum = agora.getHours() * 60 + agora.getMinutes();
 
@@ -463,10 +495,10 @@
       let futurasArr = [];
       let concluidasArr = [];
 
-      reservasHoje.forEach(r => {
-        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
-        if(!strIni) return;
+      reservasHojeCache.forEach(r => {
+        const strIni = r.horarioInicio;
+        const strFim = r.horarioFim || strIni;
+        if (!strIni) return;
 
         const [hIni, mIni] = strIni.split(':').map(Number);
         const [hFim, mFim] = strFim.split(':').map(Number);
@@ -478,7 +510,7 @@
         else futurasArr.push(r);
       });
 
-      const sortByTime = (a, b) => (a.horarioInicio || a.horaInicio || a.start || "").localeCompare(b.horarioInicio || b.horaInicio || b.start || "");
+      const sortByTime = (a, b) => (a.horarioInicio || "").localeCompare(b.horarioInicio || "");
       emAndamentoArr.sort(sortByTime);
       futurasArr.sort(sortByTime);
       concluidasArr.sort(sortByTime);
@@ -488,7 +520,7 @@
         const emAndamento = emAndamentoArr[0];
         banner.classList.add("ocupado");
         document.getElementById("statusTexto").innerText = "Ocupado";
-        document.getElementById("statusSubtexto").innerText = `${emAndamento.titulo || emAndamento.title || 'Reunião'} (${emAndamento.responsavel || emAndamento.usuario || 'Convidado'})`;
+        document.getElementById("statusSubtexto").innerText = `${emAndamento.titulo || 'Reunião'} (${emAndamento.responsavel || 'Convidado'})`;
       } else {
         banner.classList.remove("ocupado");
         document.getElementById("statusTexto").innerText = "Disponível";
@@ -505,9 +537,9 @@
         let proximaEvidenciada = false;
 
         ordenadasFinal.forEach(r => {
-          const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-          const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
-          if(!strIni) return;
+          const strIni = r.horarioInicio;
+          const strFim = r.horarioFim || strIni;
+          if (!strIni) return;
 
           const [hIni, mIni] = strIni.split(':').map(Number);
           const [hFim, mFim] = strFim.split(':').map(Number);
@@ -533,8 +565,8 @@
           div.innerHTML = `
             <div class="meeting-indicator"></div>
             <div class="meeting-details" style="width: 100%;">
-              <h4>${strIni} - ${strFim} | ${r.titulo || r.title || 'Reunião'} ${tagBadge}</h4>
-              <p>Responsável: ${r.responsavel || r.usuario || 'Convidado'}</p>
+              <h4>${strIni} - ${strFim} | ${r.titulo || 'Reunião'} ${tagBadge}</h4>
+              <p>Responsável: ${r.responsavel || 'Convidado'}</p>
             </div>
           `;
           containerList.appendChild(div);
@@ -543,7 +575,7 @@
     }
 
     function abrirModalReservaRapida() {
-      carregarUsuariosDrop();
+      carregarUsuariosFirebaseDrop();
       const d = new Date();
       const hh = String(d.getHours()).padStart(2, '0');
       const mm = String(d.getMinutes()).padStart(2, '0');
@@ -557,10 +589,13 @@
       btn.classList.add("active");
     }
 
-    function confirmarReservaPorta() {
-      const responsavel = document.getElementById("selectUsuarioPorta").value;
+    async function confirmarReservaPorta() {
+      const selUser = document.getElementById("selectUsuarioPorta");
+      const responsavel = selUser.value || "Equipa";
+      const ownerUid = selUser.options[selUser.selectedIndex]?.dataset?.uid || "porta";
       const horaSelecionada = document.getElementById("inputHoraInicioPorta").value;
       const titulo = document.getElementById("inputTituloPorta").value.trim() || "Reunião Presencial";
+      const btn = document.getElementById("btnConfirmarPorta");
 
       if (!horaSelecionada) return showToast("Por favor, selecione o horário de início.");
 
@@ -572,61 +607,41 @@
       const horaFimM = String(minFimTotal % 60).padStart(2, '0');
       const horaFimStr = `${horaFimH}:${horaFimM}`;
 
-      const hojeStr = getLocalDateString();
-      let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-
-      const conflito = reservas.some(r => {
-        const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        if (rSala !== salaAtualGlobal || rData !== hojeStr) return false;
-        
-        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5) || strIni;
-        if(!strIni) return false;
-
-        const rIni = strIni.split(':').map(Number)[0] * 60 + strIni.split(':').map(Number)[1];
-        const rFim = strFim.split(':').map(Number)[0] * 60 + strFim.split(':').map(Number)[1];
-        
+      const conflito = reservasHojeCache.some(r => {
+        if (!r.horarioInicio) return false;
+        const rIni = r.horarioInicio.split(':').map(Number)[0] * 60 + r.horarioInicio.split(':').map(Number)[1];
+        const rFim = (r.horarioFim || r.horarioInicio).split(':').map(Number)[0] * 60 + (r.horarioFim || r.horarioInicio).split(':').map(Number)[1];
         return (minInicioTotal < rFim && minFimTotal > rIni);
       });
 
-      if (conflito) return showToast("❌ Conflito de Horário! Já existe uma reunião marcada neste intervalo.");
+      if (conflito) return showToast("Conflito de Horário! Já existe uma reunião marcada neste intervalo.");
 
-      const novoEvento = {
-        id: 'res-' + Date.now(),
-        titulo: titulo,
-        title: titulo,
-        horarioInicio: horaSelecionada,
-        horaInicio: horaSelecionada,
-        horarioFim: horaFimStr,
-        horaFim: horaFimStr,
-        start: `${hojeStr}T${horaSelecionada}:00`,
-        end: `${hojeStr}T${horaFimStr}:00`,
-        sala: salaAtualGlobal,
-        room: salaAtualGlobal,
-        data: hojeStr,
-        date: hojeStr,
-        responsavel: responsavel,
-        usuario: responsavel,
-        userId: 'porta',
-        status: 'Aprovada',
-        situacao: 'Aprovada',
-        color: '#10b981',
-        backgroundColor: '#10b981',
-        dataCriacao: new Date().toISOString()
-      };
+      btn.disabled = true;
+      btn.innerText = "A reservar...";
 
-      reservas.push(novoEvento);
-      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
-      
-      let calendarioExtra = JSON.parse(localStorage.getItem("meetingroom_calendario")) || [];
-      calendarioExtra.push(novoEvento);
-      localStorage.setItem("meetingroom_calendario", JSON.stringify(calendarioExtra));
+      try {
+        await db.collection("reservas").add({
+          titulo: titulo,
+          horarioInicio: horaSelecionada,
+          horarioFim: horaFimStr,
+          sala: salaAtualGlobal,
+          data: getLocalDateString(),
+          responsavel: responsavel,
+          userId: ownerUid,
+          origem: "Display Porta",
+          canceladoPorAdmin: false,
+          criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        });
 
-      document.getElementById("modalReservaPorta").style.display = "none";
-      document.getElementById("inputTituloPorta").value = "";
-      atualizarPainel();
-      showToast("✅ Reserva efetuada com sucesso!");
+        document.getElementById("modalReservaPorta").style.display = "none";
+        document.getElementById("inputTituloPorta").value = "";
+        showToast("Reserva efetuada com sucesso!", true);
+      } catch (err) {
+        showToast("Erro ao salvar reserva: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Confirmar";
+      }
     }
 
     let wakeLock = null;
@@ -635,15 +650,13 @@
         if ('wakeLock' in navigator) {
           wakeLock = await navigator.wakeLock.request('screen');
         }
-      } catch (err) {
-        console.log(`Erro no Wake Lock: ${err.message}`);
-      }
+      } catch (err) {}
     }
 
     document.addEventListener('click', () => {
       manterEcraLigado();
       if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(e => console.log(e));
+        document.documentElement.requestFullscreen().catch(() => {});
       }
     }, { once: true });
   </script>

@@ -1,98 +1,308 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MeetingRoom - Política de Privacidade e LGPD</title>
-  <link rel="manifest" href="../manifest.json">
-  <link rel="icon" href="../ico.png" type="image/png">
+  <title>MeetingRoom - Política de Privacidade</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
+  <!-- Configurações para PWA e iOS -->
+  <link rel="manifest" href="../manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
+  <link rel="apple-touch-icon" href="../ico.png">
+
   <style>
-    .brand-logo { max-width: 150px; height: auto; }
-    .nav-links a { display: flex; align-items: center; gap: 10px; }
-    .nav-links svg { width: 18px; height: 18px; stroke-width: 2; }
-    .user-profile-box { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-color); }
-    .user-info-text h4 { font-size: 14px; color: var(--text-main); }
-    .user-info-text p { font-size: 12px; color: var(--text-muted); }
-    .policy-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; padding: 28px; max-width: 820px; line-height: 1.65; color: #334155; }
-    .policy-card h2 { font-size: 18px; color: #0f172a; margin: 20px 0 8px; }
-    .policy-card h2:first-child { margin-top: 0; }
-    .policy-card p { font-size: 14px; margin-bottom: 12px; }
-    .mobile-bottom-nav { display: none; }
-    @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .mobile-bottom-nav {
-        display: flex; justify-content: space-around; align-items: center;
-        position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
-        background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000;
+    :root {
+      --sidebar-bg: #0f172a;
+      --accent-color: #0d9488;
+      --accent-hover: #0f766e;
+      --bg-main: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --border-color: #e2e8f0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background-color: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+    }
+
+    .brand-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 12px 24px 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+    }
+
+    .brand-logo {
+      max-height: 55px;
+      width: 100%;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 10px;
+      flex: 1;
+    }
+
+    .nav-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #94a3b8;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .nav-links a svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+    }
+
+    .nav-links a.active {
+      background: rgba(13, 148, 136, 0.25);
+      color: #2dd4bf;
+    }
+
+    .user-profile-box {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 12px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
+    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
+
+    .main-content {
+      margin-left: 260px;
+      flex: 1;
+      padding: 32px;
+      background-color: var(--bg-main);
+      min-height: 100vh;
+      box-sizing: border-box;
+      max-width: 900px;
+    }
+
+    .policy-container {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
+    }
+
+    .policy-container h1 {
+      font-size: 24px;
+      color: var(--text-main);
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .policy-container p.subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    .policy-container h2 {
+      font-size: 16px;
+      color: var(--text-main);
+      margin-top: 24px;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .policy-container p, .policy-container li {
+      font-size: 14px;
+      color: var(--text-main);
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .policy-container ul {
+      margin-top: 4px;
+      margin-bottom: 16px;
+      padding-left: 20px;
+    }
+
+    .btn-voltar {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--accent-color);
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 20px;
+      transition: background 0.2s;
+    }
+
+    .btn-voltar:hover {
+      background: var(--accent-hover);
+    }
+
+    .mobile-topbar-bar { display: none; }
+
+    @media (max-width: 1024px) {
+      .sidebar { display: none !important; }
+      .main-content { margin-left: 0 !important; padding: 16px; }
+      .mobile-topbar-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #0f172a;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin: -16px -16px 20px -16px;
       }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
-      .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
-      .main-content { padding-bottom: 72px; }
+      .brand-logo { max-height: 38px; width: auto; object-fit: contain; }
     }
   </style>
 </head>
 <body>
-  <div id="sidebar-container"></div>
+
+  <aside class="sidebar">
+    <div>
+      <div class="brand-area">
+        <img src="../cabe.png" alt="Logo" class="brand-logo">
+      </div>
+
+      <nav class="nav-links">
+        <a href="calendar.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Agenda</span>
+        </a>
+        <a href="my-reservations.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span>Minhas reservas</span>
+        </a>
+        <a href="notifications.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notificações</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="user-profile-box">
+      <div class="user-info-text">
+        <h4 id="userNameDisplay">MeetingRoom</h4>
+        <p>LGPD & Privacidade</p>
+      </div>
+    </div>
+  </aside>
 
   <main class="main-content">
-    <header class="topbar">
-      <div>
-        <h1>Política de Privacidade & Termos (LGPD)</h1>
-        <p style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">Transparência, segurança e conformidade legal no tratamento de dados</p>
-      </div>
-    </header>
+    <div class="mobile-topbar-bar">
+      <img src="../cabe.png" alt="Logo" class="brand-logo">
+      <a href="calendar.html" style="color: #2dd4bf; font-size: 13px; font-weight: 600; text-decoration: none;">Voltar à Agenda</a>
+    </div>
 
-    <section class="schedule-grid-container">
-      <div class="policy-card">
-        <h2>1. Finalidade da Coleta de Dados</h2>
-        <p>O sistema <strong>MeetingRoom</strong> coleta exclusivamente dados cadastrais corporativos (nome, e-mail institucional e cargo) indispensáveis para autenticação, controle de permissões e identificação dos responsáveis pelas reservas de salas de reunião.</p>
+    <a href="calendar.html" class="btn-voltar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      Voltar para a Agenda
+    </a>
 
-        <h2>2. Base Legal e Consentimento (LGPD - Lei nº 13.709/2018)</h2>
-        <p>O tratamento de dados fundamenta-se na execução de procedimentos internos corporativos e no consentimento ativo registrado eletronicamente no primeiro acesso à plataforma, com carimbo de data/hora armazenado de forma segura no banco de dados.</p>
+    <div class="policy-container">
+      <h1>Política de Privacidade</h1>
+      <p class="subtitle">Última atualização: Novembro de 2026 | Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018)</p>
 
-        <h2>3. Armazenamento e Segurança</h2>
-        <p>As informações são processadas e armazenadas em infraestrutura em nuvem com criptografia em trânsito (HTTPS/TLS), controle de acesso baseado em perfil (RBAC) e segregação entre usuários padrão e administradores.</p>
+      <h2>1. Introdução</h2>
+      <p>
+        O <strong>MeetingRoom</strong> ("nós", "nosso" ou "sistema") respeita a sua privacidade e compromete-se a proteger os dados pessoais recolhidos no âmbito da gestão e agendamento de salas de reuniões corporativas. Esta Política de Privacidade explica de forma transparente como recolhemos, utilizamos, armazenamos e protegemos as suas informações, em total conformidade com a Lei Geral de Proteção de Dados (LGPD).
+      </p>
 
-        <h2>4. Direitos do Titular</h2>
-        <p>O usuário pode solicitar a atualização ou exclusão de seus dados cadastrais junto ao administrador do sistema a qualquer momento, respeitando os prazos legais de auditoria operacional.</p>
+      <h2>2. Dados Recolhidos e Finalidade</h2>
+      <p>Para o funcionamento seguro e eficiente do sistema de reservas, recolhemos estritamente os seguintes dados pessoais:</p>
+      <ul>
+        <li><strong>Nome e Apelido:</strong> Utilizados para identificação do responsável pela reserva e comunicação interna ou negociação de horários entre colaboradores.</li>
+        <li><strong>Cargo / Função:</strong> Utilizado para contextualizar a equipa e facilitar a gestão administrativa das salas.</li>
+        <li><strong>Registos de Utilização (Logs e Reservas):</strong> Histórico de horários agendados, cancelados ou modificados, associados ao seu identificador interno de utilizador.</li>
+      </ul>
+      <p>Nenhum dado sensível (conforme definido pelo Art. 5º, II, da LGPD) é recolhido pelo sistema.</p>
 
-        <div id="statusAceiteLgpd" style="margin-top: 20px; padding: 14px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; font-size: 13px; color: #0f766e;">
-          Verificando status do seu aceite digital...
-        </div>
-      </div>
-    </section>
+      <h2>3. Base Legal para o Tratamento</h2>
+      <p>
+        O tratamento dos seus dados pessoais baseia-se no <strong>Consentimento</strong> fornecido no primeiro acesso à plataforma (Art. 7º, I, da LGPD) e no <strong>Legítimo Interesse</strong> da organização (Art. 7º, IX, da LGPD) em assegurar a organização eficiente, o uso adequado e a segurança dos espaços de reunião corporativos.
+      </p>
 
-    <footer style="text-align: center; padding: 16px; font-size: 12px; color: #64748b; margin-top: auto;">
-      Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank" style="color: #0d9488; text-decoration: none; font-weight: 600;">CS Code Solutions</a>
-    </footer>
+      <h2>4. Armazenamento e Segurança dos Dados</h2>
+      <p>
+        Adotamos medidas técnicas e administrativas aptas a proteger os dados pessoais de acessos não autorizados e de situações de destruição, perda, alteração, comunicação ou difusão. Os dados são armazenados de forma segura utilizando infraestrutura em nuvem e mecanismos de salvaguarda local encriptados.
+      </p>
+
+      <h2>5. Partilha de Informações</h2>
+      <p>
+        Os seus dados de agendamento (nome, cargo e horários) são visíveis apenas para os demais utilizadores e administradores autorizados do sistema na mesma organização, estritamente para fins de visualização de agenda e eventual negociação de horários. Não comercializamos, alugamos ou cedemos dados pessoais a terceiros.
+      </p>
+
+      <h2>6. Direitos do Titular dos Dados</h2>
+      <p>Nos termos da LGPD, o titular dos dados tem direito a:</p>
+      <ul>
+        <li>Confirmação da existência de tratamento de dados;</li>
+        <li>Acesso aos dados recolhidos;</li>
+        <li>Correção de dados incompletos, inexatos ou desatualizados;</li>
+        <li>Eliminação dos dados pessoais tratados com o seu consentimento;</li>
+        <li>Revogação do consentimento a qualquer momento.</li>
+      </ul>
+
+      <h2>7. Alterações a Esta Política</h2>
+      <p>
+        Esta Política de Privacidade pode ser atualizada periodicamente para refletir melhorias no sistema ou exigências legais. Notificaremos os utilizadores através da própria interface da aplicação sempre que houver alterações relevantes.
+      </p>
+
+      <h2>8. Contacto</h2>
+      <p>
+        Em caso de dúvidas, solicitações ou exercício de direitos referentes à proteção de dados e LGPD, por favor contacte o administrador do sistema da sua organização ou através dos canais de suporte providenciados por <strong>CS Code Solutions</strong>.
+      </p>
+    </div>
   </main>
 
-  <div id="mobile-nav-container"></div>
-
-  <script src="../js/sidebar.js"></script>
-  <script src="../termos.js"></script>
-  <script type="module">
-    import { db } from "../js/firebase-config.js";
-    import { verificarAutenticacao } from "../js/auth.js";
-    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    verificarAutenticacao(async (user) => {
-      const box = document.getElementById("statusAceiteLgpd");
-      try {
-        const snap = await getDoc(doc(db, "termos_aceites", user.uid));
-        if (snap.exists()) {
-          const dados = snap.data();
-          const dataFmt = new Date(dados.dataHoraAceite).toLocaleString("pt-BR");
-          box.innerHTML = `✅ <strong>Termos Aceitos:</strong> Versão ${dados.versao} registrada em ${dataFmt}.`;
-        } else {
-          box.innerHTML = `⚠️ Aceite pendente. Recarregue a página para confirmar os Termos de Uso.`;
-        }
-      } catch (e) {
-        box.innerHTML = `ℹ️ Registro de conformidade ativo para ${user.email}.`;
-      }
-    });
-  </script>
 </body>
 </html>

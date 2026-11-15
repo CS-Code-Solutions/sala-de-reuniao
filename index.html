@@ -31,11 +31,9 @@
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
       text-align: center;
       box-sizing: border-box;
-      /* Borda inicial sutil e transição suave */
       border: 2px solid #e2e8f0;
       transition: all 0.3s ease-in-out;
     }
-    /* Efeito de brilho dourado ao passar o rato ou o dedo por cima */
     .login-card:hover {
       border-color: #d4af37;
       box-shadow: 0 20px 40px rgba(212, 175, 55, 0.35);
@@ -100,6 +98,10 @@
     .btn-login:active {
       transform: scale(0.98);
     }
+    .btn-login:disabled {
+      background: #94a3b8;
+      cursor: not-allowed;
+    }
     .login-footer {
       margin-top: 24px;
       padding-top: 16px;
@@ -109,6 +111,11 @@
       font-size: 11px;
       color: #64748b;
       margin: 0;
+    }
+    .login-footer a {
+      color: #0d9488;
+      text-decoration: none;
+      font-weight: 600;
     }
   </style>
 
@@ -122,16 +129,16 @@
     
     <div class="form-group">
       <label>E-mail</label>
-      <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" required>
+      <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" onkeydown="if(event.key==='Enter') fazerLogin()" required>
     </div>
     <div class="form-group">
       <label>Senha</label>
-      <input type="password" id="senhaLogin" placeholder="••••••••" required>
+      <input type="password" id="senhaLogin" placeholder="••••••••" onkeydown="if(event.key==='Enter') fazerLogin()" required>
     </div>
-    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
+    <button class="btn-login" id="btnEntrar" onclick="fazerLogin()">Entrar</button>
 
     <div class="login-footer">
-      <p>&copy; 2026 Viecelli | Powered by <strong>CS Code Solutions</strong></p>
+      <p>&copy; 2026 Viecelli | Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank">CS Code Solutions</a></p>
     </div>
   </div>
 
@@ -149,22 +156,34 @@
       firebase.initializeApp(firebaseConfig);
     }
 
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        window.location.replace("pages/calendar.html");
+      }
+    });
+
     function fazerLogin() {
       const email = document.getElementById("emailLogin").value.trim();
       const senha = document.getElementById("senhaLogin").value.trim();
+      const btn = document.getElementById("btnEntrar");
 
       if (!email || !senha) {
         alert("Por favor, preencha o e-mail e a senha.");
         return;
       }
 
+      btn.disabled = true;
+      btn.innerText = "Entrando...";
+
       firebase.auth().signInWithEmailAndPassword(email, senha)
         .then(() => {
           window.location.href = "pages/calendar.html";
         })
         .catch((error) => {
+          btn.disabled = false;
+          btn.innerText = "Entrar";
           console.error("Erro no login:", error);
-          alert("Erro ao entrar (" + error.code + "): " + error.message);
+          alert("Erro ao entrar: E-mail ou senha inválidos.");
         });
     }
   </script>

@@ -7,7 +7,13 @@
   <title>MeetingRoom - Agenda</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
-  
+  <!-- Configurações para PWA e iOS -->
+  <link rel="manifest" href="../manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
+  <link rel="apple-touch-icon" href="../ico.png">
+
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <script type="text/javascript">
     (function(){
@@ -88,6 +94,13 @@
       transition: all 0.2s;
     }
 
+    .nav-links a svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
     .nav-links a:hover, .nav-links a.active {
       background: rgba(255, 255, 255, 0.08);
       color: white;
@@ -107,17 +120,8 @@
       justify-content: space-between;
     }
 
-    .user-info-text h4 {
-      font-size: 13px;
-      color: white;
-      margin: 0;
-    }
-
-    .user-info-text p {
-      font-size: 11px;
-      color: #94a3b8;
-      margin: 2px 0 0 0;
-    }
+    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
+    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
 
     .main-content {
       margin-left: 260px;
@@ -155,29 +159,6 @@
       align-items: center;
       gap: 12px;
       flex-wrap: wrap;
-    }
-
-    .date-nav {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--card-bg);
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      font-weight: 600;
-      color: var(--text-main);
-      font-size: 14px;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-    }
-
-    .date-nav button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text-muted);
-      font-weight: bold;
-      font-size: 16px;
     }
 
     .view-toggles {
@@ -232,12 +213,31 @@
     .cal-main-header {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 16px 24px;
       border-bottom: 1px solid var(--border-color);
       font-size: 14px;
       font-weight: 600;
       color: var(--text-muted);
       background: #fafafa;
+    }
+
+    .date-nav-inline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .date-nav-inline button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent-color);
+      font-weight: bold;
+      font-size: 16px;
+      padding: 0 4px;
     }
 
     .schedule-list {
@@ -275,6 +275,27 @@
       background: #f1f5f9;
     }
 
+    .btn-action-slot { 
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px; 
+      padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; 
+      cursor: pointer; border: none; transition: all 0.2s; 
+    }
+    .btn-action-slot svg { width: 14px; height: 14px; }
+    
+    .btn-reserve { background: #22c55e; color: white; box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2); }
+    .btn-reserve:hover { background: #16a34a; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.25); }
+    
+    .btn-negotiate { background: #f0fdfa; color: var(--accent-color); border: 1px solid #ccfbf1; }
+    .btn-negotiate:hover { background: #ccfbf1; transform: translateY(-1px); }
+    
+    .btn-delete-admin { 
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px; 
+      background: #fee2e2; color: #dc2626; padding: 4px 10px; font-size: 11px; 
+      border-radius: 4px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; 
+    }
+    .btn-delete-admin svg { width: 12px; height: 12px; }
+    .btn-delete-admin:hover { background: #fecaca; transform: translateY(-1px); }
+
     .grid-semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; overflow-x: auto; }
     .card-dia-semana { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; min-height: 140px; display: flex; flex-direction: column; gap: 6px; }
 
@@ -284,14 +305,6 @@
     .card-dia-mes:hover { background: #f0fdfa; border-color: #99f6e4; }
     .card-dia-mes.outro-mes { opacity: 0.35; background: #fdfdfd; }
     .card-dia-mes.dia-hoje { border-color: var(--accent-color); background: #f0fdfa; }
-
-    .btn-action-slot { padding: 6px 12px; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer; border: none; }
-    .btn-reserve { background: #22c55e; color: white; }
-    .btn-reserve:hover { background: #16a34a; }
-    .btn-negotiate { background: #f0fdfa; color: var(--accent-color); border: 1px solid #ccfbf1; }
-    .btn-negotiate:hover { background: #ccfbf1; }
-    .btn-delete-admin { background: #fee2e2; color: #dc2626; padding: 4px 8px; font-size: 11px; border-radius: 4px; font-weight: 600; cursor: pointer; border: none; }
-    .btn-delete-admin:hover { background: #fecaca; }
 
     /* Sistema de Alerta Flutuante (Toast) */
     #floatingToastContainer {
@@ -335,13 +348,21 @@
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
     .modal-card { background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
+    
     .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
-    .form-group input, .form-group textarea { padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--accent-color); }
+    
+    .form-group input, .form-group textarea, .form-group select { 
+      padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: white; 
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { 
+      border-color: var(--accent-color); 
+    }
+
     .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save:hover { background: var(--accent-hover); }
     .btn-whatsapp { flex: 1; padding: 10px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
 
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
@@ -356,22 +377,35 @@
     .room-img { width: 80px; height: 60px; background-color: var(--border-color); border-radius: 8px; object-fit: cover; }
     .room-details h4 { font-size: 14px; color: var(--text-main); margin: 0 0 6px 0; }
     .room-details p { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin: 0 0 4px 0; }
+    .room-details p svg { width: 14px; height: 14px; stroke-width: 2; color: var(--accent-color); }
     
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
     @media (max-width: 1024px) {
       .cal-layout { grid-template-columns: 1fr; }
-      .sidebar { display: none; }
+      .sidebar { display: none !important; }
       .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      .mobile-topbar-bar { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); margin: -16px -16px 20px -16px; }
+      .mobile-topbar-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #0f172a;
+        padding: 10px 12px 10px 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        margin: -16px -16px 20px -16px;
+      }
+      .brand-logo { max-height: 38px; width: auto; object-fit: contain; margin-right: auto; margin-left: 0; }
+      .btn-sair-mobile { color: #e2e8f0; font-size: 13px; font-weight: 600; text-decoration: none; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 8px; transition: all 0.2s; }
+      .btn-sair-mobile:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
       .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
       .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
-      .mob-nav-item.active { color: #2dd4bf; }
-      .mob-nav-item span { font-size: 18px; }
+      .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
+      .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
     }
   </style>
 
+  <!-- Firebase Compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -388,13 +422,28 @@
       </div>
 
       <nav class="nav-links">
-        <a href="calendar.html" class="active">📅 Agenda</a>
-        <a href="my-reservations.html">📋 Minhas reservas</a>
-        <a href="notifications.html">🔔 Notificações</a>
+        <a href="calendar.html" class="active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <span>Agenda</span>
+        </a>
+        <a href="my-reservations.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+          <span>Minhas reservas</span>
+        </a>
+        <a href="notifications.html">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span>Notificações</span>
+        </a>
         
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">🚪 Salas</a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">👤 Usuários</a>
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px; display:none;" class="admin-only-item">Administração</div>
+        <a href="rooms.html" class="admin-only-item" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+          <span>Salas</span>
+        </a>
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          <span>Usuários</span>
+        </a>
       </nav>
     </div>
 
@@ -403,14 +452,19 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">🚪</a>
+      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      </a>
     </div>
   </aside>
 
   <main class="main-content calendar-wrapper">
     <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="Logo" class="brand-logo" style="max-height: 42px;">
-      <span id="userAvatarMobile" style="font-weight: bold; font-size: 12px; color: #ffffff;">Perfil</span>
+      <img src="../cabe.png" alt="Logo" class="brand-logo">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
+        <a href="#" onclick="fazerLogoutReal(); return false;" class="btn-sair-mobile">Sair</a>
+      </div>
     </div>
 
     <header class="cal-header">
@@ -419,11 +473,6 @@
         <p>Visualize e gerencie as reservas das salas de reunião.</p>
       </div>
       <div class="cal-controls">
-        <div class="date-nav">
-          <button onclick="mudarData(-1)">&#10094;</button>
-          <span id="dataAtualExibicao">Carregando...</span>
-          <button onclick="mudarData(1)">&#10095;</button>
-        </div>
         <div class="view-toggles" id="viewTogglesGroup">
           <button class="active" onclick="alterarVisao('dia', this)">Dia</button>
           <button onclick="alterarVisao('semana', this)">Semana</button>
@@ -439,8 +488,12 @@
     <div class="cal-layout">
       <div class="cal-main">
         <div class="cal-main-header">
-          <span id="salaHeaderTitulo">Sala de Reuniões 01</span>
-          <span id="dataHeaderExibicao">-</span>
+          <span id="salaHeaderTitulo" style="font-weight: 700;">Sala de Reuniões 01</span>
+          <div class="date-nav-inline">
+            <button onclick="mudarData(-1)">&#10094;</button>
+            <span id="dataAtualExibicao">Carregando...</span>
+            <button onclick="mudarData(1)">&#10095;</button>
+          </div>
         </div>
         <div class="schedule-list" id="gridHorarios">
           <p style="color: var(--text-muted); font-size: 14px;">A carregar agenda...</p>
@@ -454,8 +507,8 @@
             <img id="sidebarSalaImg" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
             <div class="room-details">
               <h4 id="sidebarNomeSala">Sala de Reuniões 01</h4>
-              <p id="sidebarCapacidade">👥 Capacidade: 8 pessoas</p>
-              <p id="sidebarEquipamentos">💻 Equipamentos: TV, Videoconferência...</p>
+              <p id="sidebarCapacidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas</p>
+              <p id="sidebarEquipamentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...</p>
             </div>
           </div>
         </div>
@@ -476,8 +529,8 @@
       <div class="form-group">
         <label>Horário de Início e Fim</label>
         <div style="display: flex; gap: 8px;">
-          <input type="time" id="inputHoraInicio" style="flex:1;">
-          <input type="time" id="inputHoraFim" style="flex:1;">
+          <select id="inputHoraInicio" style="flex:1;" onchange="atualizarOpcoesFim(window.dataSelecionadaGlobal, document.getElementById('salaSelect').value)" required></select>
+          <select id="inputHoraFim" style="flex:1;" required></select>
         </div>
       </div>
 
@@ -501,7 +554,7 @@
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNegociacao').style.display='none'">Voltar</button>
         <a id="linkEnviarWhatsapp" href="#" target="_blank" class="btn-whatsapp">
-          <span>💬</span> Enviar WhatsApp
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Enviar WhatsApp
         </a>
       </div>
     </div>
@@ -509,7 +562,9 @@
 
   <div class="modal-overlay" id="modalConfirmacaoExclusao">
     <div class="modal-alert-card">
-      <div style="font-size: 32px;">⚠️</div>
+      <div style="display: flex; justify-content: center; color: #dc2626;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
       <h3 class="modal-title">Excluir Reserva</h3>
       <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">Tem certeza que deseja excluir esta reserva?</p>
       <input type="hidden" id="idReservaParaExcluir">
@@ -522,7 +577,7 @@
 
   <div class="modal-overlay" id="modalAlerta">
     <div class="modal-alert-card">
-      <div style="font-size: 32px;" id="modalAlertaIcone">🎉</div>
+      <div style="display: flex; justify-content: center;" id="modalAlertaIcone"></div>
       <h3 class="modal-title" id="modalAlertaTitulo">Sucesso</h3>
       <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
       <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
@@ -530,21 +585,72 @@
   </div>
 
   <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item active"><span>📅</span> Agenda</a>
-    <a href="my-reservations.html" class="mob-nav-item"><span>📋</span> Reservas</a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;"><span>🚪</span> Salas</a>
-    <a href="notifications.html" class="mob-nav-item"><span>🔔</span> Avisos</a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;"><span>⚙️</span> Admin</a>
+    <a href="calendar.html" class="mob-nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      <span>Agenda</span>
+    </a>
+    <a href="my-reservations.html" class="mob-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+      <span>Reservas</span>
+    </a>
+    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
+      <span>Salas</span>
+    </a>
+    <a href="notifications.html" class="mob-nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+      <span>Avisos</span>
+    </a>
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+      <span>Admin</span>
+    </a>
   </nav>
+
+  <!-- Modal de Aceite da LGPD (Obrigatório) -->
+  <div class="modal-overlay" id="modalTermosLGPD" style="z-index: 9999;">
+    <div class="modal-card" style="max-width: 450px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <h3 class="modal-title" style="margin: 0;">Atualização de Privacidade</h3>
+      </div>
+      
+      <p style="font-size: 14px; color: var(--text-main); line-height: 1.5;">
+        Para continuarmos a oferecer uma ferramenta segura para as suas reservas, atualizámos a nossa Política de Privacidade em conformidade com a <strong>LGPD</strong>.
+      </p>
+      
+      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Aceda e leia a nossa <a href="privacy-policy.html" target="_blank" style="color: var(--accent-color); font-weight: 600; text-decoration: underline;">Política de Privacidade completa aqui</a> antes de prosseguir.
+      </div>
+
+      <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+        <input type="checkbox" id="checkAceiteLGPD" style="margin-top: 2px; width: 18px; height: 18px; accent-color: var(--accent-color);">
+        <span style="font-size: 13px; color: var(--text-main); font-weight: 500;">
+          Declaro que li e concordo com a coleta do meu nome e cargo exclusivamente para a gestão de reservas de salas no sistema.
+        </span>
+      </label>
+
+      <div class="modal-actions" style="margin-top: 16px;">
+        <button class="btn-save" style="width: 100%; padding: 12px; font-size: 15px;" onclick="confirmarAceiteLGPD()">Concordar e Continuar</button>
+      </div>
+    </div>
+  </div>
 
   <script>
     let usuarioEhAdmin = false;
     let apelidoUsuarioGlobal = "Utilizador";
+    let usuarioIdGlobal = null;
+    let usuarioEmailGlobal = "";
     let dataAtualObj = new Date();
     let tipoVisaoAtual = 'dia';
-    let db;
     let tempoAntecedenciaMinutos = 10;
-    let usuarioIdGlobal = null;
+    let db;
+    let unsubscribeAgenda = null;
+    let reservasSalaAtual = [];
+
+    function formatarDataLocal(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       const firebaseConfig = {
@@ -563,8 +669,9 @@
       firebase.auth().onAuthStateChanged(async (user) => {
         if (user) {
           usuarioIdGlobal = user.uid;
-          const emailUsuario = user.email.toLowerCase();
-          apelidoUsuarioGlobal = emailUsuario.split('@')[0];
+          usuarioEmailGlobal = user.email || "";
+          const emailLower = usuarioEmailGlobal.toLowerCase();
+          apelidoUsuarioGlobal = emailLower.split('@')[0];
           let cargoTexto = "Utilizador";
 
           try {
@@ -582,9 +689,9 @@
                 tempoAntecedenciaMinutos = dados.notificacoes.tempoAntecedencia;
               }
             }
-          } catch(e) {}
+          } catch (e) {}
 
-          if (emailUsuario.includes("admin") || emailUsuario.includes("teste")) {
+          if (emailLower.includes("admin") || emailLower.includes("teste")) {
             usuarioEhAdmin = true;
             cargoTexto = "Administrador";
           }
@@ -597,6 +704,7 @@
             document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
           }
 
+          verificarAceiteLGPD();
           verificarAvisosLoginEProximidade();
           mudarSalaSelecionada();
         } else {
@@ -604,6 +712,54 @@
         }
       });
     });
+
+    function fazerLogoutReal() {
+      firebase.auth().signOut().then(() => {
+        window.location.href = "../index.html";
+      });
+    }
+
+    // VERIFICAÇÃO E REGISTRO DO ACEITE LGPD NO FIRESTORE
+    async function verificarAceiteLGPD() {
+      if (!usuarioIdGlobal) return;
+      const chaveLocal = 'lgpd_aceite_' + usuarioIdGlobal;
+      if (localStorage.getItem(chaveLocal) === 'true') return;
+
+      try {
+        const doc = await db.collection("termos_aceites").doc(usuarioIdGlobal).get();
+        if (doc.exists && doc.data().aceito === true) {
+          localStorage.setItem(chaveLocal, 'true');
+        } else {
+          document.getElementById('modalTermosLGPD').style.display = 'flex';
+        }
+      } catch (e) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+    }
+
+    async function confirmarAceiteLGPD() {
+      const checkbox = document.getElementById('checkAceiteLGPD');
+      if (!checkbox.checked) {
+        mostrarAlerta("Atenção", "Por favor, confirme que leu e aceita a Política de Privacidade marcando a caixa antes de continuar.", "warning");
+        return;
+      }
+
+      try {
+        await db.collection("termos_aceites").doc(usuarioIdGlobal).set({
+          aceito: true,
+          versao: "1.0",
+          nome: apelidoUsuarioGlobal,
+          email: usuarioEmailGlobal,
+          dataAceite: firebase.firestore.FieldValue.serverTimestamp(),
+          userAgent: navigator.userAgent
+        });
+        localStorage.setItem('lgpd_aceite_' + usuarioIdGlobal, 'true');
+        document.getElementById('modalTermosLGPD').style.display = 'none';
+        mostrarAlerta("Obrigado", "As suas preferências de privacidade foram registadas com sucesso.", "success");
+      } catch (err) {
+        mostrarAlerta("Erro", "Não foi possível registar o aceite: " + err.message, "error");
+      }
+    }
 
     // Função para disparar Alertas Flutuantes Automáticos (Toast que some sozinho)
     function mostrarToastFlutuante(titulo, mensagem, tipo = "info") {
@@ -627,23 +783,20 @@
 
       container.appendChild(toast);
 
-      // O toast desaparece automaticamente após 6 segundos sem precisar de botão
       setTimeout(() => {
         toast.style.animation = "fadeOut 0.3s ease-out forwards";
         setTimeout(() => toast.remove(), 300);
       }, 6000);
     }
 
-    // Verifica cancelamentos feitos por admin ao logar e reuniões próximas
     async function verificarAvisosLoginEProximidade() {
-      const hojeStr = new Date().toISOString().split('T')[0];
+      const hojeStr = formatarDataLocal(new Date());
 
       db.collection("reservas").where("data", "==", hojeStr).get().then(snapshot => {
         const agora = new Date();
         
         snapshot.forEach(doc => {
           const r = doc.data();
-          // Se for do utilizador atual
           if (r.userId === usuarioIdGlobal || r.responsavel === apelidoUsuarioGlobal) {
             if (r.canceladoPorAdmin) {
               mostrarToastFlutuante("Reunião Cancelada", `A sua reserva "${r.titulo}" na ${r.sala} (${r.horarioInicio}) foi cancelada pela administração.`, "danger");
@@ -654,7 +807,6 @@
 
               const diferencaMinutos = (dataReuniao - agora) / (1000 * 60);
 
-              // Se a reunião está próxima dentro do tempo configurado e ainda não passou
               if (diferencaMinutos >= 0 && diferencaMinutos <= tempoAntecedenciaMinutos) {
                 mostrarToastFlutuante("Reunião Próxima", `A reunião "${r.titulo}" (${r.sala}) começa às ${r.horarioInicio} (em ${Math.round(diferencaMinutos)} min).`, "warning");
               }
@@ -670,22 +822,32 @@
       document.getElementById("salaHeaderTitulo").innerText = sala;
 
       if (sala === "Sala 01") {
-        document.getElementById("sidebarCapacidade").innerText = "👥 Capacidade: 8 pessoas";
-        document.getElementById("sidebarEquipamentos").innerText = "💻 Equipamentos: TV, Videoconferência...";
+        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas';
+        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...';
         document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
       } else if (sala === "Sala 02") {
-        document.getElementById("sidebarCapacidade").innerText = "👥 Capacidade: 12 pessoas";
-        document.getElementById("sidebarEquipamentos").innerText = "💻 Equipamentos: Projetor, Som, TV 4K";
+        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 12 pessoas';
+        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: Projetor, Som, TV 4K';
         document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
       }
 
-      carregarAgenda();
+      carregarAgendaFirebase();
     }
 
-    function mostrarAlerta(titulo, texto, icone = "🎉") {
+    function mostrarAlerta(titulo, texto, tipo = "success") {
       document.getElementById("modalAlertaTitulo").innerText = titulo;
       document.getElementById("modalAlertaTexto").innerText = texto;
-      document.getElementById("modalAlertaIcone").innerText = icone;
+      
+      let iconHtml = "";
+      if (tipo === "success") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      } else if (tipo === "error") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      }
+      
+      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
       document.getElementById("modalAlerta").style.display = "flex";
     }
 
@@ -695,19 +857,18 @@
 
     function atualizarCabecalhoData() {
       const spanData = document.getElementById("dataAtualExibicao");
-      const spanHeader = document.getElementById("dataHeaderExibicao");
       let textoFormatado = "";
 
       if (tipoVisaoAtual === 'dia') {
-        const options = { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' };
-        textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
+        const diaSemana = dataAtualObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+        const dataCurta = dataAtualObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        textoFormatado = `${diaSemana}, ${dataCurta}`;
       } 
       else if (tipoVisaoAtual === 'semana') {
         let inicioSemana = new Date(dataAtualObj);
         inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
         let fimSemana = new Date(inicioSemana);
         fimSemana.setDate(fimSemana.getDate() + 6);
-
         const opt = { day: 'numeric', month: 'short' };
         textoFormatado = `${inicioSemana.toLocaleDateString('pt-BR', opt)} - ${fimSemana.toLocaleDateString('pt-BR', opt)}, ${dataAtualObj.getFullYear()}`;
       } 
@@ -718,7 +879,6 @@
       }
 
       spanData.innerText = textoFormatado;
-      spanHeader.innerText = textoFormatado;
     }
 
     function mudarData(direcao) {
@@ -730,7 +890,7 @@
         dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
       }
       atualizarCabecalhoData();
-      carregarAgenda();
+      renderizarAgenda();
     }
 
     function alterarVisao(visao, btnElement) {
@@ -738,7 +898,7 @@
       document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
       btnElement.classList.add("active");
       atualizarCabecalhoData();
-      carregarAgenda();
+      renderizarAgenda();
     }
 
     function selecionarDiaEspecifico(dataStr) {
@@ -749,193 +909,215 @@
         else b.classList.remove("active");
       });
       atualizarCabecalhoData();
-      carregarAgenda();
+      renderizarAgenda();
     }
 
-    function carregarAgenda() {
+    function carregarAgendaFirebase() {
       const sala = document.getElementById("salaSelect").value;
       const container = document.getElementById("gridHorarios");
       document.getElementById("salaHeaderTitulo").innerText = sala;
 
-      const dataStr = dataAtualObj.toISOString().split('T')[0];
-      const horariosPadrao = ["07:00", "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00"];
+      if (unsubscribeAgenda) unsubscribeAgenda();
 
-      db.collection("reservas")
+      unsubscribeAgenda = db.collection("reservas")
         .where("sala", "==", sala)
-        .onSnapshot(async (snapshot) => {
-          let fragmentoHTML = "";
-          let reservasMapa = {};
-          
+        .onSnapshot((snapshot) => {
+          reservasSalaAtual = [];
           snapshot.forEach(doc => {
-            const res = doc.data();
-            if (res.data === dataStr) {
-              if (!reservasMapa[res.horarioInicio]) {
-                reservasMapa[res.horarioInicio] = [];
-              }
-              reservasMapa[res.horarioInicio].push({ id: doc.id, ...res });
-            }
+            reservasSalaAtual.push({ id: doc.id, ...doc.data() });
           });
-
-          if (tipoVisaoAtual === 'dia') {
-            for (const hora of horariosPadrao) {
-              const listaReservasSlot = reservasMapa[hora] || [];
-
-              if (listaReservasSlot.length > 0) {
-                const reserva = listaReservasSlot[0];
-                let whatsappResponsavel = "";
-                if (reserva.userId) {
-                  try {
-                    const userDoc = await db.collection("usuarios").doc(reserva.userId).get();
-                    if (userDoc.exists && userDoc.data().whatsapp) {
-                      whatsappResponsavel = userDoc.data().whatsapp;
-                    }
-                  } catch(e) {}
-                }
-
-                fragmentoHTML += `
-                  <div class="slot-row reserved">
-                    <div>
-                      <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${reserva.horarioInicio} - ${reserva.horarioFim || '??'}</span>
-                      <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo}</h4>
-                      <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || 'Equipa'}</p>
-                    </div>
-                    <div style="display: flex; gap: 6px; align-items: center;">
-                      <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${reserva.sala}', '${reserva.data}', '${reserva.horarioInicio}', '${reserva.responsavel || 'Colega'}', '${whatsappResponsavel}')">💬 Negociar</button>
-                      ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusao('${reserva.id}')">🗑️ Excluir</button>` : ''}
-                    </div>
-                  </div>
-                `;
-              } else {
-                fragmentoHTML += `
-                  <div class="slot-row available" onclick="abrirModalReserva('${hora}', '${dataStr}')">
-                    <div>
-                      <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${hora} - Disponível</span>
-                      <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar reunião neste horário.</p>
-                    </div>
-                    <button class="btn-action-slot btn-reserve">📅 Agendar</button>
-                  </div>
-                `;
-              }
-            }
-            container.innerHTML = fragmentoHTML;
-          } 
-          else if (tipoVisaoAtual === 'semana') {
-            let gridDivHtml = `<div class="grid-semana">`;
-            let inicioSemana = new Date(dataAtualObj);
-            inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
-
-            for (let i = 0; i < 7; i++) {
-              let diaAtual = new Date(inicioSemana);
-              diaAtual.setDate(diaAtual.getDate() + i);
-              let diaStr = diaAtual.toISOString().split('T')[0];
-              let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
-
-              gridDivHtml += `
-                <div class="card-dia-semana" style="cursor: pointer;" onclick="selecionarDiaEspecifico('${diaStr}')">
-                  <strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>
-              `;
-              
-              let reservasDoDia = [];
-              snapshot.forEach(doc => {
-                if (doc.data().data === diaStr) reservasDoDia.push({ id: doc.id, ...doc.data() });
-              });
-
-              if (reservasDoDia.length > 0) {
-                reservasDoDia.forEach(r => {
-                  gridDivHtml += `
-                    <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
-                      <b>${r.horarioInicio}</b> - ${r.titulo}
-                      ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" onclick="event.stopPropagation(); confirmarExclusao('${r.id}')">Excluir</button>` : ''}
-                    </div>
-                  `;
-                });
-              } else {
-                gridDivHtml += `<span style="font-size: 10px; color: #94a3b8; font-style: italic; margin-top: 4px;">Sem reuniões</span>`;
-              }
-              gridDivHtml += `</div>`;
-            }
-            gridDivHtml += `</div>`;
-            container.innerHTML = gridDivHtml;
-          } 
-          else if (tipoVisaoAtual === 'mes') {
-            let wrapperHtml = `<div>`;
-            wrapperHtml += `<div class="grid-mes-header"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>`;
-            wrapperHtml += `<div class="grid-mes">`;
-
-            let ano = dataAtualObj.getFullYear();
-            let mes = dataAtualObj.getMonth();
-            let primeiroDiaMes = new Date(ano, mes, 1);
-            let inicioGrid = new Date(primeiroDiaMes);
-            inicioGrid.setDate(inicioGrid.getDate() - inicioGrid.getDate() + 1 - primeiroDiaMes.getDay());
-
-            let hojeStr = new Date().toISOString().split('T')[0];
-
-            for (let i = 0; i < 42; i++) {
-              let diaAtual = new Date(inicioGrid);
-              diaAtual.setDate(diaAtual.getDate() + i);
-              let diaStr = diaAtual.toISOString().split('T')[0];
-              let eMesAtual = diaAtual.getMonth() === mes;
-              let eHoje = diaStr === hojeStr;
-
-              let countReservasDia = 0;
-              snapshot.forEach(doc => {
-                if (doc.data().data === diaStr) countReservasDia++;
-              });
-
-              wrapperHtml += `
-                <div class="card-dia-mes ${eMesAtual ? '' : 'outro-mes'} ${eHoje ? 'dia-hoje' : ''}" onclick="selecionarDiaEspecifico('${diaStr}')">
-                  <span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>
-              `;
-              if (countReservasDia > 0) {
-                wrapperHtml += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${countReservasDia} reunião(ões)</div>`;
-              }
-              wrapperHtml += `</div>`;
-            }
-            wrapperHtml += `</div></div>`;
-            container.innerHTML = wrapperHtml;
-          }
-
+          renderizarAgenda();
         }, (err) => {
           container.innerHTML = `<p style="color: #ef4444;">Erro ao sincronizar reservas: ${err.message}</p>`;
         });
     }
 
-    function abrirModalReserva(horaInicio, dataStr) {
-      document.getElementById("reservaHorarioInicio").value = horaInicio;
-      document.getElementById("inputTituloReserva").value = "";
-      document.getElementById("inputHoraInicio").value = horaInicio;
-      
-      const [h, m] = horaInicio.split(':');
-      let horaFimNum = parseInt(h) + 1;
-      let horaFimStr = (horaFimNum < 10 ? "0" : "") + horaFimNum + ":" + m;
-      document.getElementById("inputHoraFim").value = horaFimStr;
+    function renderizarAgenda() {
+      const sala = document.getElementById("salaSelect").value;
+      const container = document.getElementById("gridHorarios");
+      const dataStr = formatarDataLocal(dataAtualObj);
 
-      window.dataSelecionadaGlobal = dataStr;
-      document.getElementById("modalNovaReserva").style.display = "flex";
+      const reservasDoDia = reservasSalaAtual.filter(r => r.data === dataStr);
+
+      const iconeAgendar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>`;
+      const iconeNegociar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+      const iconeExcluir = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+
+      let fragmentoHTML = "";
+
+      if (tipoVisaoAtual === 'dia') {
+        const inicioDiaMin = 7 * 60; // 07:00
+        const fimDiaMin = 23 * 60;   // 23:00
+
+        reservasDoDia.sort((a, b) => (a.horarioInicio || "00:00").localeCompare(b.horarioInicio || "00:00"));
+
+        let cursorMin = inicioDiaMin;
+
+        reservasDoDia.forEach(reserva => {
+          const strIni = reserva.horarioInicio || "00:00";
+          const strFim = reserva.horarioFim || strIni;
+          
+          const resIniMin = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
+          const resFimMin = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
+
+          if (cursorMin < resIniMin) {
+            const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
+            const slotLivreFim = String(Math.floor(resIniMin/60)).padStart(2,'0') + ":" + String(resIniMin%60).padStart(2,'0');
+            
+            fragmentoHTML += `
+              <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
+                <div>
+                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às ${slotLivreFim} - Disponível</span>
+                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar neste intervalo livre.</p>
+                </div>
+                <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
+              </div>
+            `;
+          }
+
+          fragmentoHTML += `
+            <div class="slot-row reserved">
+              <div>
+                <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
+                <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo || 'Reunião'}</h4>
+                <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || 'Equipa'}</p>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${(reserva.responsavel || 'Colega').replace(/'/g, "\\'")}', '${reserva.userId || ''}')">${iconeNegociar} Negociar</button>
+                ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusao('${reserva.id}')">${iconeExcluir} Excluir</button>` : ''}
+              </div>
+            </div>
+          `;
+
+          cursorMin = Math.max(cursorMin, resFimMin + 5); 
+        });
+
+        if (cursorMin < fimDiaMin && reservasDoDia.length > 0) {
+          const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
+          
+          fragmentoHTML += `
+            <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
+              <div>
+                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às 23:00 - Disponível</span>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar no restante do dia.</p>
+              </div>
+              <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
+            </div>
+          `;
+        }
+        
+        if (reservasDoDia.length === 0) {
+           fragmentoHTML = `
+            <div class="slot-row available" onclick="abrirModalReserva('08:00', '${dataStr}')">
+              <div>
+                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">07:00 às 23:00 - Disponível</span>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Sem reuniões. Clique para agendar o primeiro horário.</p>
+              </div>
+              <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
+            </div>
+          `;
+        }
+
+        container.innerHTML = fragmentoHTML;
+      } 
+      else if (tipoVisaoAtual === 'semana') {
+        let gridDivHtml = `<div class="grid-semana">`;
+        let inicioSemana = new Date(dataAtualObj);
+        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+
+        for (let i = 0; i < 7; i++) {
+          let diaAtual = new Date(inicioSemana);
+          diaAtual.setDate(diaAtual.getDate() + i);
+          let diaStr = formatarDataLocal(diaAtual);
+          let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
+
+          gridDivHtml += `
+            <div class="card-dia-semana" style="cursor: pointer;" onclick="selecionarDiaEspecifico('${diaStr}')">
+              <strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>
+          `;
+          
+          let reservasDoDiaSemana = reservasSalaAtual.filter(r => r.data === diaStr);
+
+          if (reservasDoDiaSemana.length > 0) {
+            reservasDoDiaSemana.forEach(r => {
+              gridDivHtml += `
+                <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
+                  <b>${r.horarioInicio}</b> - ${r.titulo || 'Reunião'}
+                  ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" style="margin-top:2px;" onclick="event.stopPropagation(); confirmarExclusao('${r.id}')">${iconeExcluir} Excluir</button>` : ''}
+                </div>
+              `;
+            });
+          } else {
+            gridDivHtml += `<span style="font-size: 10px; color: #94a3b8; font-style: italic; margin-top: 4px;">Sem reuniões</span>`;
+          }
+          gridDivHtml += `</div>`;
+        }
+        gridDivHtml += `</div>`;
+        container.innerHTML = gridDivHtml;
+      } 
+      else if (tipoVisaoAtual === 'mes') {
+        let wrapperHtml = `<div>`;
+        wrapperHtml += `<div class="grid-mes-header"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>`;
+        wrapperHtml += `<div class="grid-mes">`;
+
+        let ano = dataAtualObj.getFullYear();
+        let mes = dataAtualObj.getMonth();
+        let primeiroDiaMes = new Date(ano, mes, 1);
+        let inicioGrid = new Date(primeiroDiaMes);
+        inicioGrid.setDate(inicioGrid.getDate() - primeiroDiaMes.getDay());
+
+        let hojeStr = formatarDataLocal(new Date());
+
+        for (let i = 0; i < 42; i++) {
+          let diaAtual = new Date(inicioGrid);
+          diaAtual.setDate(diaAtual.getDate() + i);
+          let diaStr = formatarDataLocal(diaAtual);
+          let eMesAtual = diaAtual.getMonth() === mes;
+          let eHoje = diaStr === hojeStr;
+
+          let countReservasDia = reservasSalaAtual.filter(r => r.data === diaStr).length;
+
+          wrapperHtml += `
+            <div class="card-dia-mes ${eMesAtual ? '' : 'outro-mes'} ${eHoje ? 'dia-hoje' : ''}" onclick="selecionarDiaEspecifico('${diaStr}')">
+              <span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>
+          `;
+          if (countReservasDia > 0) {
+            wrapperHtml += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${countReservasDia} reunião(ões)</div>`;
+          }
+          wrapperHtml += `</div>`;
+        }
+        wrapperHtml += `</div></div>`;
+        container.innerHTML = wrapperHtml;
+      }
     }
 
-    function abrirModalNegociacao(sala, data, horario, responsavel, whatsapp) {
+    async function abrirModalNegociacao(sala, data, horario, responsavel, ownerUserId) {
       const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo. Seria possível?`;
       document.getElementById("inputMsgWhatsapp").value = msgPronta;
 
       const btnWhatsapp = document.getElementById("linkEnviarWhatsapp");
-      
-      if (!whatsapp) {
-        btnWhatsapp.onclick = (e) => {
-          e.preventDefault();
-          mostrarAlerta("Atenção", "Este utilizador não tem um número de WhatsApp cadastrado no perfil.", "⚠️");
-        };
-        btnWhatsapp.href = "#";
-      } else {
-        const atualizarLink = () => {
-          const textoAtual = document.getElementById("inputMsgWhatsapp").value;
-          btnWhatsapp.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(textoAtual)}`;
-        };
-        atualizarLink();
-        document.getElementById("inputMsgWhatsapp").oninput = atualizarLink;
-        btnWhatsapp.onclick = null;
+      let whatsappNumero = "";
+
+      if (ownerUserId) {
+        try {
+          const userDoc = await db.collection("usuarios").doc(ownerUserId).get();
+          if (userDoc.exists && userDoc.data().whatsapp) {
+            whatsappNumero = userDoc.data().whatsapp.replace(/\D/g, '');
+          }
+        } catch (e) {}
       }
 
+      const atualizarLink = () => {
+        const textoAtual = document.getElementById("inputMsgWhatsapp").value;
+        if (whatsappNumero) {
+          btnWhatsapp.href = `https://wa.me/${whatsappNumero}?text=${encodeURIComponent(textoAtual)}`;
+        } else {
+          btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAtual)}`;
+        }
+      };
+
+      atualizarLink();
+      document.getElementById("inputMsgWhatsapp").oninput = atualizarLink;
       document.getElementById("modalNegociacao").style.display = "flex";
     }
 
@@ -944,15 +1126,32 @@
       const inicio = document.getElementById("inputHoraInicio").value;
       const fim = document.getElementById("inputHoraFim").value;
       const sala = document.getElementById("salaSelect").value;
+      const dataStr = window.dataSelecionadaGlobal || formatarDataLocal(new Date());
 
-      if (!titulo) {
-        mostrarAlerta("Atenção", "Por favor, preencha o nome da reunião.", "⚠️");
+      if (!titulo || !inicio || !fim) {
+        mostrarAlerta("Atenção", "Por favor, preencha todos os campos.", "warning");
         return;
       }
 
-      const user = firebase.auth().currentUser;
-      const userId = user ? user.uid : "";
-      const emailAuth = user ? user.email : "";
+      const minInicioTotal = parseInt(inicio.split(':')[0]) * 60 + parseInt(inicio.split(':')[1]);
+      const minFimTotal = parseInt(fim.split(':')[0]) * 60 + parseInt(fim.split(':')[1]);
+
+      if (minInicioTotal >= minFimTotal) {
+        mostrarAlerta("Erro de Horário", "O horário de fim deve ser depois do início.", "error");
+        return;
+      }
+
+      const conflito = reservasSalaAtual.some(r => {
+        if (r.data !== dataStr || !r.horarioInicio || !r.horarioFim) return false;
+        const rI = parseInt(r.horarioInicio.split(':')[0]) * 60 + parseInt(r.horarioInicio.split(':')[1]);
+        const rF = parseInt(r.horarioFim.split(':')[0]) * 60 + parseInt(r.horarioFim.split(':')[1]);
+        return (minInicioTotal < (rF + 5) && minFimTotal > (rI - 5));
+      });
+
+      if (conflito) {
+        mostrarAlerta("Conflito de Horário", "Já existe uma reunião ou intervalo de segurança (5 min) neste horário.", "error");
+        return;
+      }
 
       try {
         await db.collection("reservas").add({
@@ -960,19 +1159,19 @@
           horarioInicio: inicio,
           horarioFim: fim,
           sala: sala,
-          data: window.dataSelecionadaGlobal,
+          data: dataStr,
           responsavel: apelidoUsuarioGlobal,
-          userId: userId,
+          userId: usuarioIdGlobal,
           canceladoPorAdmin: false,
           criadoEm: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        let emailDestino = emailAuth;
+        let emailDestino = usuarioEmailGlobal;
         let nomeDestino = apelidoUsuarioGlobal;
 
         try {
-          if (userId) {
-            const userDoc = await db.collection("usuarios").doc(userId).get();
+          if (usuarioIdGlobal) {
+            const userDoc = await db.collection("usuarios").doc(usuarioIdGlobal).get();
             if (userDoc.exists) {
               const dados = userDoc.data() || {};
               if (typeof dados.emailRealNotificacao === "string" && dados.emailRealNotificacao.trim() !== "") {
@@ -983,9 +1182,7 @@
               }
             }
           }
-        } catch (profileErr) {
-          console.error("Erro ao carregar dados do perfil:", profileErr);
-        }
+        } catch (profileErr) {}
 
         let emailEnviado = false;
         let motivoFalhaEmail = "";
@@ -999,41 +1196,27 @@
             to_email: emailDestino,
             to_name: nomeDestino,
             name: titulo,
-            message: `A sua reserva para a ${sala} no dia ${window.dataSelecionadaGlobal} das ${inicio} às ${fim} foi confirmada com sucesso!`
+            message: `A sua reserva para a ${sala} no dia ${dataStr} das ${inicio} às ${fim} foi confirmada com sucesso!`
           };
 
           try {
-            await emailjs.send(
-              'service_d30n93a',
-              'template_3uxpjzk',
-              templateParams
-            );
+            await emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams);
             emailEnviado = true;
           } catch (emailErr) {
-            motivoFalhaEmail = emailErr && emailErr.text 
-              ? emailErr.text 
-              : (emailErr && emailErr.message ? emailErr.message : String(emailErr));
+            motivoFalhaEmail = emailErr && emailErr.text ? emailErr.text : (emailErr && emailErr.message ? emailErr.message : String(emailErr));
           }
         }
 
         document.getElementById("modalNovaReserva").style.display = "none";
 
         if (emailEnviado) {
-          mostrarAlerta(
-            "Reserva confirmada",
-            `Reserva criada com sucesso. E-mail enviado para ${emailDestino}.`,
-            "🎉"
-          );
+          mostrarAlerta("Reserva confirmada", `Reserva criada com sucesso. E-mail enviado para ${emailDestino}.`, "success");
         } else {
-          mostrarAlerta(
-            "Reserva criada; e-mail não enviado",
-            `A reserva foi salva, mas o envio de e-mail falhou: ${motivoFalhaEmail}.`,
-            "⚠️"
-          );
+          mostrarAlerta("Reserva criada", `A reserva foi salva no sistema, mas o envio de e-mail falhou: ${motivoFalhaEmail}.`, "warning");
         }
 
       } catch (err) {
-        mostrarAlerta("Erro", "Erro ao criar reserva: " + err.message, "❌");
+        mostrarAlerta("Erro", "Erro ao criar reserva: " + err.message, "error");
       }
     }
 
@@ -1050,32 +1233,116 @@
       const id = document.getElementById("idReservaParaExcluir").value;
       if (!id) return;
 
-      // Se o admin exclui, podemos marcar como canceladoPorAdmin para alertar o dono na entrada, ou simplesmente deletar.
-      // Aqui atualizamos com canceladoPorAdmin = true antes de deletar ou deletamos diretamente. 
-      // Para o dono receber o aviso de cancelamento imediato ao logar, atualizamos o documento com flag de cancelado:
       db.collection("reservas").doc(id).update({
         canceladoPorAdmin: true
       }).then(() => {
         return db.collection("reservas").doc(id).delete();
       }).then(() => {
         fecharModalConfirmacao();
-        mostrarAlerta("Sucesso", "Reserva excluída e utilizador notificado!", "🗑️");
-      }).catch(err => {
-        // Se a reserva já foi removida ou falhou update, tenta deletar direto
+        mostrarAlerta("Sucesso", "Reserva excluída e utilizador notificado!", "success");
+      }).catch(() => {
         db.collection("reservas").doc(id).delete().then(() => {
           fecharModalConfirmacao();
-          mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "🗑️");
+          mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "success");
         }).catch(e2 => {
           fecharModalConfirmacao();
-          mostrarAlerta("Erro", "Erro ao excluir: " + e2.message, "❌");
+          mostrarAlerta("Erro", "Erro ao excluir: " + e2.message, "error");
         });
+      });
+    }
+
+    /* BLOQUEIO INTELIGENTE DOS HORÁRIOS COM BASE NO FIRESTORE */
+    function atualizarOpcoesInicio(dataStr) {
+      const reservasDoDia = reservasSalaAtual.filter(r => r.data === dataStr);
+      const agora = new Date();
+      const hojeStr = formatarDataLocal(agora);
+      const minAtual = agora.getHours() * 60 + agora.getMinutes();
+
+      const selIni = document.getElementById("inputHoraInicio");
+      selIni.innerHTML = "";
+
+      for (let h = 7; h <= 23; h++) {
+        for (let m of [0, 30]) {
+          if (h === 23 && m === 30) continue;
+          
+          let minSlot = h * 60 + m;
+          let horaStr = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
+          let isPassado = (dataStr === hojeStr && minSlot <= minAtual);
+          
+          let isOcupado = reservasDoDia.some(r => {
+            if (!r.horarioInicio || !r.horarioFim) return false;
+            const rI = parseInt(r.horarioInicio.split(':')[0]) * 60 + parseInt(r.horarioInicio.split(':')[1]);
+            const rF = parseInt(r.horarioFim.split(':')[0]) * 60 + parseInt(r.horarioFim.split(':')[1]);
+            return (minSlot >= rI && minSlot < rF);
+          });
+
+          let opt = new Option(horaStr + (isPassado ? " (Passado)" : (isOcupado ? " (Ocupado)" : "")), horaStr);
+          if (isPassado || isOcupado) opt.disabled = true;
+          selIni.add(opt);
+        }
+      }
+    }
+
+    function atualizarOpcoesFim(dataStr) {
+      const reservasDoDia = reservasSalaAtual.filter(r => r.data === dataStr);
+      const selIni = document.getElementById("inputHoraInicio");
+      const selFim = document.getElementById("inputHoraFim");
+      
+      if (!selIni.value) return;
+      
+      const [hIni, mIni] = selIni.value.split(':').map(Number);
+      const minInicio = hIni * 60 + mIni;
+      let proximoLimite = 23 * 60 + 30;
+      
+      reservasDoDia.forEach(r => {
+        if (!r.horarioInicio) return;
+        const rI = parseInt(r.horarioInicio.split(':')[0]) * 60 + parseInt(r.horarioInicio.split(':')[1]);
+        if (rI > minInicio && rI < proximoLimite) {
+          proximoLimite = rI;
+        }
+      });
+
+      const valorFimAtual = selFim.value;
+      selFim.innerHTML = "";
+
+      for (let minSlot = minInicio + 30; minSlot <= proximoLimite; minSlot += 30) {
+        let horaStr = String(Math.floor(minSlot/60)%24).padStart(2,'0') + ":" + String(minSlot%60).padStart(2,'0');
+        selFim.add(new Option(horaStr, horaStr));
+      }
+
+      if (valorFimAtual && Array.from(selFim.options).some(o => o.value === valorFimAtual)) {
+        selFim.value = valorFimAtual;
+      } else if (selFim.options.length > 0) {
+        selFim.selectedIndex = 0;
+      }
+    }
+
+    function abrirModalReserva(horaInicio, dataStr) {
+      window.dataSelecionadaGlobal = dataStr;
+      document.getElementById("reservaHorarioInicio").value = horaInicio;
+      document.getElementById("inputTituloReserva").value = "";
+      
+      atualizarOpcoesInicio(dataStr);
+      
+      const selIni = document.getElementById("inputHoraInicio");
+      if (Array.from(selIni.options).some(o => o.value === horaInicio && !o.disabled)) {
+        selIni.value = horaInicio;
+      } else {
+        const primeiroDisponivel = Array.from(selIni.options).find(o => !o.disabled);
+        if (primeiroDisponivel) selIni.value = primeiroDisponivel.value;
+      }
+      
+      atualizarOpcoesFim(dataStr);
+      document.getElementById("modalNovaReserva").style.display = "flex";
+    }
+
+    // Registo do Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../sw.js').catch(err => console.error(err));
       });
     }
   </script>
 
-  <script type="module">
-    import { verificarAutenticacao } from "../js/auth.js";
-    verificarAutenticacao();
-  </script>
 </body>
 </html>
