@@ -75,16 +75,22 @@ function iniciarAuth() {
         
         if (pathAtual.includes("admin-users.html")) {
           window.location.replace(pathAtual.includes("/pages/") ? "calendar.html" : "pages/calendar.html");
+          return;
         }
       }
 
       if (isLoginPage) {
         window.location.replace(pathAtual.includes("/pages/") ? "calendar.html" : "pages/calendar.html");
+        return;
       }
+
+      window.AntiFlicker?.reveal();
 
     } else {
       if (!isLoginPage) {
         window.location.replace(pathAtual.includes("/pages/") ? "../index.html" : "index.html"); 
+      } else {
+        window.AntiFlicker?.reveal();
       }
     }
   });
