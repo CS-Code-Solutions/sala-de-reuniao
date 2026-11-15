@@ -1,1194 +1,189 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Agenda</title>
-  <link rel="stylesheet" href="../css/global.css">
-  <link rel="stylesheet" href="../css/components.css">
-  <!-- Configurações para PWA e iOS -->
   <link rel="manifest" href="../manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
-  <link rel="apple-touch-icon" href="../ico.png">
-
+  <link rel="icon" href="../ico.png" type="image/png">
+  <link rel="stylesheet" href="../css/global.css">
+  <link rel="stylesheet" href="../css/components.css">
   <style>
-    :root {
-      --sidebar-bg: #0f172a;
-      --accent-color: #0d9488;
-      --accent-hover: #0f766e;
-      --bg-main: #f8fafc;
-      --card-bg: #ffffff;
-      --text-main: #1e293b;
-      --text-muted: #64748b;
-      --border-color: #e2e8f0;
-    }
+    .brand-logo { max-width: 150px; height: auto; }
+    .nav-links a { display: flex; align-items: center; gap: 10px; }
+    .nav-links svg { width: 18px; height: 18px; stroke-width: 2; }
+    .user-profile-box { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 1px solid var(--border-color); }
+    .user-info-text h4 { font-size: 14px; color: var(--text-main); }
+    .user-info-text p { font-size: 12px; color: var(--text-muted); }
 
-    body {
-      background-color: var(--bg-main);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      display: flex;
-      min-height: 100vh;
-    }
+    .cal-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid var(--border-color); }
+    .date-nav { display: flex; align-items: center; gap: 8px; }
+    .date-nav button { padding: 6px 12px; border: 1px solid var(--border-color); background: #f8fafc; border-radius: 8px; cursor: pointer; font-weight: 600; }
+    .view-toggles { display: flex; background: #f1f5f9; padding: 4px; border-radius: 8px; gap: 4px; }
+    .view-toggles button { padding: 6px 14px; border: none; background: transparent; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text-muted); }
+    .view-toggles button.active { background: #ffffff; color: var(--primary); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
 
-    .sidebar {
-      width: 260px;
-      background-color: var(--sidebar-bg);
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 24px 16px;
-      position: fixed;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      z-index: 100;
-    }
+    .cal-layout { display: grid; grid-template-columns: 1fr 290px; gap: 24px; padding: 24px 32px; }
+    .cal-card { background: #ffffff; border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; }
+    .cal-main-header { display: flex; justify-content: space-between; padding: 14px 20px; background: #f8fafc; border-bottom: 1px solid var(--border-color); font-weight: 600; font-size: 14px; }
 
-    .brand-area {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 12px 24px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      margin-bottom: 12px;
-    }
+    .time-row { display: grid; grid-template-columns: 70px 1fr; border-bottom: 1px solid #f1f5f9; align-items: stretch; }
+    .time-label { padding: 14px 12px; font-size: 12px; font-weight: 600; color: var(--text-muted); border-right: 1px solid #f1f5f9; text-align: right; }
+    .event-block { margin: 6px 12px; padding: 10px 14px; border-radius: 8px; font-size: 13px; }
+    .event-block.green { background: #ecfdf5; border-left: 4px solid #10b981; color: #065f46; }
+    .event-block.blue { background: #eff6ff; border-left: 4px solid #3b82f6; color: #1e40af; }
+    .event-block.purple { background: #f5f3ff; border-left: 4px solid #8b5cf6; color: #5b21b6; }
+    .event-time { font-weight: 600; font-size: 12px; }
+    .event-title { font-weight: 700; margin-top: 2px; }
+    .event-meta { font-size: 11px; opacity: 0.85; margin-top: 2px; }
 
-    .brand-logo {
-      max-height: 55px;
-      width: 100%;
-      object-fit: contain;
-    }
+    .upcoming-item { display: flex; gap: 10px; padding: 12px 0; border-bottom: 1px solid #f1f5f9; align-items: flex-start; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 4px; background: #3b82f6; flex-shrink: 0; }
+    .up-info { display: flex; flex-direction: column; gap: 2px; }
+    .up-time { font-size: 11px; font-weight: 600; color: var(--primary); }
+    .up-title { font-size: 13px; font-weight: 600; color: var(--text-main); }
+    .up-meta { font-size: 11px; color: var(--text-muted); }
 
-    .nav-links {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 10px;
-      flex: 1;
-    }
+    /* Modal Nova Reserva */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,0.65); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
+    .modal-box { background: #ffffff; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-box label { font-size: 12px; font-weight: 600; color: #334155; display: block; margin-bottom: 4px; }
+    .modal-box input, .modal-box select { width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; }
 
-    .nav-links a {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .nav-links a svg {
-      width: 18px;
-      height: 18px;
-      stroke-width: 2;
-      flex-shrink: 0;
-    }
-
-    .nav-links a:hover, .nav-links a.active {
-      background: rgba(255, 255, 255, 0.08);
-      color: white;
-    }
-
-    .nav-links a.active {
-      background: rgba(13, 148, 136, 0.25);
-      color: #2dd4bf;
-    }
-
-    .user-profile-box {
-      background: rgba(255, 255, 255, 0.05);
-      padding: 12px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .user-info-text h4 { font-size: 13px; color: white; margin: 0; }
-    .user-info-text p { font-size: 11px; color: #94a3b8; margin: 2px 0 0 0; }
-
-    .main-content {
-      margin-left: 260px;
-      flex: 1;
-      padding: 32px;
-      background-color: var(--bg-main);
-      min-height: 100vh;
-      box-sizing: border-box;
-    }
-
-    .cal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .cal-title-area h1 {
-      font-size: 26px;
-      color: var(--text-main);
-      margin: 0 0 4px 0;
-      font-weight: 700;
-    }
-
-    .cal-title-area p {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin: 0;
-    }
-
-    .cal-controls {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .view-toggles {
-      display: flex;
-      background: var(--card-bg);
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-    }
-
-    .view-toggles button {
-      padding: 8px 16px;
-      border: none;
-      background: var(--card-bg);
-      color: var(--text-muted);
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      border-right: 1px solid var(--border-color);
-    }
-
-    .view-toggles button:last-child { border-right: none; }
-    .view-toggles button.active { background: var(--accent-color); color: white; }
-
-    .room-select {
-      padding: 9px 16px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      font-weight: 600;
-      background: var(--card-bg);
-      font-size: 13px;
-      outline: none;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
-    }
-
-    .cal-layout {
-      display: grid;
-      grid-template-columns: 1fr 320px;
-      gap: 24px;
-    }
-
-    .cal-main {
-      background: var(--card-bg);
-      border-radius: 12px;
-      border: 1px solid var(--border-color);
-      overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02);
-    }
-
-    .cal-main-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--border-color);
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--text-muted);
-      background: #fafafa;
-    }
-
-    .date-nav-inline {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      color: var(--text-main);
-      font-weight: 600;
-    }
-
-    .date-nav-inline button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--accent-color);
-      font-weight: bold;
-      font-size: 16px;
-      padding: 0 4px;
-    }
-
-    .schedule-list {
-      padding: 20px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .slot-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
-      background: var(--card-bg);
-      gap: 12px;
-      transition: all 0.2s;
-    }
-
-    .slot-row.reserved {
-      background: #f0fdfa;
-      border-color: #ccfbf1;
-      border-left: 5px solid var(--accent-color);
-    }
-
-    .slot-row.available {
-      background: #f8fafc;
-      border-color: var(--border-color);
-      border-left: 5px solid #22c55e;
-      cursor: pointer;
-    }
-    .slot-row.available:hover {
-      background: #f1f5f9;
-    }
-
-    .btn-action-slot { 
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px; 
-      padding: 6px 14px; border-radius: 6px; font-weight: 600; font-size: 12px; 
-      cursor: pointer; border: none; transition: all 0.2s; 
-    }
-    .btn-action-slot svg { width: 14px; height: 14px; }
-    
-    .btn-reserve { background: #22c55e; color: white; box-shadow: 0 2px 4px rgba(34, 197, 94, 0.2); }
-    .btn-reserve:hover { background: #16a34a; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(34, 197, 94, 0.25); }
-    
-    .btn-negotiate { background: #f0fdfa; color: var(--accent-color); border: 1px solid #ccfbf1; }
-    .btn-negotiate:hover { background: #ccfbf1; transform: translateY(-1px); }
-    
-    .btn-delete-admin { 
-      display: inline-flex; align-items: center; justify-content: center; gap: 4px; 
-      background: #fee2e2; color: #dc2626; padding: 4px 10px; font-size: 11px; 
-      border-radius: 4px; font-weight: 600; cursor: pointer; border: none; transition: all 0.2s; 
-    }
-    .btn-delete-admin svg { width: 12px; height: 12px; }
-    .btn-delete-admin:hover { background: #fecaca; transform: translateY(-1px); }
-
-    .grid-semana { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; overflow-x: auto; }
-    .card-dia-semana { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; padding: 8px; min-height: 140px; display: flex; flex-direction: column; gap: 6px; }
-
-    .grid-mes-header { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 700; font-size: 12px; color: var(--text-muted); padding: 8px 12px; background: #f1f5f9; border-bottom: 1px solid var(--border-color); }
-    .grid-mes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 12px; background: #fff; }
-    .card-dia-mes { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px; min-height: 75px; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.2s; }
-    .card-dia-mes:hover { background: #f0fdfa; border-color: #99f6e4; }
-    .card-dia-mes.outro-mes { opacity: 0.35; background: #fdfdfd; }
-    .card-dia-mes.dia-hoje { border-color: var(--accent-color); background: #f0fdfa; }
-
-    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
-    .modal-card { background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
-    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
-    
-    .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
-    .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
-    
-    /* MODIFICAÇÃO DO CSS PARA INCLUIR O SELECT BONITO */
-    .form-group input, .form-group textarea, .form-group select { 
-      padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: white; 
-    }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { 
-      border-color: var(--accent-color); 
-    }
-    /* FIM DA MODIFICAÇÃO DO SELECT */
-
-    .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
-    .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-save:hover { background: var(--accent-hover); }
-    .btn-whatsapp { flex: 1; padding: 10px; background: #16a34a; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
-
-    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
-    .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-    .btn-modal-danger { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
-    .cal-sidebar { display: flex; flex-direction: column; gap: 24px; }
-    .side-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
-    .side-card h3 { font-size: 15px; color: var(--text-main); margin: 0 0 16px 0; font-weight: 700; }
-    
-    .room-info { display: flex; gap: 12px; }
-    .room-img { width: 80px; height: 60px; background-color: var(--border-color); border-radius: 8px; object-fit: cover; }
-    .room-details h4 { font-size: 14px; color: var(--text-main); margin: 0 0 6px 0; }
-    .room-details p { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin: 0 0 4px 0; }
-    .room-details p svg { width: 14px; height: 14px; stroke-width: 2; color: var(--accent-color); }
-    
-    .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
-
-    @media (max-width: 1024px) {
-      .cal-layout { grid-template-columns: 1fr; }
-      .sidebar { display: none !important; }
-      .main-content { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
-      .mobile-topbar-bar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        background: #0f172a;
-        padding: 10px 12px 10px 8;
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        margin: -16px -16px 20px -16px;
+    @media (max-width: 960px) {
+      .cal-layout { grid-template-columns: 1fr; padding: 16px; }
+    }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .topbar { padding: 16px; }
+      .cal-controls { padding: 12px 16px; }
+      .mobile-bottom-nav {
+        display: flex; justify-content: space-around; align-items: center;
+        position: fixed; bottom: 0; left: 0; right: 0; height: 64px;
+        background: #ffffff; border-top: 1px solid var(--border-color); z-index: 1000;
       }
-      .brand-logo { max-height: 38px; width: auto; object-fit: contain; margin-right: auto; margin-left: 0; }
-      .btn-sair-mobile { color: #e2e8f0; font-size: 13px; font-weight: 600; text-decoration: none; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); padding: 6px 12px; border-radius: 8px; transition: all 0.2s; }
-      .btn-sair-mobile:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; }
-      .mobile-bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: #0f172a; border-top: 1px solid rgba(255,255,255,0.1); padding: 8px 0; justify-content: space-around; align-items: center; z-index: 1000; box-shadow: 0 -4px 12px rgba(0,0,0,0.2); }
-      .mob-nav-item { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: #94a3b8; font-size: 11px; font-weight: 600; gap: 4px; }
+      .mob-nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: var(--text-muted); text-decoration: none; gap: 4px; }
+      .mob-nav-item.active { color: var(--primary); font-weight: 600; }
       .mob-nav-item svg { width: 20px; height: 20px; stroke-width: 2; }
-      .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
+      .main-content { padding-bottom: 72px; }
     }
   </style>
 </head>
 <body>
+  <div id="sidebar-container"></div>
 
-  <aside class="sidebar">
-    <div>
-      <div class="brand-area">
-        <img src="../cabe.png" alt="Logo" class="brand-logo">
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1>Agenda de Salas</h1>
+        <span id="userAvatarMobile" style="font-size: 12px; color: var(--text-muted);"></span>
       </div>
-
-      <nav class="nav-links">
-        <a href="calendar.html" class="active">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          <span>Agenda</span>
-        </a>
-        <a href="my-reservations.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-          <span>Minhas reservas</span>
-        </a>
-        <a href="notifications.html">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-          <span>Notificações</span>
-        </a>
-        
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
-          <span>Salas</span>
-        </a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          <span>Usuários</span>
-        </a>
-      </nav>
-    </div>
-
-    <div class="user-profile-box">
-      <div class="user-info-text">
-        <h4 id="userNameDisplay">Carregando...</h4>
-        <p id="userRoleDisplay">Utilizador</p>
-      </div>
-      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-      </a>
-    </div>
-  </aside>
-
-  <main class="main-content calendar-wrapper">
-    <div class="mobile-topbar-bar">
-      <img src="../cabe.png" alt="Logo" class="brand-logo">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
-        <a href="#" onclick="fazerLogoutLocal(); return false;" class="btn-sair-mobile">Sair</a>
-      </div>
-    </div>
-
-    <header class="cal-header">
-      <div class="cal-title-area">
-        <h1>Agenda</h1>
-        <p>Visualize e gerencie as reservas das salas de reunião.</p>
-      </div>
-      <div class="cal-controls">
-        <div class="view-toggles" id="viewTogglesGroup">
-          <button class="active" onclick="alterarVisao('dia', this)">Dia</button>
-          <button onclick="alterarVisao('semana', this)">Semana</button>
-          <button onclick="alterarVisao('mes', this)">Mês</button>
-        </div>
-        <select class="room-select" id="salaSelect" onchange="mudarSalaSelecionada()">
-          <option value="Sala 01">Sala de Reuniões 01</option>
-          <option value="Sala 02">Sala de Reuniões 02</option>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <select id="seletorSala" style="padding: 9px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 13px; background: #fff;">
+          <option value="Sala de Reuniões 01">Sala de Reuniões 01</option>
+          <option value="Sala Executiva 02">Sala Executiva 02</option>
         </select>
+        <button onclick="abrirModalReserva('08:00', '09:00')" style="padding: 10px 18px; background: #0d9488; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer;">+ Nova Reserva</button>
       </div>
     </header>
 
-    <div class="cal-layout">
-      <div class="cal-main">
-        <div class="cal-main-header">
-          <span id="salaHeaderTitulo" style="font-weight: 700;">Sala de Reuniões 01</span>
-          <div class="date-nav-inline">
-            <button onclick="mudarData(-1)">&#10094;</button>
-            <span id="dataAtualExibicao">Carregando...</span>
-            <button onclick="mudarData(1)">&#10095;</button>
-          </div>
-        </div>
-        <div class="schedule-list" id="gridHorarios">
-          <p style="color: var(--text-muted); font-size: 14px;">A carregar agenda...</p>
-        </div>
+    <div class="cal-controls">
+      <div class="date-nav">
+        <button onclick="mudarData(-1)">◀</button>
+        <button onclick="resetarData()">Hoje</button>
+        <button onclick="mudarData(1)">▶</button>
+        <strong id="dataAtualExibicao" style="margin-left: 8px; font-size: 15px;"></strong>
       </div>
 
-      <div class="cal-sidebar">
-        <div class="side-card">
-          <h3>Detalhes da sala</h3>
-          <div class="room-info">
-            <img id="sidebarSalaImg" src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" alt="Sala" class="room-img">
-            <div class="room-details">
-              <h4 id="sidebarNomeSala">Sala de Reuniões 01</h4>
-              <p id="sidebarCapacidade"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas</p>
-              <p id="sidebarEquipamentos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...</p>
-            </div>
-          </div>
-        </div>
+      <div class="view-toggles" id="viewTogglesGroup">
+        <button class="active" onclick="mudarVisualizacao('dia', this)">Dia</button>
+        <button onclick="mudarVisualizacao('semana', this)">Semana</button>
+        <button onclick="mudarVisualizacao('mes', this)">Mês</button>
       </div>
     </div>
+
+    <div class="cal-layout">
+      <div class="cal-card">
+        <div class="cal-main-header">
+          <span>Sala de Reuniões 01</span>
+          <span>Carregando...</span>
+        </div>
+        <div id="gridHorarios"></div>
+      </div>
+
+      <aside class="cal-card" style="padding: 18px; height: fit-content;">
+        <h3 style="font-size: 15px; margin-bottom: 12px; color: var(--text-main);">Reservas do Dia</h3>
+        <div id="listaProximas"></div>
+      </aside>
+    </div>
+
+    <footer style="text-align: center; padding: 16px; font-size: 12px; color: #64748b; margin-top: auto;">
+      Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank" style="color: #0d9488; text-decoration: none; font-weight: 600;">CS Code Solutions</a>
+    </footer>
   </main>
 
+  <!-- Modal de Nova Reserva -->
   <div class="modal-overlay" id="modalNovaReserva">
-    <div class="modal-card">
-      <h3 class="modal-title">Nova Reserva</h3>
-      <input type="hidden" id="reservaHorarioInicio">
-      
-      <div class="form-group">
-        <label>Nome / Título da Reunião</label>
-        <input type="text" id="inputTituloReserva" placeholder="Ex: Planeamento Estratégico">
+    <div class="modal-box">
+      <h3 style="font-size: 18px; color: #1e293b;">Agendar Reunião</h3>
+      <div>
+        <label>Título da Reunião</label>
+        <input type="text" id="resTitulo" placeholder="Ex: Alinhamento Semanal">
       </div>
-
-      <div class="form-group">
-        <label>Horário de Início e Fim</label>
-        <div style="display: flex; gap: 8px;">
-          <!-- MODIFICAÇÃO DO SELECT AQUI COM ONCHANGE PARA AVALIAR O FIM -->
-          <select id="inputHoraInicio" style="flex:1;" onchange="atualizarOpcoesFim(window.dataSelecionadaGlobal, document.getElementById('salaSelect').value)" required></select>
-          <select id="inputHoraFim" style="flex:1;" required></select>
+      <div>
+        <label>Sala</label>
+        <select id="resSala">
+          <option value="Sala de Reuniões 01">Sala de Reuniões 01</option>
+          <option value="Sala Executiva 02">Sala Executiva 02</option>
+        </select>
+      </div>
+      <div>
+        <label>Data</label>
+        <input type="date" id="resData">
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div>
+          <label>Início</label>
+          <input type="time" id="resInicio" value="08:00">
+        </div>
+        <div>
+          <label>Término</label>
+          <input type="time" id="resFim" value="09:00">
         </div>
       </div>
-
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="document.getElementById('modalNovaReserva').style.display='none'">Cancelar</button>
-        <button class="btn-save" onclick="salvarNovaReservaLocal()">Confirmar Reserva</button>
+      <div style="display: flex; gap: 10px; margin-top: 8px;">
+        <button onclick="document.getElementById('modalNovaReserva').style.display='none'" style="flex:1; padding: 10px; border: 1px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer;">Cancelar</button>
+        <button onclick="confirmarReservaModal()" style="flex:1; padding: 10px; border: none; background: #0d9488; color: white; font-weight: 600; border-radius: 8px; cursor: pointer;">Confirmar</button>
       </div>
     </div>
   </div>
 
-  <div class="modal-overlay" id="modalNegociacao">
-    <div class="modal-card">
-      <h3 class="modal-title">Negociar Horário</h3>
-      <p style="font-size: 13px; color: var(--text-muted);">Personalize a mensagem para enviar ao responsável por esta reserva:</p>
-      
-      <div class="form-group">
-        <label>Mensagem</label>
-        <textarea id="inputMsgWhatsapp" rows="5" style="resize: vertical;"></textarea>
-      </div>
+  <div id="mobile-nav-container"></div>
 
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="document.getElementById('modalNegociacao').style.display='none'">Voltar</button>
-        <a id="linkEnviarWhatsapp" href="#" target="_blank" class="btn-whatsapp">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Enviar WhatsApp
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modalConfirmacaoExclusao">
-    <div class="modal-alert-card">
-      <div style="display: flex; justify-content: center; color: #dc2626;">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
-      </div>
-      <h3 class="modal-title">Excluir Reserva</h3>
-      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">Tem certeza que deseja excluir esta reserva?</p>
-      <input type="hidden" id="idReservaParaExcluir">
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
-        <button class="btn-modal-danger" onclick="executarExclusaoReservaLocal()">Sim, Excluir</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal-overlay" id="modalAlerta">
-    <div class="modal-alert-card">
-      <div style="display: flex; justify-content: center;" id="modalAlertaIcone"></div>
-      <h3 class="modal-title" id="modalAlertaTitulo">Sucesso</h3>
-      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;" id="modalAlertaTexto">Mensagem aqui</p>
-      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
-    </div>
-  </div>
-
-  <nav class="mobile-bottom-nav">
-    <a href="calendar.html" class="mob-nav-item active">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-      <span>Agenda</span>
-    </a>
-    <a href="my-reservations.html" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
-      <span>Reservas</span>
-    </a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
-      <span>Salas</span>
-    </a>
-    <a href="notifications.html" class="mob-nav-item">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-      <span>Avisos</span>
-    </a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-      <span>Admin</span>
-    </a>
-  </nav>
-
-  <script>
-    let usuarioSessao = null;
-    let usuarioEhAdmin = false;
-    let apelidoUsuarioGlobal = "Utilizador";
-    let dataAtualObj = new Date();
-    let tipoVisaoAtual = 'dia';
-
-    function formatarDataLocal(d) {
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
-      if (!sessaoStr) {
-        window.location.href = "../index.html";
-        return;
-      }
-
-      usuarioSessao = JSON.parse(sessaoStr);
-      apelidoUsuarioGlobal = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
-      usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
-
-      document.getElementById("userNameDisplay").innerText = apelidoUsuarioGlobal;
-      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
-      document.getElementById("userAvatarMobile").innerText = "Olá, " + apelidoUsuarioGlobal;
-
-      if (usuarioEhAdmin) {
-        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-      }
-
-      
-      // VERIFICAÇÃO LGPD
-      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
-      if (!localStorage.getItem(chaveLGPD)) {
-        document.getElementById('modalTermosLGPD').style.display = 'flex';
-      }
-
-      atualizarCabecalhoData();
-      mudarSalaSelecionada();
-
-      window.addEventListener('storage', (e) => {
-        if (e.key === "meetingroom_reservas" || e.key === "meetingroom_calendario") {
-          carregarAgendaLocal();
-        }
-      });
-      setInterval(carregarAgendaLocal, 30000);
-    });
-
-    
-    function confirmarAceiteLGPD() {
-      const checkbox = document.getElementById('checkAceiteLGPD');
-      if (!checkbox.checked) {
-        alert("Por favor, confirme que leu e aceita a Política de Privacidade marcando a caixa antes de continuar.");
-        return;
-      }
-      
-      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
-      localStorage.setItem(chaveLGPD, 'true');
-      document.getElementById('modalTermosLGPD').style.display = 'none';
-      
-      // Opcional: mostrar um alerta de sucesso
-      mostrarAlerta("Obrigado", "As suas preferências de privacidade foram atualizadas com sucesso.", "success");
-    }
-
-    function fazerLogoutLocal() {
-      localStorage.removeItem("meetingroom_sessao_atual");
-      window.location.href = "../index.html";
-    }
-
-    function mudarSalaSelecionada() {
-      const sala = document.getElementById("salaSelect").value;
-      document.getElementById("sidebarNomeSala").innerText = sala;
-      document.getElementById("salaHeaderTitulo").innerText = sala;
-
-      if (sala === "Sala 01") {
-        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas';
-        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...';
-        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
-      } else if (sala === "Sala 02") {
-        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 12 pessoas';
-        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: Projetor, Som, TV 4K';
-        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
-      }
-
-      carregarAgendaLocal();
-    }
-
-    function mostrarAlerta(titulo, texto, tipo = "success") {
-      document.getElementById("modalAlertaTitulo").innerText = titulo;
-      document.getElementById("modalAlertaTexto").innerText = texto;
-      
-      let iconHtml = "";
-      if (tipo === "success") {
-        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
-      } else if (tipo === "error") {
-        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-      } else {
-        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
-      }
-      
-      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
-      document.getElementById("modalAlerta").style.display = "flex";
-    }
-
-    function fecharModalAlerta() {
-      document.getElementById("modalAlerta").style.display = "none";
-      carregarAgendaLocal();
-    }
-
-    function atualizarCabecalhoData() {
-      const spanData = document.getElementById("dataAtualExibicao");
-      let textoFormatado = "";
-
-      if (tipoVisaoAtual === 'dia') {
-        const diaSemana = dataAtualObj.toLocaleDateString('pt-BR', { weekday: 'long' });
-        const dataCurta = dataAtualObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-        textoFormatado = `${diaSemana}, ${dataCurta}`;
-      } 
-      else if (tipoVisaoAtual === 'semana') {
-        let inicioSemana = new Date(dataAtualObj);
-        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
-        let fimSemana = new Date(inicioSemana);
-        fimSemana.setDate(fimSemana.getDate() + 6);
-        const opt = { day: 'numeric', month: 'short' };
-        textoFormatado = `${inicioSemana.toLocaleDateString('pt-BR', opt)} - ${fimSemana.toLocaleDateString('pt-BR', opt)}, ${dataAtualObj.getFullYear()}`;
-      } 
-      else if (tipoVisaoAtual === 'mes') {
-        const options = { month: 'long', year: 'numeric' };
-        textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
-        textoFormatado = textoFormatado.charAt(0).toUpperCase() + textoFormatado.slice(1);
-      }
-
-      spanData.innerText = textoFormatado;
-    }
-
-    function mudarData(direcao) {
-      if (tipoVisaoAtual === 'dia') {
-        dataAtualObj.setDate(dataAtualObj.getDate() + direcao);
-      } else if (tipoVisaoAtual === 'semana') {
-        dataAtualObj.setDate(dataAtualObj.getDate() + (direcao * 7));
-      } else if (tipoVisaoAtual === 'mes') {
-        dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
-      }
-      
-      // VERIFICAÇÃO LGPD
-      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
-      if (!localStorage.getItem(chaveLGPD)) {
-        document.getElementById('modalTermosLGPD').style.display = 'flex';
-      }
-
-      atualizarCabecalhoData();
-      carregarAgendaLocal();
-    }
-
-    function alterarVisao(visao, btnElement) {
-      tipoVisaoAtual = visao;
-      document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
-      btnElement.classList.add("active");
-      
-      // VERIFICAÇÃO LGPD
-      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
-      if (!localStorage.getItem(chaveLGPD)) {
-        document.getElementById('modalTermosLGPD').style.display = 'flex';
-      }
-
-      atualizarCabecalhoData();
-      carregarAgendaLocal();
-    }
-
-    function selecionarDiaEspecifico(dataStr) {
-      dataAtualObj = new Date(dataStr + "T00:00:00");
-      tipoVisaoAtual = 'dia';
-      document.querySelectorAll(".view-toggles button").forEach((b, idx) => {
-        if (idx === 0) b.classList.add("active");
-        else b.classList.remove("active");
-      });
-      
-      // VERIFICAÇÃO LGPD
-      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
-      if (!localStorage.getItem(chaveLGPD)) {
-        document.getElementById('modalTermosLGPD').style.display = 'flex';
-      }
-
-      atualizarCabecalhoData();
-      carregarAgendaLocal();
-    }
-
-    function carregarAgendaLocal() {
-      const sala = document.getElementById("salaSelect").value;
-      const container = document.getElementById("gridHorarios");
-      document.getElementById("salaHeaderTitulo").innerText = sala;
-
-      const dataStr = formatarDataLocal(dataAtualObj);
-      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      
-      const reservasDoDia = reservas.filter(r => {
-        const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        return rSala === sala && rData === dataStr;
-      });
-
-      const iconeAgendar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>`;
-      const iconeNegociar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
-      const iconeExcluir = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
-
-      let fragmentoHTML = "";
-
-      if (tipoVisaoAtual === 'dia') {
-        const inicioDiaMin = 7 * 60; // 07:00
-        const fimDiaMin = 23 * 60;   // 23:00
-
-        reservasDoDia.sort((a, b) => {
-          const tA = a.horarioInicio || a.horaInicio || a.start?.split('T')[1]?.substring(0,5) || "00:00";
-          const tB = b.horarioInicio || b.horaInicio || b.start?.split('T')[1]?.substring(0,5) || "00:00";
-          return tA.localeCompare(tB);
-        });
-
-        let cursorMin = inicioDiaMin;
-
-        reservasDoDia.forEach(reserva => {
-          const strIni = reserva.horarioInicio || reserva.horaInicio || reserva.start?.split('T')[1]?.substring(0,5) || "00:00";
-          const strFim = reserva.horarioFim || reserva.horaFim || reserva.end?.split('T')[1]?.substring(0,5) || strIni;
-          
-          const resIniMin = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
-          const resFimMin = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
-
-          if (cursorMin < resIniMin) {
-            const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
-            const slotLivreFim = String(Math.floor(resIniMin/60)).padStart(2,'0') + ":" + String(resIniMin%60).padStart(2,'0');
-            
-            fragmentoHTML += `
-              <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
-                <div>
-                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às ${slotLivreFim} - Disponível</span>
-                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar neste intervalo livre.</p>
-                </div>
-                <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
-              </div>
-            `;
-          }
-
-          fragmentoHTML += `
-            <div class="slot-row reserved">
-              <div>
-                <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
-                <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo || reserva.title || 'Reunião'}</h4>
-                <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || reserva.usuario || 'Equipa'}</p>
-              </div>
-              <div style="display: flex; gap: 6px; align-items: center;">
-                <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${reserva.responsavel || reserva.usuario || 'Colega'}')">${iconeNegociar} Negociar</button>
-                ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reserva.id}')">${iconeExcluir} Excluir</button>` : ''}
-              </div>
-            </div>
-          `;
-
-          cursorMin = Math.max(cursorMin, resFimMin + 5); 
-        });
-
-        if (cursorMin < fimDiaMin) {
-          const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
-          
-          fragmentoHTML += `
-            <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
-              <div>
-                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às 23:00 - Disponível</span>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar no restante do dia.</p>
-              </div>
-              <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
-            </div>
-          `;
-        }
-        
-        if(reservasDoDia.length === 0) {
-           fragmentoHTML = `
-            <div class="slot-row available" onclick="abrirModalReserva('08:00', '${dataStr}')">
-              <div>
-                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">07:00 às 23:00 - Disponível</span>
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Sem reuniões. Clique para agendar o primeiro horário.</p>
-              </div>
-              <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
-            </div>
-          `;
-        }
-
-        container.innerHTML = fragmentoHTML;
-      }
-      else if (tipoVisaoAtual === 'semana') {
-        let gridDivHtml = `<div class="grid-semana">`;
-        let inicioSemana = new Date(dataAtualObj);
-        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
-
-        for (let i = 0; i < 7; i++) {
-          let diaAtual = new Date(inicioSemana);
-          diaAtual.setDate(diaAtual.getDate() + i);
-          let diaStr = formatarDataLocal(diaAtual);
-          let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
-
-          gridDivHtml += `
-            <div class="card-dia-semana" style="cursor: pointer;" onclick="selecionarDiaEspecifico('${diaStr}')">
-              <strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>
-          `;
-          
-          let reservasDoDiaSemana = reservas.filter(r => {
-            const rSala = r.sala || r.room;
-            const rData = r.data || r.date || r.start?.split('T')[0];
-            return rSala === sala && rData === diaStr;
-          });
-
-          if (reservasDoDiaSemana.length > 0) {
-            reservasDoDiaSemana.forEach(r => {
-              const sIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5) || "";
-              gridDivHtml += `
-                <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
-                  <b>${sIni}</b> - ${r.titulo || r.title || 'Reunião'}
-                  ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" style="margin-top:2px;" onclick="event.stopPropagation(); confirmarExclusaoLocal('${r.id}')">${iconeExcluir} Excluir</button>` : ''}
-                </div>
-              `;
-            });
-          } else {
-            gridDivHtml += `<span style="font-size: 10px; color: #94a3b8; font-style: italic; margin-top: 4px;">Sem reuniões</span>`;
-          }
-          gridDivHtml += `</div>`;
-        }
-        gridDivHtml += `</div>`;
-        container.innerHTML = gridDivHtml;
-      }
-      else if (tipoVisaoAtual === 'mes') {
-        let wrapperHtml = `<div>`;
-        wrapperHtml += `<div class="grid-mes-header"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>`;
-        wrapperHtml += `<div class="grid-mes">`;
-
-        let ano = dataAtualObj.getFullYear();
-        let mes = dataAtualObj.getMonth();
-        let primeiroDiaMes = new Date(ano, mes, 1);
-        let inicioGrid = new Date(primeiroDiaMes);
-        inicioGrid.setDate(inicioGrid.getDate() - primeiroDiaMes.getDay());
-
-        let hojeStr = formatarDataLocal(new Date());
-
-        for (let i = 0; i < 42; i++) {
-          let diaAtual = new Date(inicioGrid);
-          diaAtual.setDate(diaAtual.getDate() + i);
-          let diaStr = formatarDataLocal(diaAtual);
-          let eMesAtual = diaAtual.getMonth() === mes;
-          let eHoje = diaStr === hojeStr;
-
-          let reservasDia = reservas.filter(r => {
-            const rSala = r.sala || r.room;
-            const rData = r.data || r.date || r.start?.split('T')[0];
-            return rSala === sala && rData === diaStr;
-          });
-
-          wrapperHtml += `
-            <div class="card-dia-mes ${eMesAtual ? '' : 'outro-mes'} ${eHoje ? 'dia-hoje' : ''}" onclick="selecionarDiaEspecifico('${diaStr}')">
-              <span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>
-          `;
-          if (reservasDia.length > 0) {
-            wrapperHtml += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${reservasDia.length} reunião(ões)</div>`;
-          }
-          wrapperHtml += `</div>`;
-        }
-        wrapperHtml += `</div></div>`;
-        container.innerHTML = wrapperHtml;
-      }
-    }
-
-    function abrirModalNegociacao(sala, data, horario, responsavel) {
-      const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo.`;
-      document.getElementById("inputMsgWhatsapp").value = msgPronta;
-
-      const btnWhatsapp = document.getElementById("linkEnviarWhatsapp");
-      const atualizarLink = () => {
-        const textoAtual = document.getElementById("inputMsgWhatsapp").value;
-        btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAtual)}`;
-      };
-      
-      atualizarLink();
-      document.getElementById("inputMsgWhatsapp").oninput = atualizarLink;
-      document.getElementById("modalNegociacao").style.display = "flex";
-    }
-
-    function salvarNovaReservaLocal() {
-      const titulo = document.getElementById("inputTituloReserva").value.trim();
-      const inicio = document.getElementById("inputHoraInicio").value;
-      const fim = document.getElementById("inputHoraFim").value;
-      const sala = document.getElementById("salaSelect").value;
-
-      if (!titulo || !inicio || !fim) {
-        mostrarAlerta("Atenção", "Por favor, preencha todos os campos.", "warning");
-        return;
-      }
-
-      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      const hojeStr = window.dataSelecionadaGlobal || formatarDataLocal(new Date());
-
-      const minInicioTotal = parseInt(inicio.split(':')[0]) * 60 + parseInt(inicio.split(':')[1]);
-      const minFimTotal = parseInt(fim.split(':')[0]) * 60 + parseInt(fim.split(':')[1]);
-
-      if (minInicioTotal >= minFimTotal) {
-          mostrarAlerta("Erro de Horário", "O horário de fim deve ser depois do início.", "error");
-          return;
-      }
-
-      const conflito = reservas.some(r => {
-        const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        if (rSala !== sala || rData !== hojeStr) return false;
-        
-        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5);
-        if(!strIni || !strFim) return false;
-
-        const rI = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
-        const rF = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
-        
-        return (minInicioTotal < (rF + 5) && minFimTotal > (rI - 5));
-      });
-
-      if (conflito) {
-          mostrarAlerta("Conflito de Horário", "Já existe uma reunião ou intervalo de segurança (5 min) neste horário.", "error");
-          return;
-      }
-
-      const novaReserva = {
-        id: 'res-' + Date.now(),
-        titulo: titulo,
-        title: titulo,
-        horarioInicio: inicio,
-        horaInicio: inicio,
-        horarioFim: fim,
-        horaFim: fim,
-        start: `${hojeStr}T${inicio}:00`,
-        end: `${hojeStr}T${fim}:00`,
-        sala: sala,
-        room: sala,
-        data: hojeStr,
-        date: hojeStr,
-        responsavel: apelidoUsuarioGlobal,
-        usuario: apelidoUsuarioGlobal,
-        userId: usuarioSessao.uid
-      };
-
-      reservas.push(novaReserva);
-      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
-
-      document.getElementById("modalNovaReserva").style.display = "none";
-      mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso!", "success");
-    }
-
-    function confirmarExclusaoLocal(id) {
-      document.getElementById("idReservaParaExcluir").value = id;
-      document.getElementById("modalConfirmacaoExclusao").style.display = "flex";
-    }
-
-    function fecharModalConfirmacao() {
-      document.getElementById("modalConfirmacaoExclusao").style.display = "none";
-    }
-
-    function executarExclusaoReservaLocal() {
-      const id = document.getElementById("idReservaParaExcluir").value;
-      if (!id) return;
-
-      let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      reservas = reservas.filter(r => r.id !== id);
-      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
-
-      fecharModalConfirmacao();
-      mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "success");
-    }
-
-    /* NOVAS FUNÇÕES PARA O BLOQUEIO INTELIGENTE DOS HORÁRIOS */
-    function atualizarOpcoesInicio(dataStr, sala) {
-      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      const reservasDoDia = reservas.filter(r => {
-        const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        return rSala === sala && rData === dataStr;
-      });
-      
-      const agora = new Date();
-      const hojeStr = formatarDataLocal(agora);
-      const minAtual = agora.getHours() * 60 + agora.getMinutes();
-
-      const selIni = document.getElementById("inputHoraInicio");
-      selIni.innerHTML = "";
-
-      for (let h = 7; h <= 23; h++) {
-        for (let m of [0, 30]) {
-          if (h === 23 && m === 30) continue; // Último início possível é 23:00
-          
-          let minSlot = h * 60 + m;
-          let horaStr = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
-          
-          // Verifica se o horário já passou (apenas se for o dia de hoje)
-          let isPassado = (dataStr === hojeStr && minSlot <= minAtual);
-          
-          // Verifica se o horário cai dentro de uma reserva existente
-          let isOcupado = reservasDoDia.some(r => {
-            const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
-            const strF = r.horarioFim || r.horaFim || r.end?.split('T')[1];
-            if(!strI || !strF) return false;
-            const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
-            const rF = parseInt(strF.split(':')[0]) * 60 + parseInt(strF.split(':')[1]);
-            return (minSlot >= rI && minSlot < rF);
-          });
-
-          // Cria a opção e bloqueia se for inválida
-          let opt = new Option(horaStr + (isPassado ? " (Passado)" : (isOcupado ? " (Ocupado)" : "")), horaStr);
-          if (isPassado || isOcupado) opt.disabled = true;
-          selIni.add(opt);
-        }
-      }
-    }
-
-    function atualizarOpcoesFim(dataStr, sala) {
-      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
-      const reservasDoDia = reservas.filter(r => {
-        const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        return rSala === sala && rData === dataStr;
-      });
-      
-      const selIni = document.getElementById("inputHoraInicio");
-      const selFim = document.getElementById("inputHoraFim");
-      
-      if (!selIni.value) return;
-      
-      const [hIni, mIni] = selIni.value.split(':').map(Number);
-      const minInicio = hIni * 60 + mIni;
-
-      // Descobrir a próxima reserva para limitar a hora de fim (não pode passar por cima)
-      let proximoLimite = 23 * 60 + 30; // Máximo permitido do dia (23:30)
-      
-      reservasDoDia.forEach(r => {
-        const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
-        if(!strI) return;
-        const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
-        if (rI > minInicio && rI < proximoLimite) {
-          proximoLimite = rI; // Define a barreira
-        }
-      });
-
-      const valorFimAtual = selFim.value;
-      selFim.innerHTML = "";
-
-      // Gera os horários de fim válidos, de 30 em 30 min, apenas até encostar na próxima reserva
-      for (let minSlot = minInicio + 30; minSlot <= proximoLimite; minSlot += 30) {
-        let horaStr = String(Math.floor(minSlot/60)%24).padStart(2,'0') + ":" + String(minSlot%60).padStart(2,'0');
-        selFim.add(new Option(horaStr, horaStr));
-      }
-
-      // Tenta manter o valor anterior, se não for possível, seleciona a primeira opção (+30 min)
-      if (valorFimAtual && Array.from(selFim.options).some(o => o.value === valorFimAtual)) {
-        selFim.value = valorFimAtual;
-      } else if (selFim.options.length > 0) {
-        selFim.selectedIndex = 0;
-      }
-    }
-
-    function abrirModalReserva(horaInicio, dataStr) {
-      window.dataSelecionadaGlobal = dataStr;
-      const sala = document.getElementById("salaSelect").value;
-      
-      document.getElementById("reservaHorarioInicio").value = horaInicio;
-      document.getElementById("inputTituloReserva").value = "";
-      
-      // 1. Gera os horários de início e desativa passados/ocupados
-      atualizarOpcoesInicio(dataStr, sala);
-      
-      const selIni = document.getElementById("inputHoraInicio");
-      
-      // 2. Seleciona o horário clicado se estiver disponível
-      if (Array.from(selIni.options).some(o => o.value === horaInicio && !o.disabled)) {
-        selIni.value = horaInicio;
-      } else {
-        // Se clicar por engano num intervalo inválido, força para o primeiro livre
-        const primeiroDisponivel = Array.from(selIni.options).find(o => !o.disabled);
-        if (primeiroDisponivel) selIni.value = primeiroDisponivel.value;
-      }
-      
-      // 3. Gera os horários de fim restringidos inteligentemente
-      atualizarOpcoesFim(dataStr, sala);
-
-      document.getElementById("modalNovaReserva").style.display = "flex";
-    }
-  </script>
-
-  <!-- Modal de Aceite da LGPD (Obrigatório) -->
-  <div class="modal-overlay" id="modalTermosLGPD" style="z-index: 9999;"> <!-- z-index super alto para ficar por cima de tudo -->
-    <div class="modal-card" style="max-width: 450px;">
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-        <h3 class="modal-title" style="margin: 0;">Atualização de Privacidade</h3>
-      </div>
-      
-      <p style="font-size: 14px; color: var(--text-main); line-height: 1.5;">
-        Para continuarmos a oferecer uma ferramenta segura para as suas reservas, atualizámos a nossa Política de Privacidade em conformidade com a <strong>LGPD</strong>.
-      </p>
-      
-      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
-        Aceda e leia a nossa <a href="privacy-policy.html" target="_blank" style="color: var(--accent-color); font-weight: 600; text-decoration: underline;">Política de Privacidade completa aqui</a> antes de prosseguir.
-      </div>
-
-      <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
-        <input type="checkbox" id="checkAceiteLGPD" style="margin-top: 2px; width: 18px; height: 18px; accent-color: var(--accent-color);">
-        <span style="font-size: 13px; color: var(--text-main); font-weight: 500;">
-          Declaro que li e concordo com a coleta do meu nome e cargo exclusivamente para a gestão de reservas de salas no sistema.
-        </span>
-      </label>
-
-      <div class="modal-actions" style="margin-top: 16px;">
-        <button class="btn-save" style="width: 100%; padding: 12px; font-size: 15px;" onclick="confirmarAceiteLGPD()">Concordar e Continuar</button>
-      </div>
-    </div>
-  </div>
-  <!-- Script de Termos de Uso e LGPD -->
+  <script src="../js/sidebar.js"></script>
   <script src="../termos.js"></script>
-
+  <script type="module" src="../js/calendar.js"></script>
   <script>
-    // Registo do Service Worker PWA
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('../sw.js').catch(err => console.error(err));
-      });
-    }
+    async function confirmarReservaModal() {
+      const titulo = document.getElementById("resTitulo").value.trim();
+      const sala = document.getElementById("resSala").value;
+      const data = document.getElementById("resData").value;
+      const inicio = document.getElementById("resInicio").value;
+      const fim = document.getElementById("resFim").value;
 
-    // Validação do aceite no carregamento da agenda
-    document.addEventListener("DOMContentLoaded", () => {
-      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
-      if (sessaoStr) {
-        const usuarioSessao = JSON.parse(sessaoStr);
-        verificarAceiteTermosUtilizador(usuarioSessao);
+      if (!titulo || !data || !inicio || !fim) {
+        alert("Preencha todos os campos da reserva.");
+        return;
       }
-    });
-  </script>
 
+      const ok = await window.salvarReservaFirestore({ titulo, data, inicio, fim, sala });
+      if (ok) {
+        document.getElementById("resTitulo").value = "";
+        document.getElementById("modalNovaReserva").style.display = "none";
+      }
+    }
+  </script>
 </body>
 </html>
