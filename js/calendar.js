@@ -3,9 +3,12 @@ import { verificarAutenticacao } from "./auth.js";
 import {
   collection,
   query,
-  where,
   onSnapshot,
   addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  deleteDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -15,10 +18,16 @@ let salaSelecionada = "Sala de Reuniões 01";
 let reservasCache = [];
 let usuarioAtual = null;
 let unsubscribeReservas = null;
+let tempoAntecedenciaMinutos = 10;
 
 document.addEventListener("DOMContentLoaded", () => {
-  verificarAutenticacao((user) => {
+  if (window.emailjs) {
+    window.emailjs.init({ publicKey: "X6E_oavkyc9MgyxTc" });
+  }
+
+  verificarAutenticacao(async (user) => {
     usuarioAtual = user;
+    await carregarPreferenciasUsuario();
     atualizarTextoData();
     iniciarEscutaReservas();
   });
@@ -32,11 +41,34 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+async function carregarPreferenciasUsuario() {
+  if (!usuarioAtual) return;
+  try {
+    const snap = await getDoc(doc(db, "usuarios", usuarioAtual.uid));
+    if (snap.exists()) {
+      const dados = snap.data();
+      if (dados.apelido && dados.apelido.trim() !== "") {
+        usuarioAtual.nome = dados.apelido.trim();
+      }
+      if (dados.notificacoes && dados.notificacoes.tempoAntecedencia) {
+        tempoAntecedenciaMinutos = Number(dados.notificacoes.tempoAntecedencia) || 10;
+      }
+    }
+  } catch (e) {
+    console.error("Erro ao carregar preferências:", e);
+  }
+}
+
 function formatarDataISO(data) {
   const ano = data.getFullYear();
   const mes = String(data.getMonth() + 1).padStart(2, "0");
   const dia = String(data.getDate()).padStart(2, "0");
   return `${ano}-${mes}-${dia}`;
+}
+
+function horarioParaMinutos(hhmm) {
+  const [h, m] = hhmm.split(":").map(Number);
+  return h * 60 + m;
 }
 
 function iniciarEscutaReservas() {
@@ -48,15 +80,80 @@ function iniciarEscutaReservas() {
     (snapshot) => {
       reservasCache = [];
       snapshot.forEach((docSnap) => {
-        reservasCache.push({ id: docSnap.id, ...docSnap.data() });
+        const d = docSnap.data();
+        reservasCache.push({
+          id: docSnap.id,
+          ...d,
+          inicio: d.inicio || d.horarioInicio || "08:00",
+          fim: d.fim || d.horarioFim || "09:00"
+        });
       });
+      verificarAvisosProximidade();
       carregarAgenda();
     },
     (error) => {
-      console.error("Erro ao sincronizar reservas com Firestore:", error);
+      console.error("Erro ao sincronizar reservas:", error);
     }
   );
 }
+
+function verificarAvisosProximidade() {
+  if (!usuarioAtual) return;
+  const hojeISO = formatarDataISO(new Date());
+  const agora = new Date();
+
+  reservasCache.forEach((r) => {
+    if (r.data !== hojeISO) return;
+    const ehMinha = r.userId === usuarioAtual.uid || r.responsavel === usuarioAtual.nome;
+    if (!ehMinha) return;
+
+    if (r.canceladoPorAdmin) {
+      mostrarToastFlutuante(
+        "Reunião Cancelada",
+        `A sua reserva "${r.titulo}" na ${r.sala} (${r.inicio}) foi cancelada pela administração.`,
+        "danger"
+      );
+    } else if (r.inicio) {
+      const [h, m] = r.inicio.split(":").map(Number);
+      const dataReuniao = new Date();
+      dataReuniao.setHours(h, m, 0, 0);
+      const diffMin = (dataReuniao - agora) / 60000;
+
+      if (diffMin >= 0 && diffMin <= tempoAntecedenciaMinutos) {
+        mostrarToastFlutuante(
+          "Reunião Próxima",
+          `A reunião "${r.titulo}" (${r.sala}) começa às ${r.inicio} (em ${Math.round(diffMin)} min).`,
+          "warning"
+        );
+      }
+    }
+  });
+}
+
+window.mostrarToastFlutuante = function (titulo, mensagem, tipo = "info") {
+  const container = document.getElementById("floatingToastContainer");
+  if (!container) return;
+
+  const toast = document.createElement("div");
+  toast.className = `toast-alert ${tipo}`;
+  let icone = "📢";
+  if (tipo === "warning") icone = "⏰";
+  if (tipo === "danger") icone = "⚠️";
+
+  toast.innerHTML = `
+    <div style="font-size: 20px;">${icone}</div>
+    <div style="flex: 1;">
+      <h4 style="font-size: 14px; font-weight: 700; color: #1e293b; margin: 0 0 2px 0;">${titulo}</h4>
+      <p style="font-size: 12px; color: #64748b; margin: 0; line-height: 1.4;">${mensagem}</p>
+    </div>
+  `;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 300);
+  }, 6000);
+};
 
 window.mudarData = function (dias) {
   if (tipoVisualizacaoAtual === "dia") {
@@ -66,7 +163,6 @@ window.mudarData = function (dias) {
   } else if (tipoVisualizacaoAtual === "mes") {
     dataAtual.setMonth(dataAtual.getMonth() + dias);
   }
-
   atualizarTextoData();
   carregarAgendaComAnimacao();
 };
@@ -78,10 +174,8 @@ window.resetarData = function () {
 };
 
 window.mudarVisualizacao = function (tipo, btnClicado) {
-  const botoes = document.querySelectorAll("#viewTogglesGroup button");
-  botoes.forEach((btn) => btn.classList.remove("active"));
+  document.querySelectorAll("#viewTogglesGroup button").forEach((b) => b.classList.remove("active"));
   if (btnClicado) btnClicado.classList.add("active");
-
   tipoVisualizacaoAtual = tipo;
   atualizarTextoData();
   carregarAgendaComAnimacao();
@@ -90,7 +184,6 @@ window.mudarVisualizacao = function (tipo, btnClicado) {
 function carregarAgendaComAnimacao() {
   const grid = document.getElementById("gridHorarios");
   if (grid) grid.style.opacity = "0.3";
-
   setTimeout(() => {
     carregarAgenda();
     if (grid) grid.style.opacity = "1";
@@ -102,20 +195,16 @@ function atualizarTextoData() {
   if (!spanData) return;
 
   if (tipoVisualizacaoAtual === "mes") {
-    const opcoesMes = { month: "long", year: "numeric" };
-    const txt = dataAtual.toLocaleDateString("pt-BR", opcoesMes);
+    const txt = dataAtual.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
     spanData.innerText = txt.charAt(0).toUpperCase() + txt.slice(1);
   } else if (tipoVisualizacaoAtual === "semana") {
     const primeiroDia = new Date(dataAtual);
     primeiroDia.setDate(primeiroDia.getDate() - primeiroDia.getDay());
-
     const ultimoDia = new Date(primeiroDia);
     ultimoDia.setDate(ultimoDia.getDate() + 6);
-
     spanData.innerText = `${primeiroDia.getDate()} de ${primeiroDia.toLocaleDateString("pt-BR", { month: "short" })} - ${ultimoDia.getDate()} de ${ultimoDia.toLocaleDateString("pt-BR", { month: "short" })} de ${ultimoDia.getFullYear()}`;
   } else {
-    const opcoesCurta = { day: "2-digit", month: "short", year: "numeric" };
-    spanData.innerText = dataAtual.toLocaleDateString("pt-BR", opcoesCurta).replace(".", "");
+    spanData.innerText = dataAtual.toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" }).replace(".", "");
   }
 }
 
@@ -123,7 +212,6 @@ function carregarAgenda() {
   const gridContainer = document.getElementById("gridHorarios");
   const proxContainer = document.getElementById("listaProximas");
   const headerMain = document.querySelector(".cal-main-header");
-
   if (!gridContainer) return;
 
   gridContainer.innerHTML = "";
@@ -131,8 +219,7 @@ function carregarAgenda() {
 
   if (headerMain) {
     if (tipoVisualizacaoAtual === "dia") {
-      const opcoesLonga = { weekday: "long", day: "2-digit", month: "long", year: "numeric" };
-      const dataLonga = dataAtual.toLocaleDateString("pt-BR", opcoesLonga);
+      const dataLonga = dataAtual.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
       headerMain.innerHTML = `<span>${salaSelecionada}</span><span>${dataLonga.charAt(0).toUpperCase() + dataLonga.slice(1)}</span>`;
     } else if (tipoVisualizacaoAtual === "semana") {
       headerMain.innerHTML = `<span>${salaSelecionada}</span><span>Vista Semanal</span>`;
@@ -145,17 +232,12 @@ function carregarAgenda() {
     renderizarVistaDia(gridContainer, proxContainer);
   } else if (tipoVisualizacaoAtual === "semana") {
     renderizarVistaSemana(gridContainer);
-  } else if (tipoVisualizacaoAtual === "mes") {
+  } else {
     renderizarVistaMes(gridContainer);
   }
 }
 
-function horarioParaMinutos(hhmm) {
-  const [h, m] = hhmm.split(":").map(Number);
-  return h * 60 + m;
-}
-
-function renderizarVistaDia(gridContainer, proxContainer) {
+async function renderizarVistaDia(gridContainer, proxContainer) {
   const dataISO = formatarDataISO(dataAtual);
   const agora = new Date();
   const hojeISO = formatarDataISO(agora);
@@ -166,20 +248,15 @@ function renderizarVistaDia(gridContainer, proxContainer) {
     .sort((a, b) => a.inicio.localeCompare(b.inicio));
 
   const faixasBase = [
-    { hora: "07:00", inicio: "07:00", fim: "08:00" },
-    { hora: "08:00", inicio: "08:00", fim: "09:00" },
-    { hora: "09:00", inicio: "09:00", fim: "10:00" },
-    { hora: "10:00", inicio: "10:00", fim: "11:00" },
-    { hora: "11:00", inicio: "11:00", fim: "12:00" },
-    { hora: "12:00", inicio: "12:00", fim: "13:00" },
-    { hora: "13:00", inicio: "13:00", fim: "14:00" },
-    { hora: "14:00", inicio: "14:00", fim: "15:00" },
-    { hora: "15:00", inicio: "15:00", fim: "16:00" },
-    { hora: "16:00", inicio: "16:00", fim: "17:00" },
-    { hora: "17:00", inicio: "17:00", fim: "18:00" }
-  ];
+    "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
+    "13:00", "14:00", "15:00", "16:00", "17:00"
+  ].map((h) => {
+    const [hh] = h.split(":");
+    const fim = `${String(Number(hh) + 1).padStart(2, "0")}:00`;
+    return { hora: h, inicio: h, fim };
+  });
 
-  faixasBase.forEach((faixa) => {
+  for (const faixa of faixasBase) {
     const fIni = horarioParaMinutos(faixa.inicio);
     const fFim = horarioParaMinutos(faixa.fim);
 
@@ -193,13 +270,32 @@ function renderizarVistaDia(gridContainer, proxContainer) {
     row.className = "time-row";
 
     if (reservaConflito) {
-      const cor = reservaConflito.cor || "blue";
+      let whatsappResp = "";
+      if (reservaConflito.userId) {
+        try {
+          const uDoc = await getDoc(doc(db, "usuarios", reservaConflito.userId));
+          if (uDoc.exists() && uDoc.data().whatsapp) {
+            whatsappResp = uDoc.data().whatsapp;
+          }
+        } catch (e) {}
+      }
+
+      const btnAdmin = usuarioAtual?.ehAdmin
+        ? `<button onclick="excluirReservaAdmin('${reservaConflito.id}')" style="background:#fee2e2; color:#dc2626; border:none; padding:4px 8px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer;">🗑️ Excluir</button>`
+        : "";
+
       row.innerHTML = `
         <div class="time-label">${faixa.hora}</div>
-        <div class="event-block ${cor}">
-          <div class="event-time">${reservaConflito.inicio} - ${reservaConflito.fim}</div>
-          <div class="event-title">${reservaConflito.titulo}</div>
-          <div class="event-meta">${reservaConflito.responsavel || "Colaborador"} • ${reservaConflito.tipo || "Reunião"}</div>
+        <div class="event-block ${reservaConflito.cor || "blue"}" style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+          <div>
+            <div class="event-time">${reservaConflito.inicio} - ${reservaConflito.fim}</div>
+            <div class="event-title">${reservaConflito.titulo}</div>
+            <div class="event-meta">Responsável: ${reservaConflito.responsavel || "Equipa"}</div>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button onclick="abrirModalNegociacao('${salaSelecionada}', '${reservaConflito.data}', '${reservaConflito.inicio}', '${reservaConflito.responsavel || "Colega"}', '${whatsappResp}')" style="background:#ffffff; color:#0d9488; border:1px solid #99f6e4; padding:5px 10px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer;">💬 Negociar</button>
+            ${btnAdmin}
+          </div>
         </div>
       `;
     } else {
@@ -220,9 +316,8 @@ function renderizarVistaDia(gridContainer, proxContainer) {
         `;
       }
     }
-
     gridContainer.appendChild(row);
-  });
+  }
 
   if (proxContainer) {
     if (reservasDoDia.length === 0) {
@@ -248,19 +343,17 @@ function renderizarVistaDia(gridContainer, proxContainer) {
 function renderizarVistaSemana(gridContainer) {
   const primeiroDia = new Date(dataAtual);
   primeiroDia.setDate(primeiroDia.getDate() - primeiroDia.getDay());
-
   const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-  let html = `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; padding: 10px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 13px; font-weight: bold; color: #475569;">`;
 
+  let html = `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; text-align: center; padding: 10px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-size: 13px; font-weight: bold; color: #475569;">`;
   const tempDia = new Date(primeiroDia);
   for (let i = 0; i < 7; i++) {
     const ehHoje = tempDia.toDateString() === new Date().toDateString();
     html += `<div style="${ehHoje ? "color: #2563eb; background: #eff6ff; padding: 4px; border-radius: 6px;" : ""}">${diasSemana[i]}<br><span style="font-size: 16px;">${tempDia.getDate()}</span></div>`;
     tempDia.setDate(tempDia.getDate() + 1);
   }
-  html += `</div>`;
+  html += `</div><div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 16px; min-height: 350px;">`;
 
-  html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; padding: 16px; min-height: 350px;">`;
   const diaIter = new Date(primeiroDia);
   for (let i = 0; i < 7; i++) {
     const iso = formatarDataISO(diaIter);
@@ -280,7 +373,6 @@ function renderizarVistaSemana(gridContainer) {
     diaIter.setDate(diaIter.getDate() + 1);
   }
   html += `</div>`;
-
   gridContainer.innerHTML = html;
 }
 
@@ -289,13 +381,11 @@ function renderizarVistaMes(gridContainer) {
   const mes = dataAtual.getMonth();
   const primeiroDiaMes = new Date(ano, mes, 1).getDay();
   const ultimoDiaMes = new Date(ano, mes + 1, 0).getDate();
-
   const diasSemana = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
   let html = `<div style="display: grid; grid-template-columns: repeat(7, 1fr); background: #f8fafc; border-bottom: 1px solid #e2e8f0; text-align: center; font-weight: bold; font-size: 12px; color: #64748b; padding: 10px 0;">`;
   diasSemana.forEach((d) => (html += `<div>${d}</div>`));
-  html += `</div>`;
-
-  html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(75px, auto); gap: 1px; background: #e2e8f0; border-bottom: 1px solid #e2e8f0;">`;
+  html += `</div><div style="display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(75px, auto); gap: 1px; background: #e2e8f0; border-bottom: 1px solid #e2e8f0;">`;
 
   for (let i = 0; i < primeiroDiaMes; i++) {
     html += `<div style="background: #f8fafc; padding: 8px;"></div>`;
@@ -311,46 +401,67 @@ function renderizarVistaMes(gridContainer) {
 
     const badges = resCelula
       .slice(0, 2)
-      .map(
-        (r) =>
-          `<span style="font-size: 10px; background: #dbeafe; color: #1e40af; padding: 2px 4px; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;">${r.inicio} ${r.titulo}</span>`
-      )
+      .map((r) => `<span style="font-size: 10px; background: #dbeafe; color: #1e40af; padding: 2px 4px; border-radius: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px;">${r.inicio} ${r.titulo}</span>`)
       .join("");
 
     html += `
       <div style="background: white; padding: 8px; display: flex; flex-direction: column;">
-        <span style="font-size: 13px; font-weight: ${ehHoje ? "bold" : "normal"}; color: ${ehHoje ? "#2563eb" : "#334155"}; ${ehHoje ? "background: #eff6ff; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center;" : ""}">${dia}</span>
+        <span style="font-size: 13px; font-weight: ${ehHoje ? "bold" : "normal"}; color: ${ehHoje ? "#2563eb" : "#334155"};">${dia}</span>
         ${badges}
       </div>
     `;
   }
-
   html += `</div>`;
   gridContainer.innerHTML = html;
 }
 
-window.abrirModalReserva = async function (inicio = "08:00", fim = "09:00") {
+window.abrirModalReserva = function (inicio = "08:00", fim = "09:00") {
   const modal = document.getElementById("modalNovaReserva");
   if (modal) {
     document.getElementById("resData").value = formatarDataISO(dataAtual);
+    document.getElementById("resSala").value = salaSelecionada;
     document.getElementById("resInicio").value = inicio;
     document.getElementById("resFim").value = fim;
     modal.style.display = "flex";
-    return;
+  }
+};
+
+window.abrirModalNegociacao = function (sala, data, horario, responsavel, whatsapp) {
+  const modal = document.getElementById("modalNegociacao");
+  if (!modal) return;
+
+  const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo. Seria possível?`;
+  const inputMsg = document.getElementById("inputMsgWhatsapp");
+  const btnWhatsapp = document.getElementById("linkEnviarWhatsapp");
+  inputMsg.value = msgPronta;
+
+  if (!whatsapp) {
+    btnWhatsapp.href = "#";
+    btnWhatsapp.onclick = (e) => {
+      e.preventDefault();
+      alert("Este utilizador não tem um número de WhatsApp registado no perfil.");
+    };
+  } else {
+    const atualizarLink = () => {
+      btnWhatsapp.href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(inputMsg.value)}`;
+    };
+    atualizarLink();
+    inputMsg.oninput = atualizarLink;
+    btnWhatsapp.onclick = null;
   }
 
-  const dataISO = formatarDataISO(dataAtual);
-  const titulo = prompt(`Nova Reserva em ${dataISO} (${salaSelecionada})\nHorário: ${inicio} às ${fim}\nTítulo da reunião:`);
-  if (!titulo || !titulo.trim()) return;
+  modal.style.display = "flex";
+};
 
-  await salvarReservaFirestore({
-    titulo: titulo.trim(),
-    data: dataISO,
-    inicio,
-    fim,
-    sala: salaSelecionada,
-    tipo: "Reunião"
-  });
+window.excluirReservaAdmin = async function (id) {
+  if (!confirm("Deseja excluir esta reserva e notificar o utilizador?")) return;
+  try {
+    await updateDoc(doc(db, "reservas", id), { canceladoPorAdmin: true });
+    await deleteDoc(doc(db, "reservas", id));
+    mostrarToastFlutuante("Reserva Excluída", "A reserva foi removida com sucesso.", "info");
+  } catch (e) {
+    await deleteDoc(doc(db, "reservas", id));
+  }
 };
 
 window.salvarReservaFirestore = async function ({ titulo, data, inicio, fim, sala, tipo = "Reunião" }) {
@@ -367,7 +478,6 @@ window.salvarReservaFirestore = async function ({ titulo, data, inicio, fim, sal
     return false;
   }
 
-  // Bloqueio inteligente de conflito de horário na mesma sala e data
   const conflito = reservasCache.find((r) => {
     if (r.data !== data) return false;
     if ((r.sala || "Sala de Reuniões 01") !== sala) return false;
@@ -387,18 +497,63 @@ window.salvarReservaFirestore = async function ({ titulo, data, inicio, fim, sal
       data,
       inicio,
       fim,
+      horarioInicio: inicio,
+      horarioFim: fim,
       sala,
       tipo,
       cor: "blue",
       userId: usuarioAtual.uid,
       responsavel: usuarioAtual.nome,
       emailResponsavel: usuarioAtual.email,
+      canceladoPorAdmin: false,
       criadoEm: serverTimestamp()
     });
+
+    // Busca e-mail real de notificação configurado pelo utilizador
+    let emailDestino = usuarioAtual.email;
+    let nomeDestino = usuarioAtual.nome;
+    let emailAtivo = true;
+
+    try {
+      const userDoc = await getDoc(doc(db, "usuarios", usuarioAtual.uid));
+      if (userDoc.exists()) {
+        const dados = userDoc.data() || {};
+        if (dados.emailRealNotificacao && dados.emailRealNotificacao.trim() !== "") {
+          emailDestino = dados.emailRealNotificacao.trim();
+        }
+        if (dados.apelido && dados.apelido.trim() !== "") {
+          nomeDestino = dados.apelido.trim();
+        }
+        if (dados.notificacoes && typeof dados.notificacoes.email === "boolean") {
+          emailAtivo = dados.notificacoes.email;
+        }
+      }
+    } catch (profileErr) {
+      console.error("Erro ao carregar perfil para e-mail:", profileErr);
+    }
+
+    // Disparo via EmailJS
+    if (emailAtivo && emailDestino && emailDestino.includes("@") && window.emailjs) {
+      try {
+        await window.emailjs.send("service_d30n93a", "template_3uxpjzk", {
+          to_email: emailDestino,
+          to_name: nomeDestino,
+          name: titulo,
+          message: `A sua reserva para a ${sala} no dia ${data} das ${inicio} às ${fim} foi confirmada com sucesso!`
+        });
+        mostrarToastFlutuante("Reserva Confirmada", `Reserva salva e e-mail enviado para ${emailDestino}.`, "info");
+      } catch (emailErr) {
+        const motivo = emailErr?.text || emailErr?.message || "Falha no serviço de e-mail";
+        mostrarToastFlutuante("Reserva Salva", `A reserva foi salva, mas o e-mail falhou: ${motivo}`, "warning");
+      }
+    } else {
+      mostrarToastFlutuante("Reserva Confirmada", "Agendamento registado com sucesso!", "info");
+    }
+
     return true;
   } catch (error) {
-    console.error("Erro ao gravar reserva no Firestore:", error);
-    alert("Erro ao salvar reserva. Verifique sua conexão.");
+    console.error("Erro ao gravar reserva:", error);
+    alert("Erro ao salvar reserva. Verifique a sua ligação.");
     return false;
   }
 };
