@@ -2,43 +2,58 @@
 <html lang="pt-BR">
 <head>
   <!-- Configurações para PWA e iOS -->
-<link rel="manifest" href="../manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MeetingRoom">
-<link rel="apple-touch-icon" href="../ico.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
+  <link rel="apple-touch-icon" href="ico.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MeetingRoom - Entrar</title>
-  <link rel="stylesheet" href="css/global.css">
   <link rel="icon" href="ico.png" type="image/png">
   <style>
     body {
       margin: 0;
-      padding: 0;
+      padding: 16px;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      /* Removemos qualquer máscara/degradê escuro, exibindo apenas a imagem de fundo pura */
-      background: url('fundo.jpg') no-repeat center center fixed;
+      background-color: #0f172a;
+      background-image: url('fundo.jpg');
+      background-repeat: no-repeat;
+      background-position: center center;
+      background-attachment: fixed;
       background-size: cover;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
     .login-card {
       background: #ffffff;
-      padding: 40px;
-      border-radius: 16px;
+      padding: 36px 32px;
+      border-radius: 20px;
       width: 100%;
-      max-width: 400px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      max-width: 380px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
       text-align: center;
+      box-sizing: border-box;
+      border: 2px solid #e2e8f0;
+      transition: all 0.3s ease-in-out;
+    }
+    .login-card:hover {
+      border-color: #d4af37;
+      box-shadow: 0 20px 40px rgba(212, 175, 55, 0.35);
     }
     .login-logo {
-      max-width: 180px;
+      max-width: 160px;
+      max-height: 75px;
+      width: auto;
       height: auto;
       margin-bottom: 24px;
       object-fit: contain;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-user-drag: none;
     }
     .form-group {
       margin-bottom: 16px;
@@ -49,87 +64,363 @@
     }
     .form-group label {
       font-weight: 600;
-      font-size: 13px;
+      font-size: 12px;
       color: #334155;
+      letter-spacing: 0.3px;
     }
     .form-group input {
-      padding: 12px;
+      padding: 12px 14px;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      border-radius: 10px;
       font-size: 14px;
       outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+      background: #f8fafc;
+    }
+    .form-group input:hover {
+      border-color: #94a3b8;
     }
     .form-group input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: #ffffff;
+      border-color: #0d9488;
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+    }
+    .forgot-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -8px;
+      margin-bottom: 14px;
+    }
+    .forgot-link {
+      font-size: 12px;
+      color: #0d9488;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .forgot-link:hover {
+      text-decoration: underline;
+      color: #0f766e;
     }
     .btn-login {
       width: 100%;
       padding: 12px;
-      background: #2563eb;
+      background: #0d9488;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    .btn-login:hover {
+      background: #0f766e;
+    }
+    .btn-login:active {
+      transform: scale(0.98);
+    }
+    .btn-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .login-footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .login-footer p {
+      font-size: 11px;
+      color: #64748b;
+      margin: 0;
+    }
+    .login-footer a {
+      color: #0d9488;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Estilos dos Modais Personalizados */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+    }
+    .modal-alert-card {
+      background: white;
+      width: 100%;
+      max-width: 380px;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: center;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-modal-cancel {
+      flex: 1;
+      padding: 10px;
+      background: #f1f5f9;
+      color: #64748b;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-modal-ok {
+      flex: 1;
+      width: 100%;
+      padding: 10px;
+      background: #0d9488;
       color: white;
       border: none;
       border-radius: 8px;
       font-weight: 600;
-      font-size: 15px;
       cursor: pointer;
-      margin-top: 10px;
     }
-    .btn-login:hover {
-      background: #1d4ed8;
+    .btn-modal-ok:hover {
+      background: #0f766e;
+    }
+    .btn-modal-ok:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
     }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 </head>
 <body>
   <div class="login-card">
-    <!-- Logótipo fixo exclusivamente como login.png -->
-    <img src="login.png" alt="Logo MeetingRoom" class="login-logo">
+    <img src="login.png" alt="Logo MeetingRoom" class="login-logo" onerror="this.onerror=null; this.src='cabe.png';">
     
-    <div class="form-group">
-      <label>E-mail</label>
-      <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" required>
+    <form id="formLogin" onsubmit="fazerLoginFirebase(event)">
+      <div class="form-group">
+        <label for="emailLogin">E-mail</label>
+        <input type="email" id="emailLogin" placeholder="seu.email@empresa.com" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <label for="senhaLogin">Senha</label>
+        <input type="password" id="senhaLogin" placeholder="••••••••" autocomplete="current-password" required>
+      </div>
+
+      <div class="forgot-row">
+        <a href="#" class="forgot-link" onclick="abrirModalRecuperarSenha(); return false;">Esqueci minha senha</a>
+      </div>
+
+      <button type="submit" class="btn-login" id="btnEntrar">Entrar</button>
+    </form>
+
+    <div class="login-footer">
+      <p>&copy; 2026 Viecelli | Powered by <a href="https://www.instagram.com/cs_code_solutions?exln=Ym1mNDMzYTYxa3d6" target="_blank" rel="noopener noreferrer">CS Code Solutions</a></p>
     </div>
-    <div class="form-group">
-      <label>Senha</label>
-      <input type="password" id="senhaLogin" placeholder="••••••••" required>
-    </div>
-    <button class="btn-login" onclick="fazerLogin()">Entrar</button>
   </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-      authDomain: "reuniao-d1b29.firebaseapp.com",
-      projectId: "reuniao-d1b29",
-      storageBucket: "reuniao-d1b29.firebasestorage.app",
-      messagingSenderId: "887897617950",
-      appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-    };
+  <!-- Modal de Alerta Personalizado -->
+  <div class="modal-overlay" id="modalAlertaLogin">
+    <div class="modal-alert-card">
+      <div style="display: flex; justify-content: center;" id="modalAlertaIcone"></div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Atenção</h3>
+      <p style="font-size: 14px; color: #64748b; line-height: 1.5; margin: 0;" id="modalAlertaTexto">Mensagem aqui</p>
+      <button type="button" class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+  <!-- Modal de Recuperação de Senha -->
+  <div class="modal-overlay" id="modalRecuperarSenha">
+    <div class="modal-alert-card">
+      <h3 class="modal-title">Redefinir Senha</h3>
+      <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 0;">Informe o seu e-mail cadastrado para receber o link de redefinição de senha.</p>
+      <div class="form-group" style="margin-bottom: 0;">
+        <label for="emailRecuperacao">E-mail</label>
+        <input type="email" id="emailRecuperacao" placeholder="seu.email@empresa.com">
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-modal-cancel" onclick="fecharModalRecuperarSenha()">Cancelar</button>
+        <button type="button" class="btn-modal-ok" id="btnEnviarRecuperacao" onclick="enviarRecuperacaoSenha()">Enviar Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK v10.8.0 (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
+  <script>
+    const authService = window.auth || firebase.auth();
+    const dbService = window.db || firebase.firestore();
+    let redirecionando = false;
+
+    function mostrarAlertaLogin(titulo, texto, tipo = "warning") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+
+      let iconHtml = "";
+      if (tipo === "success") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      } else if (tipo === "error") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      }
+
+      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
+      document.getElementById("modalAlertaLogin").style.display = "flex";
     }
 
-    function fazerLogin() {
-      const email = document.getElementById("emailLogin").value.trim();
-      const senha = document.getElementById("senhaLogin").value.trim();
+    function fecharModalAlerta() {
+      document.getElementById("modalAlertaLogin").style.display = "none";
+    }
+
+    async function prepararPerfilERedirecionar(user) {
+      if (!user || redirecionando) return;
+      redirecionando = true;
+
+      try {
+        const emailLower = (user.email || "").toLowerCase();
+        const nomeFallback = user.displayName || (emailLower ? emailLower.split("@")[0] : "Utilizador");
+        const docRef = dbService.collection("usuarios").doc(user.uid);
+        const docSnap = await docRef.get();
+
+        let perfil = null;
+        if (docSnap.exists) {
+          perfil = docSnap.data();
+        } else {
+          const ehAdminInicial = emailLower.includes("admin");
+          perfil = {
+            uid: user.uid,
+            nome: nomeFallback,
+            apelido: nomeFallback.split(" ")[0],
+            email: emailLower,
+            cargo: ehAdminInicial ? "Administrador" : "Usuário",
+            criadoEm: new Date().toISOString()
+          };
+          await docRef.set(perfil);
+        }
+
+        const ehAdmin = perfil.cargo === "Administrador" || emailLower.includes("admin");
+
+        // Cache leve apenas de UI para o anti-flicker.js evitar piscadas na transição
+        localStorage.setItem("meetingroom_perfil_ui", JSON.stringify({
+          uid: user.uid,
+          nome: perfil.nome || nomeFallback,
+          apelido: perfil.apelido || nomeFallback.split(" ")[0],
+          email: emailLower,
+          cargo: perfil.cargo || (ehAdmin ? "Administrador" : "Usuário"),
+          ehAdmin: ehAdmin
+        }));
+      } catch (e) {
+        console.warn("Não foi possível pré-carregar o perfil completo antes do redirecionamento:", e);
+      }
+
+      window.location.replace("pages/calendar.html");
+    }
+
+    // Se já houver sessão ativa no Firebase Auth, redireciona direto para a agenda
+    authService.onAuthStateChanged((user) => {
+      if (user) {
+        prepararPerfilERedirecionar(user);
+      }
+    });
+
+    async function fazerLoginFirebase(event) {
+      if (event) event.preventDefault();
+
+      const email = document.getElementById("emailLogin").value.trim().toLowerCase();
+      const senha = document.getElementById("senhaLogin").value;
 
       if (!email || !senha) {
-        alert("Por favor, preencha o e-mail e a senha.");
+        mostrarAlertaLogin("Atenção", "Por favor, preencha o e-mail e a senha.", "warning");
         return;
       }
 
-      firebase.auth().signInWithEmailAndPassword(email, senha)
-        .then(() => {
-          window.location.href = "pages/calendar.html";
-        })
-        .catch((error) => {
-          console.error("Erro no login:", error);
-          alert("Erro ao entrar (" + error.code + "): " + error.message);
-        });
+      const btnEntrar = document.getElementById("btnEntrar");
+      btnEntrar.disabled = true;
+      btnEntrar.innerText = "A entrar...";
+
+      try {
+        const credencial = await authService.signInWithEmailAndPassword(email, senha);
+        await prepararPerfilERedirecionar(credencial.user);
+      } catch (error) {
+        console.error("Erro na autenticação:", error);
+        let mensagem = "E-mail ou senha incorretos.";
+
+        if (error.code === "auth/invalid-email") {
+          mensagem = "O endereço de e-mail informado é inválido.";
+        } else if (error.code === "auth/user-disabled") {
+          mensagem = "Esta conta foi desativada. Contacte o administrador.";
+        } else if (error.code === "auth/too-many-requests") {
+          mensagem = "Muitas tentativas falhadas. Aguarde alguns instantes e tente novamente.";
+        } else if (error.code === "auth/network-request-failed") {
+          mensagem = "Falha de ligação à internet. Verifique a sua rede.";
+        }
+
+        mostrarAlertaLogin("Erro no Acesso", mensagem, "error");
+        btnEntrar.disabled = false;
+        btnEntrar.innerText = "Entrar";
+      }
+    }
+
+    function abrirModalRecuperarSenha() {
+      const emailAtual = document.getElementById("emailLogin").value.trim();
+      document.getElementById("emailRecuperacao").value = emailAtual;
+      document.getElementById("modalRecuperarSenha").style.display = "flex";
+    }
+
+    function fecharModalRecuperarSenha() {
+      document.getElementById("modalRecuperarSenha").style.display = "none";
+    }
+
+    async function enviarRecuperacaoSenha() {
+      const email = document.getElementById("emailRecuperacao").value.trim();
+      if (!email || !email.includes("@")) {
+        mostrarAlertaLogin("Atenção", "Informe um endereço de e-mail válido.", "warning");
+        return;
+      }
+
+      const btn = document.getElementById("btnEnviarRecuperacao");
+      btn.disabled = true;
+      btn.innerText = "A enviar...";
+
+      try {
+        await authService.sendPasswordResetEmail(email);
+        fecharModalRecuperarSenha();
+        mostrarAlertaLogin("E-mail Enviado", "Se o e-mail estiver cadastrado, receberá um link para redefinir a sua senha.", "success");
+      } catch (error) {
+        console.error("Erro ao enviar e-mail de recuperação:", error);
+        fecharModalRecuperarSenha();
+        mostrarAlertaLogin("Erro", "Não foi possível enviar o e-mail de redefinição. Verifique o endereço e tente novamente.", "error");
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Enviar Link";
+      }
+    }
+
+    // Registo do Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('js/sw.js').catch(err => console.error(err));
+      });
     }
   </script>
 </body>
