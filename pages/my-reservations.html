@@ -14,6 +14,17 @@
   <title>MeetingRoom - Minhas Reservas</title>
   <link rel="stylesheet" href="../css/global.css">
   <link rel="stylesheet" href="../css/components.css">
+
+  <!-- Inicialização do EmailJS (para notificação caso um Admin cancele reserva de terceiros) -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init({
+        publicKey: "X6E_oavkyc9MgyxTc"
+      });
+    })();
+  </script>
+
   <style>
     :root {
       --sidebar-bg: #0f172a;
@@ -116,7 +127,7 @@
 
     .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
     .page-header { margin-bottom: 24px; }
-    .page-header h1 { font-size: 26px; color: var(--text-main); margin-bottom: 4px; font-weight: 700; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); margin: 0 0 4px 0; font-weight: 700; }
     
     .reservation-card {
       background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
@@ -124,37 +135,39 @@
       border-left: 5px solid var(--accent-color);
     }
     
-    .res-meta { font-size: 12px; font-weight: 600; color: var(--accent-color); display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+    .res-meta { font-size: 12px; font-weight: 600; color: var(--accent-color); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
     .res-meta svg { width: 14px; height: 14px; stroke-width: 2; }
     
     .btn-delete {
-      background: #fee2e2; color: #dc2626; border: none; padding: 6px 12px; border-radius: 6px;
+      background: #fee2e2; color: #dc2626; border: none; padding: 8px 14px; border-radius: 6px;
       font-weight: 600; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+      transition: all 0.2s;
     }
     .btn-delete svg { width: 14px; height: 14px; }
     .btn-delete:hover { background: #fecaca; }
 
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-card { background: white; width: 100%; max-width: 400px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
-    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
-    .modal-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
+    .modal-text { font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0; }
     .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
     .btn-modal-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-modal-confirm { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-modal-confirm:disabled { opacity: 0.7; cursor: not-allowed; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
 
     @media (max-width: 1024px) {
-      .sidebar { display: none; }
+      .sidebar { display: none !important; }
       .page-wrapper { margin-left: 0 !important; padding: 16px; padding-bottom: 90px; }
       .mobile-topbar-bar {
         display: flex;
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8;
+        padding: 10px 12px 10px 8px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
@@ -193,12 +206,12 @@
           <span>Notificações</span>
         </a>
         
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">
+        <div class="admin-only-item" style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px; display: none;">Administração</div>
+        <a href="rooms.html" class="admin-only-item" style="display: none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
           <span>Salas</span>
         </a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">
+        <a href="admin-users.html" class="admin-only-item" style="display: none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Usuários</span>
         </a>
@@ -226,7 +239,7 @@
 
     <header class="page-header">
       <h1>Minhas Reservas</h1>
-      <p style="color: var(--text-muted); font-size: 14px;">Consulte e gerencie as reuniões marcadas por si.</p>
+      <p style="color: var(--text-muted); font-size: 14px; margin: 0;">Consulte e gerencie as reuniões marcadas por si.</p>
     </header>
 
     <section>
@@ -248,6 +261,15 @@
         <button class="btn-modal-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
         <button class="btn-modal-confirm" id="btnConfirmarCancelamento" onclick="executarCancelamentoLocal()">Sim, Cancelar</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: center;" id="modalAlertaIcone"></div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Aviso</h3>
+      <p class="modal-text" id="modalAlertaTexto">Mensagem aqui</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
     </div>
   </div>
 
@@ -280,11 +302,12 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="../js/firebase-config.js"></script>
   <script src="../js/auth.js"></script>
-  <script src="../termos.js"></script>
 
   <script>
     let usuarioSessao = null;
     let usuarioEhAdmin = false;
+    let uidUsuarioAtual = "";
+    let apelidoUsuarioGlobal = "Utilizador";
     let reservasFirestoreGlobal = [];
 
     function escaparHTML(str) {
@@ -296,12 +319,34 @@
         .replace(/'/g, "&#39;");
     }
 
+    function formatarDataExibicao(dataStr) {
+      if (!dataStr) return "";
+      const partes = String(dataStr).split("T")[0].split("-");
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      }
+      return dataStr;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
       verificarAutenticacao({
         onSessaoPronta: (perfil) => {
           usuarioSessao = perfil;
+          const userAuth = window.auth ? window.auth.currentUser : null;
+          uidUsuarioAtual = (userAuth && userAuth.uid) || perfil.uid || "";
+
+          apelidoUsuarioGlobal = perfil.apelido || (perfil.nome ? perfil.nome.split(' ')[0] : "Utilizador");
           usuarioEhAdmin = !!perfil.ehAdmin;
-          iniciarListenerMinhasReservas();
+
+          document.getElementById("userNameDisplay").innerText = apelidoUsuarioGlobal;
+          document.getElementById("userRoleDisplay").innerText = perfil.cargo || (usuarioEhAdmin ? "Administrador" : "Utilizador");
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + apelidoUsuarioGlobal;
+
+          if (usuarioEhAdmin) {
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+          }
+
+          iniciarListenerMinhasReservasFirestore();
         }
       });
     });
@@ -316,7 +361,28 @@
       }
     }
 
-    function iniciarListenerMinhasReservas() {
+    function mostrarAlerta(titulo, texto, tipo = "success") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+
+      let iconHtml = "";
+      if (tipo === "success") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      } else if (tipo === "error") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      }
+
+      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+    }
+
+    function iniciarListenerMinhasReservasFirestore() {
       window.db.collection("reservas").onSnapshot((snapshot) => {
         const lista = [];
         snapshot.forEach((doc) => {
@@ -324,33 +390,37 @@
           if (dados.canceladoPorAdmin === true) return;
           lista.push({ id: doc.id, ...dados });
         });
+
         reservasFirestoreGlobal = lista;
-        carregarMinhasReservasLocal();
+        renderizarMinhasReservas(lista);
       }, (error) => {
-        console.error("Erro ao carregar reservas no Firestore:", error);
+        console.error("Erro ao sincronizar reservas com o Firestore:", error);
         const container = document.getElementById("listaMinhasReservas");
         if (container) {
-          container.innerHTML = `<p style="color: #dc2626; font-size: 14px;">Não foi possível carregar as reservas. Tente recarregar a página.</p>`;
+          container.innerHTML = `<p style="color: #dc2626; font-size: 14px;">Erro ao carregar reservas. Verifique a sua ligação.</p>`;
         }
       });
     }
 
-    function carregarMinhasReservasLocal() {
+    function renderizarMinhasReservas(reservas) {
       const container = document.getElementById("listaMinhasReservas");
-      const userAuth = window.auth ? window.auth.currentUser : null;
-      const uidAtual = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid) || "";
-
+      if (!container) return;
       container.innerHTML = "";
 
-      let minhasReservas = reservasFirestoreGlobal.filter(r => usuarioEhAdmin || r.userId === uidAtual);
+      const minhasReservas = reservas.filter(r =>
+        usuarioEhAdmin ||
+        r.userId === uidUsuarioAtual ||
+        r.responsavel === apelidoUsuarioGlobal
+      );
 
-      // Ordena por data e horário de início
+      // Ordena por data e horário de início (mais próximas primeiro)
       minhasReservas.sort((a, b) => {
-        const dA = a.data || a.date || "";
-        const dB = b.data || b.date || "";
+        const dA = String(a.data || a.date || (a.start && a.start.split('T')[0]) || "");
+        const dB = String(b.data || b.date || (b.start && b.start.split('T')[0]) || "");
         if (dA !== dB) return dA.localeCompare(dB);
-        const hA = a.horarioInicio || a.horaInicio || "";
-        const hB = b.horarioInicio || b.horaInicio || "";
+
+        const hA = String(a.horarioInicio || a.horaInicio || (a.start && a.start.split('T')[1]) || "");
+        const hB = String(b.horarioInicio || b.horaInicio || (b.start && b.start.split('T')[1]) || "");
         return hA.localeCompare(hB);
       });
 
@@ -361,12 +431,13 @@
 
       minhasReservas.forEach(reserva => {
         const salaSafe = escaparHTML(reserva.sala || reserva.room || "Sala 01");
-        const dataSafe = escaparHTML(reserva.data || reserva.date || "");
-        const iniSafe = escaparHTML(reserva.horarioInicio || reserva.horaInicio || "");
-        const fimSafe = escaparHTML(reserva.horarioFim || reserva.horaFim || "");
+        const dataRaw = reserva.data || reserva.date || (reserva.start && reserva.start.split('T')[0]) || "";
+        const dataFormatada = escaparHTML(formatarDataExibicao(dataRaw));
+        const inicioSafe = escaparHTML(reserva.horarioInicio || reserva.horaInicio || (reserva.start && reserva.start.split('T')[1] && reserva.start.split('T')[1].substring(0,5)) || "");
+        const fimSafe = escaparHTML(reserva.horarioFim || reserva.horaFim || (reserva.end && reserva.end.split('T')[1] && reserva.end.split('T')[1].substring(0,5)) || "");
         const tituloSafe = escaparHTML(reserva.titulo || reserva.title || "Reunião");
-        const respSafe = escaparHTML(reserva.responsavel || reserva.usuario || (usuarioSessao && usuarioSessao.nome) || "");
-        const idSafe = escaparHTML(reserva.id);
+        const responsavelSafe = escaparHTML(reserva.responsavel || reserva.usuario || usuarioSessao.nome || "Utilizador");
+        const idAttr = escaparHTML(reserva.id).replace(/'/g, "\\'");
 
         const div = document.createElement("div");
         div.className = "reservation-card";
@@ -374,13 +445,13 @@
           <div>
             <div class="res-meta">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${salaSafe} &nbsp;|&nbsp; 
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${dataSafe} &nbsp;|&nbsp; 
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${iniSafe} - ${fimSafe}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${dataFormatada} &nbsp;|&nbsp; 
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${inicioSafe}${fimSafe ? ' - ' + fimSafe : ''}
             </div>
             <h4 style="font-size: 16px; color: var(--text-main); margin: 4px 0;">${tituloSafe}</h4>
-            <p style="font-size: 13px; color: var(--text-muted);">Responsável: ${respSafe}</p>
+            <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Responsável: ${responsavelSafe}</p>
           </div>
-          <button class="btn-delete" onclick="abrirModalConfirmacao('${idSafe}')">
+          <button class="btn-delete" onclick="abrirModalConfirmacao('${idAttr}')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg> Cancelar
           </button>
         `;
@@ -399,29 +470,75 @@
 
     async function executarCancelamentoLocal() {
       const id = document.getElementById("reservaParaExcluirId").value;
-      const btn = document.getElementById("btnConfirmarCancelamento");
       if (!id) return;
 
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "A cancelar...";
+      const btnConfirmar = document.getElementById("btnConfirmarCancelamento");
+      if (btnConfirmar) {
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerText = "A cancelar...";
       }
 
       try {
-        await window.db.collection("reservas").doc(id).delete();
+        const docRef = window.db.collection("reservas").doc(id);
+        const docSnap = await docRef.get();
+
+        if (!docSnap.exists) {
+          fecharModalConfirmacao();
+          mostrarAlerta("Aviso", "Esta reserva já não se encontra disponível.", "warning");
+          return;
+        }
+
+        const reserva = docSnap.data();
+        const pertenceAoUsuario = reserva.userId === uidUsuarioAtual || reserva.responsavel === apelidoUsuarioGlobal;
+
+        if (!pertenceAoUsuario && !usuarioEhAdmin) {
+          fecharModalConfirmacao();
+          mostrarAlerta("Acesso Negado", "Não tem permissão para cancelar esta reserva.", "error");
+          return;
+        }
+
+        // Se um administrador cancelar a reserva de outro utilizador, notifica-o via Toast e E-mail
+        if (usuarioEhAdmin && !pertenceAoUsuario) {
+          await docRef.update({
+            canceladoPorAdmin: true,
+            canceladoEm: new Date().toISOString()
+          });
+
+          if (reserva.userId && window.emailjs && typeof window.emailjs.send === "function") {
+            const userSnap = await window.db.collection("usuarios").doc(reserva.userId).get();
+            const dadosUser = userSnap.exists ? userSnap.data() : {};
+            const emailDestino = dadosUser.emailNotificacao || (dadosUser.notificacoes && dadosUser.notificacoes.emailDestino) || dadosUser.email || "";
+            const envioAtivo = dadosUser.notificacoes ? !!dadosUser.notificacoes.email : false;
+
+            if (envioAtivo && emailDestino && emailDestino.includes("@")) {
+              await emailjs.send('service_d30n93a', 'template_3uxpjzk', {
+                to_email: emailDestino,
+                to_name: reserva.responsavel || dadosUser.apelido || dadosUser.nome || "Utilizador",
+                name: reserva.titulo || "Reunião",
+                message: `Atenção: A sua reserva "${reserva.titulo || 'Reunião'}" na ${reserva.sala || 'Sala'} marcada para o dia ${reserva.data || ''} das ${reserva.horarioInicio || ''} às ${reserva.horarioFim || ''} foi cancelada pela administração.`
+              });
+            }
+          }
+        } else {
+          // Cancelamento feito pelo próprio dono da reserva: remove diretamente e liberta o horário
+          await docRef.delete();
+        }
+
         fecharModalConfirmacao();
+        mostrarAlerta("Sucesso", "Reserva cancelada com sucesso!", "success");
       } catch (error) {
         console.error("Erro ao cancelar reserva no Firestore:", error);
         fecharModalConfirmacao();
-        alert("Não foi possível cancelar a reserva. Tente novamente.");
+        mostrarAlerta("Erro", "Não foi possível cancelar a reserva. Tente novamente.", "error");
       } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Sim, Cancelar";
+        if (btnConfirmar) {
+          btnConfirmar.disabled = false;
+          btnConfirmar.innerText = "Sim, Cancelar";
         }
       }
     }
 
+    // Registo do Service Worker PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('../js/sw.js').catch(err => console.error(err));
