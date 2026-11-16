@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <script src="../js/anti-flicker.js"></script>
   <!-- Configurações para PWA e iOS -->
-<link rel="manifest" href="../manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MeetingRoom">
-<link rel="apple-touch-icon" href="../ico.png">
+  <link rel="manifest" href="../manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="MeetingRoom">
+  <link rel="apple-touch-icon" href="../ico.png">
   <link rel="icon" href="../ico.png" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -115,7 +116,7 @@
 
     .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; margin: 0; }
     
     .rooms-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
     .room-card-item { background: white; border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; display: flex; flex-direction: column; gap: 16px; border-left: 5px solid var(--accent-color); }
@@ -123,10 +124,10 @@
     .room-card-item.embreve { border-left-color: #d97706; }
 
     .room-info-box { display: flex; gap: 16px; }
-    .room-card-img { width: 100px; height: 80px; border-radius: 8px; object-fit: cover; background: var(--border-color); }
-    .room-details h3 { font-size: 16px; color: var(--text-main); margin-bottom: 4px; }
-    .room-details p { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-    .room-details p svg { width: 14px; height: 14px; stroke-width: 2; color: var(--accent-color); }
+    .room-card-img { width: 100px; height: 80px; border-radius: 8px; object-fit: cover; background: var(--border-color); flex-shrink: 0; }
+    .room-details h3 { font-size: 16px; color: var(--text-main); margin: 0 0 4px 0; }
+    .room-details p { font-size: 13px; color: var(--text-muted); margin: 0 0 4px 0; display: flex; align-items: center; gap: 6px; }
+    .room-details p svg { width: 14px; height: 14px; stroke-width: 2; color: var(--accent-color); flex-shrink: 0; }
 
     .room-actions { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px; }
     
@@ -145,13 +146,16 @@
 
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
     .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; max-height: 90vh; overflow-y: auto; }
-    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
     .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent-color); }
     .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save:hover { background: var(--accent-hover); }
+    .btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
 
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
     .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
@@ -167,7 +171,7 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8;
+        padding: 10px 12px 10px 8px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
@@ -206,12 +210,12 @@
           <span>Notificações</span>
         </a>
         
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="active admin-only-item" style="display:none;">
+        <div class="admin-only-item" style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px; display: none;">Administração</div>
+        <a href="rooms.html" class="active admin-only-item" style="display: none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
           <span>Salas</span>
         </a>
-        <a href="admin-users.html" class="admin-only-item" style="display:none;">
+        <a href="admin-users.html" class="admin-only-item" style="display: none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Usuários</span>
         </a>
@@ -262,7 +266,7 @@
 
       <div class="form-group">
         <label>Capacidade (pessoas)</label>
-        <input type="number" id="inputCapacidade" placeholder="Ex: 8">
+        <input type="number" id="inputCapacidade" placeholder="Ex: 8" min="1">
       </div>
 
       <div class="form-group">
@@ -286,7 +290,7 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalSala()">Cancelar</button>
-        <button class="btn-save" onclick="salvarSalaLocal()">Guardar Alterações</button>
+        <button class="btn-save" id="btnSalvarSala" onclick="salvarSalaLocal()">Guardar Alterações</button>
       </div>
     </div>
   </div>
@@ -323,37 +327,86 @@
     </a>
   </nav>
 
+  <!-- Firebase SDK v10.8.0 (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/auth.js"></script>
+
   <script>
     let usuarioSessao = null;
     let usuarioEhAdmin = false;
     let listaSalasGlobal = [];
+    let seedSalasExecutado = false;
+
+    const IMAGEM_PADRAO_SALA = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
+
+    const SALAS_INICIAIS_PADRAO = [
+      {
+        id: "sala-1",
+        nome: "Sala de Reuniões 01",
+        capacidade: 8,
+        equipamentos: "TV, Videoconferência, Quadro",
+        status: "Ativa",
+        imagem: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80"
+      },
+      {
+        id: "sala-2",
+        nome: "Sala de Reuniões 02",
+        capacidade: 6,
+        equipamentos: "TV, Quadro",
+        status: "Em breve",
+        imagem: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80"
+      }
+    ];
+
+    function escaparHTML(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function sanitizarUrlImagem(url) {
+      const limpo = String(url || "").trim();
+      if (limpo.startsWith("data:image/") || limpo.startsWith("https://") || limpo.startsWith("http://")) {
+        return limpo.replace(/"/g, "&quot;");
+      }
+      return IMAGEM_PADRAO_SALA;
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
-      if (!sessaoStr) {
-        window.location.href = "../index.html";
-        return;
-      }
+      verificarAutenticacao({
+        onSessaoPronta: (perfil) => {
+          usuarioSessao = perfil;
+          const nomeBase = perfil.apelido || (perfil.nome ? perfil.nome.split(' ')[0] : "Utilizador");
+          usuarioEhAdmin = !!perfil.ehAdmin;
 
-      usuarioSessao = JSON.parse(sessaoStr);
-      let nomeBase = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
-      usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
+          document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userRoleDisplay").innerText = perfil.cargo || (usuarioEhAdmin ? "Administrador" : "Utilizador");
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
 
-      document.getElementById("userNameDisplay").innerText = nomeBase;
-      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
-      document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
+          if (usuarioEhAdmin) {
+            document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+            document.getElementById("btnNovaSala").style.display = "block";
+          }
 
-      if (usuarioEhAdmin) {
-        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-        document.getElementById("btnNovaSala").style.display = "block";
-      }
-
-      carregarSalasLocal();
+          iniciarListenerSalasFirestore();
+        }
+      });
     });
 
     function fazerLogoutLocal() {
-      localStorage.removeItem("meetingroom_sessao_atual");
-      window.location.href = "../index.html";
+      if (typeof window.fazerLogoutReal === "function") {
+        window.fazerLogoutReal();
+      } else {
+        localStorage.removeItem("meetingroom_sessao_atual");
+        localStorage.removeItem("meetingroom_perfil_ui");
+        window.location.href = "../index.html";
+      }
     }
 
     function mostrarAlerta(titulo, texto, tipo = "success") {
@@ -363,6 +416,8 @@
       let iconHtml = "";
       if (tipo === "success") {
         iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      } else if (tipo === "error") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
       } else if (tipo === "warning") {
         iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
       }
@@ -372,24 +427,57 @@
 
     function fecharModalAlerta() {
       document.getElementById("modalAlerta").style.display = "none";
-      carregarSalasLocal();
     }
 
-    function carregarSalasLocal() {
+    function iniciarListenerSalasFirestore() {
+      window.db.collection("salas").onSnapshot(async (snapshot) => {
+        if (snapshot.empty) {
+          if (!seedSalasExecutado) {
+            seedSalasExecutado = true;
+            if (usuarioEhAdmin) {
+              try {
+                for (const salaPadrao of SALAS_INICIAIS_PADRAO) {
+                  await window.db.collection("salas").doc(salaPadrao.id).set({
+                    nome: salaPadrao.nome,
+                    capacidade: salaPadrao.capacidade,
+                    equipamentos: salaPadrao.equipamentos,
+                    status: salaPadrao.status,
+                    imagem: salaPadrao.imagem,
+                    criadoEm: new Date().toISOString()
+                  });
+                }
+                return;
+              } catch (e) {
+                console.warn("Não foi possível registar as salas padrão no Firestore:", e);
+              }
+            }
+          }
+          listaSalasGlobal = SALAS_INICIAIS_PADRAO;
+          renderizarSalas(listaSalasGlobal);
+          return;
+        }
+
+        const salas = [];
+        snapshot.forEach((doc) => {
+          salas.push({ id: doc.id, ...doc.data() });
+        });
+
+        salas.sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+        listaSalasGlobal = salas;
+        renderizarSalas(salas);
+      }, (error) => {
+        console.error("Erro ao sincronizar salas com o Firestore:", error);
+        const container = document.getElementById("listaSalasContainer");
+        if (container) {
+          container.innerHTML = `<p style="color: #dc2626; font-size: 14px;">Erro ao carregar salas. Verifique a sua ligação.</p>`;
+        }
+      });
+    }
+
+    function renderizarSalas(salas) {
       const container = document.getElementById("listaSalasContainer");
+      if (!container) return;
       container.innerHTML = "";
-
-      let salas = JSON.parse(localStorage.getItem("meetingroom_salas")) || [];
-
-      if (salas.length === 0) {
-        salas = [
-          { id: "sala-1", nome: "Sala de Reuniões 01", capacidade: 8, equipamentos: "TV, Videoconferência, Quadro", status: "Ativa", imagem: "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80" },
-          { id: "sala-2", nome: "Sala de Reuniões 02", capacidade: 6, equipamentos: "TV, Quadro", status: "Em breve", imagem: "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=150&q=80" }
-        ];
-        localStorage.setItem("meetingroom_salas", JSON.stringify(salas));
-      }
-
-      listaSalasGlobal = salas;
 
       salas.forEach(sala => {
         let classeStatus = "ativa";
@@ -406,20 +494,26 @@
           classeCard = "embreve";
         }
 
+        const nomeSafe = escaparHTML(sala.nome || "Sala");
+        const capacidadeSafe = parseInt(sala.capacidade) || 8;
+        const equipamentosSafe = escaparHTML(sala.equipamentos || "TV, Videoconferência...");
+        const imagemSafe = sanitizarUrlImagem(sala.imagem);
+        const idAttr = escaparHTML(sala.id).replace(/'/g, "\\'");
+
         const div = document.createElement("div");
         div.className = `room-card-item ${classeCard}`;
         div.innerHTML = `
           <div class="room-info-box">
-            <img src="${sala.imagem || 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80'}" alt="Sala" class="room-card-img">
+            <img src="${imagemSafe}" alt="Sala" class="room-card-img">
             <div class="room-details">
-              <h3>${sala.nome}</h3>
-              <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: ${sala.capacidade || 8} pessoas</p>
-              <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: ${sala.equipamentos || 'TV, Videoconferência...'}</p>
+              <h3>${nomeSafe}</h3>
+              <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: ${capacidadeSafe} pessoas</p>
+              <p><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: ${equipamentosSafe}</p>
             </div>
           </div>
           <div class="room-actions">
             <span class="badge-status ${classeStatus}">${textoStatus}</span>
-            ${usuarioEhAdmin ? `<button class="btn-edit-room" onclick="abrirModalEdicao('${sala.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Editar</button>` : ''}
+            ${usuarioEhAdmin ? `<button class="btn-edit-room" onclick="abrirModalEdicao('${idAttr}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Editar</button>` : ''}
           </div>
         `;
         container.appendChild(div);
@@ -428,16 +522,52 @@
 
     function converterImagemParaBase64(event) {
       const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        mostrarAlerta("Formato Inválido", "Selecione apenas ficheiros de imagem.", "warning");
+        event.target.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const maxDim = 640;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+
+          const canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Comprime em JPEG para caber com folga no limite de 1 MB do Firestore
+          const base64Comprimido = canvas.toDataURL("image/jpeg", 0.78);
+          document.getElementById("inputImagemBase64").value = base64Comprimido;
+        };
+        img.onerror = function() {
           document.getElementById("inputImagemBase64").value = e.target.result;
         };
-        reader.readAsDataURL(file);
-      }
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
     }
 
     function abrirModalSala() {
+      if (!usuarioEhAdmin) return;
       document.getElementById("modalSalaTitulo").innerText = "Nova Sala";
       document.getElementById("editSalaId").value = "";
       document.getElementById("inputNomeSala").value = "";
@@ -450,6 +580,7 @@
     }
 
     function abrirModalEdicao(id) {
+      if (!usuarioEhAdmin) return;
       const sala = listaSalasGlobal.find(s => s.id === id);
       if (!sala) return;
 
@@ -468,10 +599,15 @@
       document.getElementById("modalSala").style.display = "none";
     }
 
-    function salvarSalaLocal() {
+    async function salvarSalaLocal() {
+      if (!usuarioEhAdmin) {
+        mostrarAlerta("Acesso Negado", "Apenas administradores podem gerir salas.", "error");
+        return;
+      }
+
       const id = document.getElementById("editSalaId").value;
       const nome = document.getElementById("inputNomeSala").value.trim();
-      const capacidade = document.getElementById("inputCapacidade").value;
+      const capacidade = parseInt(document.getElementById("inputCapacidade").value) || 8;
       const equipamentos = document.getElementById("inputEquipamentos").value.trim();
       const status = document.getElementById("inputStatusSala").value;
       let imagem = document.getElementById("inputImagemBase64").value.trim();
@@ -482,28 +618,54 @@
       }
 
       if (!imagem) {
-        imagem = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
+        imagem = IMAGEM_PADRAO_SALA;
       }
 
-      let salas = JSON.parse(localStorage.getItem("meetingroom_salas")) || [];
-
-      if (id) {
-        salas = salas.map(s => s.id === id ? { ...s, nome, capacidade: parseInt(capacidade) || 8, equipamentos, status, imagem } : s);
-      } else {
-        const novaSala = {
-          id: 'sala-' + Date.now(),
-          nome,
-          capacidade: parseInt(capacidade) || 8,
-          equipamentos,
-          status,
-          imagem
-        };
-        salas.push(novaSala);
+      const btnSalvar = document.getElementById("btnSalvarSala");
+      if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.innerText = "A guardar...";
       }
 
-      localStorage.setItem("meetingroom_salas", JSON.stringify(salas));
-      fecharModalSala();
-      mostrarAlerta("Sucesso", "Sala guardada com sucesso!", "success");
+      try {
+        if (id) {
+          await window.db.collection("salas").doc(id).set({
+            nome,
+            capacidade,
+            equipamentos,
+            status,
+            imagem,
+            atualizadoEm: new Date().toISOString()
+          }, { merge: true });
+        } else {
+          await window.db.collection("salas").add({
+            nome,
+            capacidade,
+            equipamentos,
+            status,
+            imagem,
+            criadoEm: new Date().toISOString()
+          });
+        }
+
+        fecharModalSala();
+        mostrarAlerta("Sucesso", "Sala guardada com sucesso!", "success");
+      } catch (error) {
+        console.error("Erro ao guardar sala no Firestore:", error);
+        mostrarAlerta("Erro", "Não foi possível guardar a sala. Verifique o tamanho da imagem ou a sua ligação.", "error");
+      } finally {
+        if (btnSalvar) {
+          btnSalvar.disabled = false;
+          btnSalvar.innerText = "Guardar Alterações";
+        }
+      }
+    }
+
+    // Registo do Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../js/sw.js').catch(err => console.error(err));
+      });
     }
   </script>
 </body>
