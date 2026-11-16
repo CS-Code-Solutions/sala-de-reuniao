@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+  <script src="../js/anti-flicker.js"></script>
   <!-- Configurações para PWA e iOS -->
   <link rel="manifest" href="../manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -115,7 +116,7 @@
 
     .page-wrapper { margin-left: 260px; flex: 1; padding: 32px; background-color: var(--bg-main); min-height: 100vh; box-sizing: border-box; }
     .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; }
+    .page-header h1 { font-size: 26px; color: var(--text-main); font-weight: 700; margin: 0; }
     
     .user-card {
       background: white; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--border-color);
@@ -131,23 +132,33 @@
     .action-btns { display: flex; gap: 8px; }
     .btn-icon {
       background: white; border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 10px;
-      cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
-      color: #64748b;
+      cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+      color: #64748b; font-weight: 600; transition: all 0.2s;
     }
-    .btn-icon svg { width: 14px; height: 14px; stroke-width: 2.5; }
+    .btn-icon svg { width: 14px; height: 14px; stroke-width: 2.2; }
+    .btn-icon:hover { background: #f8fafc; color: var(--text-main); border-color: #cbd5e1; }
     .btn-icon.delete:hover { border-color: #fca5a5; color: #ef4444; background: #fef2f2; }
     
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; }
-    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    .modal-card { background: white; width: 100%; max-width: 450px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
+    .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
     
     .form-group { display: flex; flex-direction: column; gap: 6px; text-align: left; }
     .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
     .form-group input, .form-group select { padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--accent-color); }
+    .form-group input:disabled { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
 
     .modal-actions { display: flex; gap: 12px; margin-top: 8px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-save { flex: 1; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-save:hover { background: var(--accent-hover); }
+    .btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
+
+    .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
+    .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-danger { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-danger:disabled { opacity: 0.7; cursor: not-allowed; }
 
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -160,7 +171,7 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8;
+        padding: 10px 12px 10px 8px;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
@@ -194,7 +205,6 @@
     }
     .display-card-info h4 { margin: 0 0 4px 0; font-size: 15px; color: var(--text-main); font-weight: 700; }
     .display-card-info p { margin: 0; font-size: 12px; color: var(--text-muted); }
-    
   </style>
 </head>
 <body>
@@ -222,12 +232,12 @@
           <span>Display Porta</span>
         </a>
         
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
-        <a href="rooms.html" class="admin-only-item" style="display:none;">
+        <div class="admin-only-item" style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px; display: none;">Administração</div>
+        <a href="rooms.html" class="admin-only-item" style="display: none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
           <span>Salas</span>
         </a>
-        <a href="admin-users.html" class="active admin-only-item" style="display:none;">
+        <a href="admin-users.html" class="active admin-only-item" style="display: none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Usuários</span>
         </a>
@@ -265,6 +275,7 @@
     </section>
   </main>
 
+  <!-- Modal Criar / Editar Utilizador -->
   <div class="modal-overlay" id="modalUsuario">
     <div class="modal-card">
       <h3 class="modal-title" id="modalTitleText">Novo Utilizador</h3>
@@ -285,8 +296,8 @@
         <input type="email" id="inputEmail" placeholder="joao@viecelli.com">
       </div>
 
-      <div class="form-group">
-        <label>Senha</label>
+      <div class="form-group" id="grupoSenhaUsuario">
+        <label>Senha (mínimo 6 caracteres)</label>
         <input type="password" id="inputSenha" placeholder="••••••••">
       </div>
 
@@ -298,9 +309,75 @@
         </select>
       </div>
 
+      <div id="areaResetSenhaEdicao" style="display: none; background: #f8fafc; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border-color); justify-content: space-between; align-items: center; gap: 8px;">
+        <span style="font-size: 12px; color: var(--text-muted);">Precisa alterar a senha deste utilizador?</span>
+        <button type="button" id="btnEnviarResetSenha" onclick="enviarResetSenhaUsuario()" style="background: white; border: 1px solid var(--border-color); color: var(--accent-color); font-weight: 600; font-size: 12px; padding: 6px 10px; border-radius: 6px; cursor: pointer;">Enviar Link de Redefinição</button>
+      </div>
+
       <div class="modal-actions">
-        <button class="btn-cancel" onclick="document.getElementById('modalUsuario').style.display='none'">Cancelar</button>
-        <button class="btn-save" onclick="salvarUtilizadorLocal()">Guardar</button>
+        <button class="btn-cancel" onclick="fecharModalUsuario()">Cancelar</button>
+        <button class="btn-save" id="btnSalvarUsuario" onclick="salvarUtilizadorLocal()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirmação Exclusão -->
+  <div class="modal-overlay" id="modalConfirmacaoExclusao">
+    <div class="modal-alert-card">
+      <div style="display: flex; justify-content: center; color: #dc2626;">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      </div>
+      <h3 class="modal-title">Excluir Utilizador</h3>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0;" id="textoConfirmacaoExclusao">Tem certeza que deseja excluir este utilizador?</p>
+      <input type="hidden" id="idUsuarioParaExcluir">
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
+        <button class="btn-modal-danger" id="btnConfirmarExclusaoUsuario" onclick="executarExclusaoUsuarioLocal()">Sim, Excluir</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Alerta Padrão -->
+  <div class="modal-overlay" id="modalAlerta">
+    <div class="modal-alert-card">
+      <div style="display: flex; justify-content: center;" id="modalAlertaIcone"></div>
+      <h3 class="modal-title" id="modalAlertaTitulo">Aviso</h3>
+      <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5; margin: 0;" id="modalAlertaTexto">Mensagem aqui</p>
+      <button class="btn-modal-ok" onclick="fecharModalAlerta()">OK</button>
+    </div>
+  </div>
+
+  <!-- Modal para Selecionar qual Display de Porta abrir -->
+  <div class="modal-overlay" id="modalSelecaoDisplay">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 class="modal-title">Abrir Display de Porta</h3>
+        <button onclick="document.getElementById('modalSelecaoDisplay').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; padding:0;">&times;</button>
+      </div>
+      <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">Selecione qual sala deseja visualizar em modo de ecrã inteiro no tablet/monitor da porta.</p>
+      
+      <div class="display-card-list" id="listaDisplaySalas">
+        <!-- Card Sala 01 -->
+        <div class="display-card-item" onclick="irParaDisplay('Sala 01')">
+          <div class="display-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          </div>
+          <div class="display-card-info">
+            <h4>Sala de Reuniões 01</h4>
+            <p>Capacidade: 8 pessoas</p>
+          </div>
+        </div>
+        
+        <!-- Card Sala 02 -->
+        <div class="display-card-item" onclick="irParaDisplay('Sala 02')">
+          <div class="display-card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+          </div>
+          <div class="display-card-info">
+            <h4>Sala de Reuniões 02</h4>
+            <p>Capacidade: 12 pessoas</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -332,64 +409,137 @@
     </a>
   </nav>
 
+  <!-- Firebase SDK v10.8.0 (Compat) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="../js/firebase-config.js"></script>
+  <script src="../js/auth.js"></script>
+
   <script>
     let usuarioSessao = null;
+    let uidUsuarioAtual = "";
+    let usuarioEhAdmin = false;
+    let listaUsuariosGlobal = [];
+
+    function escaparHTML(str) {
+      return String(str || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
-      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
-      if (!sessaoStr) {
-        window.location.href = "../index.html";
-        return;
-      }
+      verificarAutenticacao({
+        onSessaoPronta: (perfil) => {
+          usuarioSessao = perfil;
+          const userAuth = window.auth ? window.auth.currentUser : null;
+          uidUsuarioAtual = (userAuth && userAuth.uid) || perfil.uid || "";
 
-      usuarioSessao = JSON.parse(sessaoStr);
-      let nomeBase = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
-      let usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
+          const nomeBase = perfil.apelido || (perfil.nome ? perfil.nome.split(' ')[0] : "Utilizador");
+          usuarioEhAdmin = !!perfil.ehAdmin;
 
-      document.getElementById("userNameDisplay").innerText = nomeBase;
-      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
-      document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
+          document.getElementById("userNameDisplay").innerText = nomeBase;
+          document.getElementById("userRoleDisplay").innerText = perfil.cargo || (usuarioEhAdmin ? "Administrador" : "Utilizador");
+          document.getElementById("userAvatarMobile").innerText = "Olá, " + nomeBase;
 
-      if (usuarioEhAdmin) {
-        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
-      } else {
-        window.location.href = "calendar.html";
-        return;
-      }
+          if (!usuarioEhAdmin) {
+            window.location.replace("calendar.html");
+            return;
+          }
 
-      carregarUsuariosLocal();
+          document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+          iniciarListenerUsuariosFirestore();
+          carregarSalasParaDisplay();
+        }
+      });
     });
 
     function fazerLogoutLocal() {
-      localStorage.removeItem("meetingroom_sessao_atual");
-      window.location.href = "../index.html";
+      if (typeof window.fazerLogoutReal === "function") {
+        window.fazerLogoutReal();
+      } else {
+        localStorage.removeItem("meetingroom_sessao_atual");
+        localStorage.removeItem("meetingroom_perfil_ui");
+        window.location.href = "../index.html";
+      }
     }
 
-    function carregarUsuariosLocal() {
+    function mostrarAlerta(titulo, texto, tipo = "success") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+
+      let iconHtml = "";
+      if (tipo === "success") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      } else if (tipo === "error") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      }
+
+      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+    }
+
+    function iniciarListenerUsuariosFirestore() {
+      window.db.collection("usuarios").onSnapshot((snapshot) => {
+        const usuarios = [];
+        snapshot.forEach((doc) => {
+          usuarios.push({ uid: doc.id, ...doc.data() });
+        });
+
+        usuarios.sort((a, b) => String(a.nome || a.email || "").localeCompare(String(b.nome || b.email || ""), "pt-BR"));
+        listaUsuariosGlobal = usuarios;
+        renderizarUsuarios(usuarios);
+      }, (error) => {
+        console.error("Erro ao sincronizar utilizadores com o Firestore:", error);
+        const container = document.getElementById("listaUtilizadores");
+        if (container) {
+          container.innerHTML = `<p style="color: #dc2626; font-size: 14px;">Erro ao carregar utilizadores. Verifique as permissões ou a sua ligação.</p>`;
+        }
+      });
+    }
+
+    function renderizarUsuarios(usuarios) {
       const container = document.getElementById("listaUtilizadores");
-      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
+      if (!container) return;
       container.innerHTML = "";
 
       if (usuarios.length === 0) {
-        usuarios = [
-          { uid: "admin-1", email: "admin@viecelli.com", senha: "123456", nome: "Administrador", apelido: "Programador", cargo: "Administrador" },
-          { uid: "user-1", email: "usuario@viecelli.com", senha: "123456", nome: "Utilizador Teste", apelido: "Usuário", cargo: "Usuário" }
-        ];
-        localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
+        container.innerHTML = `<p style="color: var(--text-muted); font-size: 14px;">Nenhum utilizador registado no sistema.</p>`;
+        return;
       }
 
       usuarios.forEach(user => {
-        const isAd = user.cargo === 'Administrador';
+        const cargo = user.cargo || "Usuário";
+        const isAd = cargo === "Administrador";
+        const nomeSafe = escaparHTML(user.nome || user.apelido || "Sem Nome");
+        const apelidoSafe = escaparHTML(user.apelido || "");
+        const emailSafe = escaparHTML(user.email || "");
+        const cargoSafe = escaparHTML(cargo);
+        const uidAttr = escaparHTML(user.uid).replace(/'/g, "\\'");
+
         const div = document.createElement("div");
         div.className = "user-card";
         div.innerHTML = `
           <div style="flex: 1;">
-            <strong style="color: var(--text-main); font-size: 16px;">${user.nome}</strong> <span style="color: var(--text-muted); font-size: 13px;">(Apelido: <b>${user.apelido || ''}</b>)</span>
-            <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0;">${user.email}</p>
-            <span class="badge ${isAd ? 'admin' : 'user'}">${user.cargo}</span>
+            <strong style="color: var(--text-main); font-size: 16px;">${nomeSafe}</strong>
+            ${apelidoSafe ? `<span style="color: var(--text-muted); font-size: 13px;"> (Apelido: <b>${apelidoSafe}</b>)</span>` : ''}
+            <p style="color: var(--text-muted); font-size: 13px; margin: 4px 0;">${emailSafe}</p>
+            <span class="badge ${isAd ? 'admin' : 'user'}">${cargoSafe}</span>
           </div>
           <div class="action-btns">
-            <button class="btn-icon delete" onclick="excluirUsuarioLocal('${user.uid}')" title="Excluir">
+            <button class="btn-icon" onclick="abrirModalEdicaoUsuario('${uidAttr}')" title="Editar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg> Editar
+            </button>
+            <button class="btn-icon delete" onclick="confirmarExclusaoUsuario('${uidAttr}')" title="Excluir">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </button>
           </div>
@@ -403,63 +553,229 @@
       document.getElementById("inputNome").value = "";
       document.getElementById("inputApelido").value = "";
       document.getElementById("inputEmail").value = "";
+      document.getElementById("inputEmail").disabled = false;
       document.getElementById("inputSenha").value = "";
+      document.getElementById("grupoSenhaUsuario").style.display = "flex";
+      document.getElementById("areaResetSenhaEdicao").style.display = "none";
       document.getElementById("inputCargo").value = "Usuário";
       document.getElementById("modalTitleText").innerText = "Novo Utilizador";
       document.getElementById("modalUsuario").style.display = "flex";
     }
 
-    function salvarUtilizadorLocal() {
-      const nome = document.getElementById("inputNome").value.trim();
-      const apelido = document.getElementById("inputApelido").value.trim();
-      const email = document.getElementById("inputEmail").value.trim();
-      const senha = document.getElementById("inputSenha").value.trim();
-      const cargo = document.getElementById("inputCargo").value;
+    function abrirModalEdicaoUsuario(uid) {
+      const user = listaUsuariosGlobal.find(u => u.uid === uid);
+      if (!user) return;
 
-      if (!nome || !email || !senha) {
-        alert("Preencha todos os campos obrigatórios (Nome, E-mail, Senha).");
-        return;
-      }
-
-      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
-      const userIdEdit = document.getElementById("editUserId").value;
-
-      if (userIdEdit) {
-        usuarios = usuarios.map(u => u.uid === userIdEdit ? { ...u, nome, apelido, email, senha, cargo } : u);
-        alert("Utilizador atualizado com sucesso!");
-      } else {
-        const novoUser = {
-          uid: 'user-' + Date.now(),
-          nome,
-          apelido,
-          email,
-          senha,
-          cargo
-        };
-        usuarios.push(novoUser);
-        alert("Utilizador criado com sucesso!");
-      }
-
-      localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
-      document.getElementById("modalUsuario").style.display = "none";
-      carregarUsuariosLocal();
+      document.getElementById("editUserId").value = user.uid;
+      document.getElementById("inputNome").value = user.nome || "";
+      document.getElementById("inputApelido").value = user.apelido || "";
+      document.getElementById("inputEmail").value = user.email || "";
+      document.getElementById("inputEmail").disabled = true;
+      document.getElementById("inputSenha").value = "";
+      document.getElementById("grupoSenhaUsuario").style.display = "none";
+      document.getElementById("areaResetSenhaEdicao").style.display = user.email ? "flex" : "none";
+      document.getElementById("inputCargo").value = user.cargo || "Usuário";
+      document.getElementById("modalTitleText").innerText = "Editar Utilizador";
+      document.getElementById("modalUsuario").style.display = "flex";
     }
 
-    function excluirUsuarioLocal(uid) {
-      if (uid === 'admin-1') {
-        alert("Não é possível excluir o administrador principal Programador.");
-        return;
-      }
-      if (uid === usuarioSessao.uid) {
-        alert("Não é possível excluir o seu próprio utilizador enquanto está logado.");
-        return;
-      }
-      if(!confirm("Tem certeza que deseja excluir este utilizador?")) return;
+    function fecharModalUsuario() {
+      document.getElementById("modalUsuario").style.display = "none";
+    }
 
-      let usuarios = JSON.parse(localStorage.getItem("meetingroom_usuarios")) || [];
-      usuarios = usuarios.filter(u => u.uid !== uid);
-      localStorage.setItem("meetingroom_usuarios", JSON.stringify(usuarios));
-      carregarUsuariosLocal();
+    function obterFirebaseSecundario() {
+      const nomeAppSecundario = "SecondaryAdminApp";
+      const existente = window.firebase.apps.find(app => app.name === nomeAppSecundario);
+      if (existente) return existente;
+      return window.firebase.initializeApp(window.firebase.app().options, nomeAppSecundario);
+    }
+
+    async function salvarUtilizadorLocal() {
+      if (!usuarioEhAdmin) {
+        mostrarAlerta("Acesso Negado", "Apenas administradores podem gerir utilizadores.", "error");
+        return;
+      }
+
+      const userIdEdit = document.getElementById("editUserId").value;
+      const nome = document.getElementById("inputNome").value.trim();
+      const apelido = document.getElementById("inputApelido").value.trim() || nome.split(" ")[0];
+      const email = document.getElementById("inputEmail").value.trim().toLowerCase();
+      const senha = document.getElementById("inputSenha").value;
+      const cargo = document.getElementById("inputCargo").value;
+
+      if (!nome || !email) {
+        mostrarAlerta("Atenção", "Preencha os campos obrigatórios (Nome e E-mail).", "warning");
+        return;
+      }
+
+      if (!userIdEdit && (!senha || senha.length < 6)) {
+        mostrarAlerta("Senha Inválida", "A senha inicial deve ter pelo menos 6 caracteres.", "warning");
+        return;
+      }
+
+      const btnSalvar = document.getElementById("btnSalvarUsuario");
+      if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.innerText = "A guardar...";
+      }
+
+      try {
+        if (userIdEdit) {
+          await window.db.collection("usuarios").doc(userIdEdit).set({
+            nome,
+            apelido,
+            cargo,
+            atualizadoEm: new Date().toISOString()
+          }, { merge: true });
+
+          fecharModalUsuario();
+          mostrarAlerta("Sucesso", "Utilizador atualizado com sucesso!", "success");
+        } else {
+          // Usa uma instância secundária do Firebase Auth para criar o utilizador sem desconectar o Admin atual
+          const appSecundario = obterFirebaseSecundario();
+          const authSecundario = appSecundario.auth();
+
+          const credencial = await authSecundario.createUserWithEmailAndPassword(email, senha);
+          const novoUid = credencial.user.uid;
+          await authSecundario.signOut();
+
+          await window.db.collection("usuarios").doc(novoUid).set({
+            uid: novoUid,
+            nome,
+            apelido,
+            email,
+            cargo,
+            criadoEm: new Date().toISOString()
+          });
+
+          fecharModalUsuario();
+          mostrarAlerta("Sucesso", "Utilizador criado com sucesso!", "success");
+        }
+      } catch (error) {
+        console.error("Erro ao guardar utilizador:", error);
+        let msgErro = "Não foi possível guardar o utilizador. Tente novamente.";
+        if (error.code === "auth/email-already-in-use") {
+          msgErro = "Este endereço de e-mail já está registado no sistema.";
+        } else if (error.code === "auth/invalid-email") {
+          msgErro = "O formato do e-mail informado é inválido.";
+        } else if (error.code === "auth/weak-password") {
+          msgErro = "A senha deve conter no mínimo 6 caracteres.";
+        }
+        mostrarAlerta("Erro", msgErro, "error");
+      } finally {
+        if (btnSalvar) {
+          btnSalvar.disabled = false;
+          btnSalvar.innerText = "Guardar";
+        }
+      }
+    }
+
+    async function enviarResetSenhaUsuario() {
+      const email = document.getElementById("inputEmail").value.trim();
+      if (!email || !window.auth) return;
+
+      const btnReset = document.getElementById("btnEnviarResetSenha");
+      if (btnReset) {
+        btnReset.disabled = true;
+        btnReset.innerText = "A enviar...";
+      }
+
+      try {
+        await window.auth.sendPasswordResetEmail(email);
+        mostrarAlerta("E-mail Enviado", `Enviámos um link de redefinição de senha para ${email}.`, "success");
+      } catch (error) {
+        console.error("Erro ao enviar redefinição de senha:", error);
+        mostrarAlerta("Erro", "Não foi possível enviar o e-mail de redefinição.", "error");
+      } finally {
+        if (btnReset) {
+          btnReset.disabled = false;
+          btnReset.innerText = "Enviar Link de Redefinição";
+        }
+      }
+    }
+
+    function confirmarExclusaoUsuario(uid) {
+      if (uid === "admin-1") {
+        mostrarAlerta("Ação Bloqueada", "Não é possível excluir o administrador principal.", "warning");
+        return;
+      }
+      if (uid === uidUsuarioAtual) {
+        mostrarAlerta("Ação Bloqueada", "Não é possível excluir o seu próprio utilizador enquanto está logado.", "warning");
+        return;
+      }
+
+      const user = listaUsuariosGlobal.find(u => u.uid === uid);
+      const nomeExibicao = user ? (user.nome || user.email) : "este utilizador";
+
+      document.getElementById("idUsuarioParaExcluir").value = uid;
+      document.getElementById("textoConfirmacaoExclusao").innerText = `Tem certeza que deseja excluir o acesso de "${nomeExibicao}"?`;
+      document.getElementById("modalConfirmacaoExclusao").style.display = "flex";
+    }
+
+    function fecharModalConfirmacao() {
+      document.getElementById("modalConfirmacaoExclusao").style.display = "none";
+    }
+
+    async function executarExclusaoUsuarioLocal() {
+      const uid = document.getElementById("idUsuarioParaExcluir").value;
+      if (!uid || !usuarioEhAdmin) return;
+
+      const btnExcluir = document.getElementById("btnConfirmarExclusaoUsuario");
+      if (btnExcluir) {
+        btnExcluir.disabled = true;
+        btnExcluir.innerText = "A excluir...";
+      }
+
+      try {
+        await window.db.collection("usuarios").doc(uid).delete();
+        fecharModalConfirmacao();
+        mostrarAlerta("Sucesso", "Utilizador removido com sucesso!", "success");
+      } catch (error) {
+        console.error("Erro ao excluir utilizador no Firestore:", error);
+        fecharModalConfirmacao();
+        mostrarAlerta("Erro", "Não foi possível excluir o utilizador. Tente novamente.", "error");
+      } finally {
+        if (btnExcluir) {
+          btnExcluir.disabled = false;
+          btnExcluir.innerText = "Sim, Excluir";
+        }
+      }
+    }
+
+    async function carregarSalasParaDisplay() {
+      const container = document.getElementById("listaDisplaySalas");
+      if (!container) return;
+
+      try {
+        const snapshot = await window.db.collection("salas").get();
+        if (snapshot.empty) return;
+
+        const salas = [];
+        snapshot.forEach(doc => salas.push({ id: doc.id, ...doc.data() }));
+        salas.sort((a, b) => String(a.nome || "").localeCompare(String(b.nome || ""), "pt-BR"));
+
+        container.innerHTML = "";
+        salas.forEach(sala => {
+          const nomeSala = sala.nome || "Sala";
+          const nomeSafe = escaparHTML(nomeSala);
+          const capSafe = parseInt(sala.capacidade) || 8;
+          const nomeAttr = nomeSala.replace(/'/g, "\\'");
+
+          container.innerHTML += `
+            <div class="display-card-item" onclick="irParaDisplay('${nomeAttr}')">
+              <div class="display-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+              </div>
+              <div class="display-card-info">
+                <h4>${nomeSafe}</h4>
+                <p>Capacidade: ${capSafe} pessoas</p>
+              </div>
+            </div>
+          `;
+        });
+      } catch (e) {
+        console.warn("Usando lista padrão de displays de porta:", e);
+      }
     }
 
     function abrirModalSelecaoDisplay() {
@@ -469,43 +785,14 @@
     function irParaDisplay(nomeSala) {
       window.location.href = `display-porta.html?sala=${encodeURIComponent(nomeSala)}`;
     }
-    
-  </script>
 
-  <!-- Modal para Selecionar qual Display de Porta abrir -->
-  <div class="modal-overlay" id="modalSelecaoDisplay">
-    <div class="modal-card">
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 class="modal-title">Abrir Display de Porta</h3>
-        <button onclick="document.getElementById('modalSelecaoDisplay').style.display='none'" style="background:none; border:none; font-size:24px; cursor:pointer; color:#94a3b8; padding:0;">&times;</button>
-      </div>
-      <p style="font-size: 13px; color: var(--text-muted); margin: 4px 0 0 0;">Selecione qual sala deseja visualizar em modo de ecrã inteiro no tablet/monitor da porta.</p>
-      
-      <div class="display-card-list">
-        <!-- Card Sala 01 -->
-        <div class="display-card-item" onclick="irParaDisplay('Sala 01')">
-          <div class="display-card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-          </div>
-          <div class="display-card-info">
-            <h4>Sala de Reuniões 01</h4>
-            <p>Capacidade: 8 pessoas</p>
-          </div>
-        </div>
-        
-        <!-- Card Sala 02 -->
-        <div class="display-card-item" onclick="irParaDisplay('Sala 02')">
-          <div class="display-card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
-          </div>
-          <div class="display-card-info">
-            <h4>Sala de Reuniões 02</h4>
-            <p>Capacidade: 12 pessoas</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+    // Registo do Service Worker PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('../js/sw.js').catch(err => console.error(err));
+      });
+    }
+  </script>
 
 </body>
 </html>
