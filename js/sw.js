@@ -2,7 +2,7 @@
 // SERVICE WORKER - MEETINGROOM (sw.js)
 // ==========================================
 
-const CACHE_NAME = 'meetingroom-cache-v1.2.0';
+const CACHE_NAME = 'meetingroom-cache-v1.0.0';
 
 // Ficheiros essenciais a guardar em cache para carregamento rápido
 const ASSETS_TO_CACHE = [

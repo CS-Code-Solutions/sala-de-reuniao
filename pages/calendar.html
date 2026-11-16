@@ -14,70 +14,6 @@
   <meta name="apple-mobile-web-app-title" content="MeetingRoom">
   <link rel="apple-touch-icon" href="../ico.png">
 
-  <!-- ========================================== -->
-  <!-- PADRÃO ANTI-FOUC (ZERO FLICKER / ANTI-PISC) -->
-  <!-- ========================================== -->
-  <script>
-    (function () {
-      const STORAGE_KEY = 'meetingroom_sessao_atual';
-      const root = document.documentElement;
-      let cachedUser = null;
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) cachedUser = JSON.parse(raw);
-      } catch (e) {}
-
-      let dynamicCss = `
-        html.af-not-admin .admin-only-item { display: none !important; }
-        html.af-locked body { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
-        html.af-ready body { opacity: 1 !important; visibility: visible !important; transition: opacity 0.15s ease-out; }
-      `;
-
-      if (cachedUser) {
-        root.classList.add('af-has-session');
-        root.classList.add(cachedUser.cargo === "Administrador" ? 'af-is-admin' : 'af-not-admin');
-        if (cachedUser.cargo !== "Administrador") {
-          dynamicCss += `.admin-only-item { display: none !important; }\n`;
-        }
-      } else {
-        root.classList.add('af-locked');
-      }
-
-      const style = document.createElement('style');
-      style.id = 'anti-flicker-style';
-      style.textContent = dynamicCss;
-      document.head.appendChild(style);
-
-      window.AntiFlicker = {
-        reveal: function(isAdmin) {
-          root.classList.remove('af-locked');
-          root.classList.add('af-ready');
-          root.classList.toggle('af-is-admin', isAdmin);
-          root.classList.toggle('af-not-admin', !isAdmin);
-          setTimeout(() => {
-            const s = document.getElementById('anti-flicker-style');
-            if (s && isAdmin) s.remove();
-          }, 200);
-        }
-      };
-
-      setTimeout(() => {
-        if (root.classList.contains('af-locked')) {
-          window.AntiFlicker.reveal(false);
-        }
-      }, 3000);
-    })();
-  </script>
-
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-  <script type="text/javascript">
-    (function(){
-      emailjs.init({
-        publicKey: "X6E_oavkyc9MgyxTc"
-      });
-    })();
-  </script>
-
   <style>
     :root {
       --sidebar-bg: #0f172a;
@@ -361,45 +297,6 @@
     .card-dia-mes.outro-mes { opacity: 0.35; background: #fdfdfd; }
     .card-dia-mes.dia-hoje { border-color: var(--accent-color); background: #f0fdfa; }
 
-    /* Sistema de Alerta Flutuante (Toast) */
-    #floatingToastContainer {
-      position: fixed;
-      top: 24px;
-      right: 24px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-width: 380px;
-      width: 100%;
-      pointer-events: none;
-    }
-    .toast-alert {
-      background: #ffffff;
-      border-left: 5px solid var(--accent-color);
-      border-top: 1px solid var(--border-color);
-      border-right: 1px solid var(--border-color);
-      border-bottom: 1px solid var(--border-color);
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
-      pointer-events: auto;
-      animation: slideInRight 0.3s ease-out forwards;
-      display: flex;
-      gap: 12px;
-      align-items: flex-start;
-    }
-    .toast-alert.warning { border-left-color: #d97706; background: #fffbeb; }
-    .toast-alert.danger { border-left-color: #dc2626; background: #fef2f2; }
-    @keyframes slideInRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes fadeOut {
-      from { opacity: 1; }
-      to { opacity: 0; transform: translateY(-10px); }
-    }
-
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; justify-content: center; align-items: center; padding: 16px; overflow-y: auto; }
     .modal-card { background: white; width: 100%; max-width: 420px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 14px; max-height: 90vh; overflow-y: auto; }
     .modal-title { font-size: 18px; font-weight: 700; color: var(--text-main); margin: 0; }
@@ -407,12 +304,14 @@
     .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
     
+    /* MODIFICAÇÃO DO CSS PARA INCLUIR O SELECT BONITO */
     .form-group input, .form-group textarea, .form-group select { 
       padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: white; 
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { 
       border-color: var(--accent-color); 
     }
+    /* FIM DA MODIFICAÇÃO DO SELECT */
 
     .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
@@ -446,7 +345,7 @@
         justify-content: space-between;
         align-items: center;
         background: #0f172a;
-        padding: 10px 12px 10px 8px;
+        padding: 10px 12px 10px 8;
         border-bottom: 1px solid rgba(255,255,255,0.1);
         margin: -16px -16px 20px -16px;
       }
@@ -459,16 +358,8 @@
       .mob-nav-item.active { color: #2dd4bf; font-weight: 700; }
     }
   </style>
-
-  <!-- Firebase Compat SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-
-  <!-- Contentor para os Avisos Flutuantes Automáticos -->
-  <div id="floatingToastContainer"></div>
 
   <aside class="sidebar">
     <div>
@@ -490,12 +381,12 @@
           <span>Notificações</span>
         </a>
         
-        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item">Administração</div>
-        <a href="rooms.html" class="admin-only-item">
+        <div style="font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 700; margin: 16px 0 6px 12px; letter-spacing: 0.5px;" class="admin-only-item" style="display:none;">Administração</div>
+        <a href="rooms.html" class="admin-only-item" style="display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
           <span>Salas</span>
         </a>
-        <a href="admin-users.html" class="admin-only-item">
+        <a href="admin-users.html" class="admin-only-item" style="display:none;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
           <span>Usuários</span>
         </a>
@@ -507,7 +398,7 @@
         <h4 id="userNameDisplay">Carregando...</h4>
         <p id="userRoleDisplay">Utilizador</p>
       </div>
-      <a href="#" onclick="fazerLogoutReal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">
+      <a href="#" onclick="fazerLogoutLocal(); return false;" title="Sair" style="color: #94a3b8; font-size: 18px; text-decoration: none;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
       </a>
     </div>
@@ -518,7 +409,7 @@
       <img src="../cabe.png" alt="Logo" class="brand-logo">
       <div style="display: flex; align-items: center; gap: 8px;">
         <span id="userAvatarMobile" style="font-weight: 600; font-size: 12px; color: #ffffff;">Olá, Usuário</span>
-        <a href="#" onclick="fazerLogoutReal(); return false;" class="btn-sair-mobile">Sair</a>
+        <a href="#" onclick="fazerLogoutLocal(); return false;" class="btn-sair-mobile">Sair</a>
       </div>
     </div>
 
@@ -584,6 +475,7 @@
       <div class="form-group">
         <label>Horário de Início e Fim</label>
         <div style="display: flex; gap: 8px;">
+          <!-- MODIFICAÇÃO DO SELECT AQUI COM ONCHANGE PARA AVALIAR O FIM -->
           <select id="inputHoraInicio" style="flex:1;" onchange="atualizarOpcoesFim(window.dataSelecionadaGlobal, document.getElementById('salaSelect').value)" required></select>
           <select id="inputHoraFim" style="flex:1;" required></select>
         </div>
@@ -591,7 +483,7 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNovaReserva').style.display='none'">Cancelar</button>
-        <button class="btn-save" onclick="salvarNovaReservaFirebase()">Confirmar Reserva</button>
+        <button class="btn-save" onclick="salvarNovaReservaLocal()">Confirmar Reserva</button>
       </div>
     </div>
   </div>
@@ -609,7 +501,7 @@
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNegociacao').style.display='none'">Voltar</button>
         <a id="linkEnviarWhatsapp" href="#" target="_blank" class="btn-whatsapp">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Enviar WhatsApp
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg> Enviar WhatsApp
         </a>
       </div>
     </div>
@@ -625,7 +517,7 @@
       <input type="hidden" id="idReservaParaExcluir">
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
-        <button class="btn-modal-danger" onclick="executarExclusaoReserva()">Sim, Excluir</button>
+        <button class="btn-modal-danger" onclick="executarExclusaoReservaLocal()">Sim, Excluir</button>
       </div>
     </div>
   </div>
@@ -648,7 +540,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
       <span>Reservas</span>
     </a>
-    <a href="rooms.html" class="mob-nav-item admin-only-item">
+    <a href="rooms.html" class="mob-nav-item admin-only-item" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 20V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v14"></path><path d="M2 20h20"></path><circle cx="14" cy="12" r="1"></circle></svg>
       <span>Salas</span>
     </a>
@@ -656,14 +548,601 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
       <span>Avisos</span>
     </a>
-    <a href="admin-users.html" class="mob-nav-item admin-only-item">
+    <a href="admin-users.html" class="mob-nav-item admin-only-item" style="display:none;">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
       <span>Admin</span>
     </a>
   </nav>
 
+  <script>
+    let usuarioSessao = null;
+    let usuarioEhAdmin = false;
+    let apelidoUsuarioGlobal = "Utilizador";
+    let dataAtualObj = new Date();
+    let tipoVisaoAtual = 'dia';
+
+    function formatarDataLocal(d) {
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (!sessaoStr) {
+        window.location.href = "../index.html";
+        return;
+      }
+
+      usuarioSessao = JSON.parse(sessaoStr);
+      apelidoUsuarioGlobal = usuarioSessao.apelido || usuarioSessao.nome.split(' ')[0];
+      usuarioEhAdmin = usuarioSessao.cargo === "Administrador";
+
+      document.getElementById("userNameDisplay").innerText = apelidoUsuarioGlobal;
+      document.getElementById("userRoleDisplay").innerText = usuarioSessao.cargo;
+      document.getElementById("userAvatarMobile").innerText = "Olá, " + apelidoUsuarioGlobal;
+
+      if (usuarioEhAdmin) {
+        document.querySelectorAll(".admin-only-item").forEach(el => el.style.display = "flex");
+      }
+
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
+      atualizarCabecalhoData();
+      mudarSalaSelecionada();
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === "meetingroom_reservas" || e.key === "meetingroom_calendario") {
+          carregarAgendaLocal();
+        }
+      });
+      setInterval(carregarAgendaLocal, 30000);
+    });
+
+    
+    function confirmarAceiteLGPD() {
+      const checkbox = document.getElementById('checkAceiteLGPD');
+      if (!checkbox.checked) {
+        alert("Por favor, confirme que leu e aceita a Política de Privacidade marcando a caixa antes de continuar.");
+        return;
+      }
+      
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      localStorage.setItem(chaveLGPD, 'true');
+      document.getElementById('modalTermosLGPD').style.display = 'none';
+      
+      // Opcional: mostrar um alerta de sucesso
+      mostrarAlerta("Obrigado", "As suas preferências de privacidade foram atualizadas com sucesso.", "success");
+    }
+
+    function fazerLogoutLocal() {
+      localStorage.removeItem("meetingroom_sessao_atual");
+      window.location.href = "../index.html";
+    }
+
+    function mudarSalaSelecionada() {
+      const sala = document.getElementById("salaSelect").value;
+      document.getElementById("sidebarNomeSala").innerText = sala;
+      document.getElementById("salaHeaderTitulo").innerText = sala;
+
+      if (sala === "Sala 01") {
+        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas';
+        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...';
+        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
+      } else if (sala === "Sala 02") {
+        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 12 pessoas';
+        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: Projetor, Som, TV 4K';
+        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
+      }
+
+      carregarAgendaLocal();
+    }
+
+    function mostrarAlerta(titulo, texto, tipo = "success") {
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
+      
+      let iconHtml = "";
+      if (tipo === "success") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+      } else if (tipo === "error") {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+      } else {
+        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+      }
+      
+      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
+      document.getElementById("modalAlerta").style.display = "flex";
+    }
+
+    function fecharModalAlerta() {
+      document.getElementById("modalAlerta").style.display = "none";
+      carregarAgendaLocal();
+    }
+
+    function atualizarCabecalhoData() {
+      const spanData = document.getElementById("dataAtualExibicao");
+      let textoFormatado = "";
+
+      if (tipoVisaoAtual === 'dia') {
+        const diaSemana = dataAtualObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+        const dataCurta = dataAtualObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        textoFormatado = `${diaSemana}, ${dataCurta}`;
+      } 
+      else if (tipoVisaoAtual === 'semana') {
+        let inicioSemana = new Date(dataAtualObj);
+        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+        let fimSemana = new Date(inicioSemana);
+        fimSemana.setDate(fimSemana.getDate() + 6);
+        const opt = { day: 'numeric', month: 'short' };
+        textoFormatado = `${inicioSemana.toLocaleDateString('pt-BR', opt)} - ${fimSemana.toLocaleDateString('pt-BR', opt)}, ${dataAtualObj.getFullYear()}`;
+      } 
+      else if (tipoVisaoAtual === 'mes') {
+        const options = { month: 'long', year: 'numeric' };
+        textoFormatado = dataAtualObj.toLocaleDateString('pt-BR', options);
+        textoFormatado = textoFormatado.charAt(0).toUpperCase() + textoFormatado.slice(1);
+      }
+
+      spanData.innerText = textoFormatado;
+    }
+
+    function mudarData(direcao) {
+      if (tipoVisaoAtual === 'dia') {
+        dataAtualObj.setDate(dataAtualObj.getDate() + direcao);
+      } else if (tipoVisaoAtual === 'semana') {
+        dataAtualObj.setDate(dataAtualObj.getDate() + (direcao * 7));
+      } else if (tipoVisaoAtual === 'mes') {
+        dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
+      }
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
+      atualizarCabecalhoData();
+      carregarAgendaLocal();
+    }
+
+    function alterarVisao(visao, btnElement) {
+      tipoVisaoAtual = visao;
+      document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
+      btnElement.classList.add("active");
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
+      atualizarCabecalhoData();
+      carregarAgendaLocal();
+    }
+
+    function selecionarDiaEspecifico(dataStr) {
+      dataAtualObj = new Date(dataStr + "T00:00:00");
+      tipoVisaoAtual = 'dia';
+      document.querySelectorAll(".view-toggles button").forEach((b, idx) => {
+        if (idx === 0) b.classList.add("active");
+        else b.classList.remove("active");
+      });
+      
+      // VERIFICAÇÃO LGPD
+      const chaveLGPD = 'lgpd_aceite_' + usuarioSessao.uid;
+      if (!localStorage.getItem(chaveLGPD)) {
+        document.getElementById('modalTermosLGPD').style.display = 'flex';
+      }
+
+      atualizarCabecalhoData();
+      carregarAgendaLocal();
+    }
+
+    function carregarAgendaLocal() {
+      const sala = document.getElementById("salaSelect").value;
+      const container = document.getElementById("gridHorarios");
+      document.getElementById("salaHeaderTitulo").innerText = sala;
+
+      const dataStr = formatarDataLocal(dataAtualObj);
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      
+      const reservasDoDia = reservas.filter(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        return rSala === sala && rData === dataStr;
+      });
+
+      const iconeAgendar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>`;
+      const iconeNegociar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>`;
+      const iconeExcluir = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+
+      let fragmentoHTML = "";
+
+      if (tipoVisaoAtual === 'dia') {
+        const inicioDiaMin = 7 * 60; // 07:00
+        const fimDiaMin = 23 * 60;   // 23:00
+
+        reservasDoDia.sort((a, b) => {
+          const tA = a.horarioInicio || a.horaInicio || a.start?.split('T')[1]?.substring(0,5) || "00:00";
+          const tB = b.horarioInicio || b.horaInicio || b.start?.split('T')[1]?.substring(0,5) || "00:00";
+          return tA.localeCompare(tB);
+        });
+
+        let cursorMin = inicioDiaMin;
+
+        reservasDoDia.forEach(reserva => {
+          const strIni = reserva.horarioInicio || reserva.horaInicio || reserva.start?.split('T')[1]?.substring(0,5) || "00:00";
+          const strFim = reserva.horarioFim || reserva.horaFim || reserva.end?.split('T')[1]?.substring(0,5) || strIni;
+          
+          const resIniMin = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
+          const resFimMin = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
+
+          if (cursorMin < resIniMin) {
+            const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
+            const slotLivreFim = String(Math.floor(resIniMin/60)).padStart(2,'0') + ":" + String(resIniMin%60).padStart(2,'0');
+            
+            fragmentoHTML += `
+              <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
+                <div>
+                  <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às ${slotLivreFim} - Disponível</span>
+                  <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar neste intervalo livre.</p>
+                </div>
+                <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
+              </div>
+            `;
+          }
+
+          fragmentoHTML += `
+            <div class="slot-row reserved">
+              <div>
+                <span style="font-size: 12px; font-weight: 700; color: var(--accent-color);">${strIni} - ${strFim}</span>
+                <h4 style="font-size: 15px; color: var(--text-main); margin: 2px 0;">${reserva.titulo || reserva.title || 'Reunião'}</h4>
+                <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${reserva.responsavel || reserva.usuario || 'Equipa'}</p>
+              </div>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${sala}', '${dataStr}', '${strIni}', '${reserva.responsavel || reserva.usuario || 'Colega'}')">${iconeNegociar} Negociar</button>
+                ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${reserva.id}')">${iconeExcluir} Excluir</button>` : ''}
+              </div>
+            </div>
+          `;
+
+          cursorMin = Math.max(cursorMin, resFimMin + 5); 
+        });
+
+        if (cursorMin < fimDiaMin) {
+          const slotLivreIni = String(Math.floor(cursorMin/60)).padStart(2,'0') + ":" + String(cursorMin%60).padStart(2,'0');
+          
+          fragmentoHTML += `
+            <div class="slot-row available" onclick="abrirModalReserva('${slotLivreIni}', '${dataStr}')">
+              <div>
+                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">${slotLivreIni} às 23:00 - Disponível</span>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Clique para agendar no restante do dia.</p>
+              </div>
+              <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
+            </div>
+          `;
+        }
+        
+        if(reservasDoDia.length === 0) {
+           fragmentoHTML = `
+            <div class="slot-row available" onclick="abrirModalReserva('08:00', '${dataStr}')">
+              <div>
+                <span style="font-size: 13px; font-weight: 700; color: #16a34a;">07:00 às 23:00 - Disponível</span>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Sem reuniões. Clique para agendar o primeiro horário.</p>
+              </div>
+              <button class="btn-action-slot btn-reserve">${iconeAgendar} Agendar</button>
+            </div>
+          `;
+        }
+
+        container.innerHTML = fragmentoHTML;
+      }
+      else if (tipoVisaoAtual === 'semana') {
+        let gridDivHtml = `<div class="grid-semana">`;
+        let inicioSemana = new Date(dataAtualObj);
+        inicioSemana.setDate(inicioSemana.getDate() - inicioSemana.getDay());
+
+        for (let i = 0; i < 7; i++) {
+          let diaAtual = new Date(inicioSemana);
+          diaAtual.setDate(diaAtual.getDate() + i);
+          let diaStr = formatarDataLocal(diaAtual);
+          let nomeDia = diaAtual.toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'numeric' });
+
+          gridDivHtml += `
+            <div class="card-dia-semana" style="cursor: pointer;" onclick="selecionarDiaEspecifico('${diaStr}')">
+              <strong style="font-size: 11px; color: var(--text-main); border-bottom: 1px solid var(--border-color); padding-bottom: 4px;">${nomeDia}</strong>
+          `;
+          
+          let reservasDoDiaSemana = reservas.filter(r => {
+            const rSala = r.sala || r.room;
+            const rData = r.data || r.date || r.start?.split('T')[0];
+            return rSala === sala && rData === diaStr;
+          });
+
+          if (reservasDoDiaSemana.length > 0) {
+            reservasDoDiaSemana.forEach(r => {
+              const sIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5) || "";
+              gridDivHtml += `
+                <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
+                  <b>${sIni}</b> - ${r.titulo || r.title || 'Reunião'}
+                  ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" style="margin-top:2px;" onclick="event.stopPropagation(); confirmarExclusaoLocal('${r.id}')">${iconeExcluir} Excluir</button>` : ''}
+                </div>
+              `;
+            });
+          } else {
+            gridDivHtml += `<span style="font-size: 10px; color: #94a3b8; font-style: italic; margin-top: 4px;">Sem reuniões</span>`;
+          }
+          gridDivHtml += `</div>`;
+        }
+        gridDivHtml += `</div>`;
+        container.innerHTML = gridDivHtml;
+      }
+      else if (tipoVisaoAtual === 'mes') {
+        let wrapperHtml = `<div>`;
+        wrapperHtml += `<div class="grid-mes-header"><span>Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span></div>`;
+        wrapperHtml += `<div class="grid-mes">`;
+
+        let ano = dataAtualObj.getFullYear();
+        let mes = dataAtualObj.getMonth();
+        let primeiroDiaMes = new Date(ano, mes, 1);
+        let inicioGrid = new Date(primeiroDiaMes);
+        inicioGrid.setDate(inicioGrid.getDate() - primeiroDiaMes.getDay());
+
+        let hojeStr = formatarDataLocal(new Date());
+
+        for (let i = 0; i < 42; i++) {
+          let diaAtual = new Date(inicioGrid);
+          diaAtual.setDate(diaAtual.getDate() + i);
+          let diaStr = formatarDataLocal(diaAtual);
+          let eMesAtual = diaAtual.getMonth() === mes;
+          let eHoje = diaStr === hojeStr;
+
+          let reservasDia = reservas.filter(r => {
+            const rSala = r.sala || r.room;
+            const rData = r.data || r.date || r.start?.split('T')[0];
+            return rSala === sala && rData === diaStr;
+          });
+
+          wrapperHtml += `
+            <div class="card-dia-mes ${eMesAtual ? '' : 'outro-mes'} ${eHoje ? 'dia-hoje' : ''}" onclick="selecionarDiaEspecifico('${diaStr}')">
+              <span style="font-size: 11px; font-weight: bold; color: #475569;">${diaAtual.getDate()}</span>
+          `;
+          if (reservasDia.length > 0) {
+            wrapperHtml += `<div style="background: var(--accent-color); color: white; border-radius: 4px; padding: 2px 4px; font-size: 9px; text-align: center; margin-top: 2px; font-weight: 600;">${reservasDia.length} reunião(ões)</div>`;
+          }
+          wrapperHtml += `</div>`;
+        }
+        wrapperHtml += `</div></div>`;
+        container.innerHTML = wrapperHtml;
+      }
+    }
+
+    function abrirModalNegociacao(sala, data, horario, responsavel) {
+      const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo.`;
+      document.getElementById("inputMsgWhatsapp").value = msgPronta;
+
+      const btnWhatsapp = document.getElementById("linkEnviarWhatsapp");
+      const atualizarLink = () => {
+        const textoAtual = document.getElementById("inputMsgWhatsapp").value;
+        btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAtual)}`;
+      };
+      
+      atualizarLink();
+      document.getElementById("inputMsgWhatsapp").oninput = atualizarLink;
+      document.getElementById("modalNegociacao").style.display = "flex";
+    }
+
+    function salvarNovaReservaLocal() {
+      const titulo = document.getElementById("inputTituloReserva").value.trim();
+      const inicio = document.getElementById("inputHoraInicio").value;
+      const fim = document.getElementById("inputHoraFim").value;
+      const sala = document.getElementById("salaSelect").value;
+
+      if (!titulo || !inicio || !fim) {
+        mostrarAlerta("Atenção", "Por favor, preencha todos os campos.", "warning");
+        return;
+      }
+
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const hojeStr = window.dataSelecionadaGlobal || formatarDataLocal(new Date());
+
+      const minInicioTotal = parseInt(inicio.split(':')[0]) * 60 + parseInt(inicio.split(':')[1]);
+      const minFimTotal = parseInt(fim.split(':')[0]) * 60 + parseInt(fim.split(':')[1]);
+
+      if (minInicioTotal >= minFimTotal) {
+          mostrarAlerta("Erro de Horário", "O horário de fim deve ser depois do início.", "error");
+          return;
+      }
+
+      const conflito = reservas.some(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        if (rSala !== sala || rData !== hojeStr) return false;
+        
+        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
+        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5);
+        if(!strIni || !strFim) return false;
+
+        const rI = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
+        const rF = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
+        
+        return (minInicioTotal < (rF + 5) && minFimTotal > (rI - 5));
+      });
+
+      if (conflito) {
+          mostrarAlerta("Conflito de Horário", "Já existe uma reunião ou intervalo de segurança (5 min) neste horário.", "error");
+          return;
+      }
+
+      const novaReserva = {
+        id: 'res-' + Date.now(),
+        titulo: titulo,
+        title: titulo,
+        horarioInicio: inicio,
+        horaInicio: inicio,
+        horarioFim: fim,
+        horaFim: fim,
+        start: `${hojeStr}T${inicio}:00`,
+        end: `${hojeStr}T${fim}:00`,
+        sala: sala,
+        room: sala,
+        data: hojeStr,
+        date: hojeStr,
+        responsavel: apelidoUsuarioGlobal,
+        usuario: apelidoUsuarioGlobal,
+        userId: usuarioSessao.uid
+      };
+
+      reservas.push(novaReserva);
+      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
+
+      document.getElementById("modalNovaReserva").style.display = "none";
+      mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso!", "success");
+    }
+
+    function confirmarExclusaoLocal(id) {
+      document.getElementById("idReservaParaExcluir").value = id;
+      document.getElementById("modalConfirmacaoExclusao").style.display = "flex";
+    }
+
+    function fecharModalConfirmacao() {
+      document.getElementById("modalConfirmacaoExclusao").style.display = "none";
+    }
+
+    function executarExclusaoReservaLocal() {
+      const id = document.getElementById("idReservaParaExcluir").value;
+      if (!id) return;
+
+      let reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      reservas = reservas.filter(r => r.id !== id);
+      localStorage.setItem("meetingroom_reservas", JSON.stringify(reservas));
+
+      fecharModalConfirmacao();
+      mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "success");
+    }
+
+    /* NOVAS FUNÇÕES PARA O BLOQUEIO INTELIGENTE DOS HORÁRIOS */
+    function atualizarOpcoesInicio(dataStr, sala) {
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const reservasDoDia = reservas.filter(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        return rSala === sala && rData === dataStr;
+      });
+      
+      const agora = new Date();
+      const hojeStr = formatarDataLocal(agora);
+      const minAtual = agora.getHours() * 60 + agora.getMinutes();
+
+      const selIni = document.getElementById("inputHoraInicio");
+      selIni.innerHTML = "";
+
+      for (let h = 7; h <= 23; h++) {
+        for (let m of [0, 30]) {
+          if (h === 23 && m === 30) continue; // Último início possível é 23:00
+          
+          let minSlot = h * 60 + m;
+          let horaStr = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
+          
+          // Verifica se o horário já passou (apenas se for o dia de hoje)
+          let isPassado = (dataStr === hojeStr && minSlot <= minAtual);
+          
+          // Verifica se o horário cai dentro de uma reserva existente
+          let isOcupado = reservasDoDia.some(r => {
+            const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
+            const strF = r.horarioFim || r.horaFim || r.end?.split('T')[1];
+            if(!strI || !strF) return false;
+            const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
+            const rF = parseInt(strF.split(':')[0]) * 60 + parseInt(strF.split(':')[1]);
+            return (minSlot >= rI && minSlot < rF);
+          });
+
+          // Cria a opção e bloqueia se for inválida
+          let opt = new Option(horaStr + (isPassado ? " (Passado)" : (isOcupado ? " (Ocupado)" : "")), horaStr);
+          if (isPassado || isOcupado) opt.disabled = true;
+          selIni.add(opt);
+        }
+      }
+    }
+
+    function atualizarOpcoesFim(dataStr, sala) {
+      const reservas = JSON.parse(localStorage.getItem("meetingroom_reservas")) || [];
+      const reservasDoDia = reservas.filter(r => {
+        const rSala = r.sala || r.room;
+        const rData = r.data || r.date || r.start?.split('T')[0];
+        return rSala === sala && rData === dataStr;
+      });
+      
+      const selIni = document.getElementById("inputHoraInicio");
+      const selFim = document.getElementById("inputHoraFim");
+      
+      if (!selIni.value) return;
+      
+      const [hIni, mIni] = selIni.value.split(':').map(Number);
+      const minInicio = hIni * 60 + mIni;
+
+      // Descobrir a próxima reserva para limitar a hora de fim (não pode passar por cima)
+      let proximoLimite = 23 * 60 + 30; // Máximo permitido do dia (23:30)
+      
+      reservasDoDia.forEach(r => {
+        const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
+        if(!strI) return;
+        const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
+        if (rI > minInicio && rI < proximoLimite) {
+          proximoLimite = rI; // Define a barreira
+        }
+      });
+
+      const valorFimAtual = selFim.value;
+      selFim.innerHTML = "";
+
+      // Gera os horários de fim válidos, de 30 em 30 min, apenas até encostar na próxima reserva
+      for (let minSlot = minInicio + 30; minSlot <= proximoLimite; minSlot += 30) {
+        let horaStr = String(Math.floor(minSlot/60)%24).padStart(2,'0') + ":" + String(minSlot%60).padStart(2,'0');
+        selFim.add(new Option(horaStr, horaStr));
+      }
+
+      // Tenta manter o valor anterior, se não for possível, seleciona a primeira opção (+30 min)
+      if (valorFimAtual && Array.from(selFim.options).some(o => o.value === valorFimAtual)) {
+        selFim.value = valorFimAtual;
+      } else if (selFim.options.length > 0) {
+        selFim.selectedIndex = 0;
+      }
+    }
+
+    function abrirModalReserva(horaInicio, dataStr) {
+      window.dataSelecionadaGlobal = dataStr;
+      const sala = document.getElementById("salaSelect").value;
+      
+      document.getElementById("reservaHorarioInicio").value = horaInicio;
+      document.getElementById("inputTituloReserva").value = "";
+      
+      // 1. Gera os horários de início e desativa passados/ocupados
+      atualizarOpcoesInicio(dataStr, sala);
+      
+      const selIni = document.getElementById("inputHoraInicio");
+      
+      // 2. Seleciona o horário clicado se estiver disponível
+      if (Array.from(selIni.options).some(o => o.value === horaInicio && !o.disabled)) {
+        selIni.value = horaInicio;
+      } else {
+        // Se clicar por engano num intervalo inválido, força para o primeiro livre
+        const primeiroDisponivel = Array.from(selIni.options).find(o => !o.disabled);
+        if (primeiroDisponivel) selIni.value = primeiroDisponivel.value;
+      }
+      
+      // 3. Gera os horários de fim restringidos inteligentemente
+      atualizarOpcoesFim(dataStr, sala);
+
+      document.getElementById("modalNovaReserva").style.display = "flex";
+    }
+  </script>
+
   <!-- Modal de Aceite da LGPD (Obrigatório) -->
-  <div class="modal-overlay" id="modalTermosLGPD" style="z-index: 9999;">
+  <div class="modal-overlay" id="modalTermosLGPD" style="z-index: 9999;"> <!-- z-index super alto para ficar por cima de tudo -->
     <div class="modal-card" style="max-width: 450px;">
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
@@ -690,239 +1169,25 @@
       </div>
     </div>
   </div>
-
-  <!-- Script principal integrado ao Firebase -->
-  <script src="../js/calendar.js"></script>
+  <!-- Script de Termos de Uso e LGPD -->
+  <script src="../termos.js"></script>
 
   <script>
-    let usuarioEhAdmin = false;
-    let apelidoUsuarioGlobal = "Utilizador";
-    let usuarioIdGlobal = null;
-    let usuarioEmailGlobal = "";
-    let tempoAntecedenciaMinutos = 10;
-    let db;
-    let unsubscribeAgenda = null;
-    let reservasSalaAtual = [];
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const firebaseConfig = {
-        apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
-        authDomain: "reuniao-d1b29.firebaseapp.com",
-        projectId: "reuniao-d1b29",
-        storageBucket: "reuniao-d1b29.firebasestorage.app",
-        messagingSenderId: "887897617950",
-        appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
-      };
-      if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-      db = firebase.firestore();
-
-      firebase.auth().onAuthStateChanged(async (user) => {
-        if (user) {
-          usuarioIdGlobal = user.uid;
-          usuarioEmailGlobal = user.email || "";
-          const emailLower = usuarioEmailGlobal.toLowerCase();
-          apelidoUsuarioGlobal = emailLower.split('@')[0];
-          let cargoTexto = "Utilizador";
-
-          try {
-            const doc = await db.collection("usuarios").doc(user.uid).get();
-            if (doc.exists) {
-              const dados = doc.data();
-              if (dados.apelido && dados.apelido.trim() !== "") {
-                apelidoUsuarioGlobal = dados.apelido;
-              }
-              if (dados.cargo === "Administrador") {
-                usuarioEhAdmin = true;
-                cargoTexto = "Administrador";
-              }
-              if (dados.notificacoes && dados.notificacoes.tempoAntecedencia) {
-                tempoAntecedenciaMinutos = dados.notificacoes.tempoAntecedencia;
-              }
-            }
-          } catch (e) {}
-
-          if (emailLower.includes("admin") || emailLower.includes("teste")) {
-            usuarioEhAdmin = true;
-            cargoTexto = "Administrador";
-          }
-
-          document.getElementById("userNameDisplay").innerText = apelidoUsuarioGlobal;
-          document.getElementById("userRoleDisplay").innerText = cargoTexto;
-          document.getElementById("userAvatarMobile").innerText = "Olá, " + apelidoUsuarioGlobal;
-
-          // Libera a tela com o padrão anti-flicker revelando o status de admin exato
-          if (window.AntiFlicker) {
-            window.AntiFlicker.reveal(usuarioEhAdmin);
-          }
-
-          verificarAceiteLGPD();
-          verificarAvisosLoginEProximidade();
-          mudarSalaSelecionada();
-        } else {
-          window.location.href = "../index.html";
-        }
-      });
-    });
-
-    function fazerLogoutReal() {
-      firebase.auth().signOut().then(() => {
-        localStorage.removeItem("meetingroom_sessao_atual");
-        window.location.href = "../index.html";
-      });
-    }
-
-    async function verificarAceiteLGPD() {
-      if (!usuarioIdGlobal) return;
-      const chaveLocal = 'lgpd_aceite_' + usuarioIdGlobal;
-      if (localStorage.getItem(chaveLocal) === 'true') return;
-
-      try {
-        const doc = await db.collection("termos_aceites").doc(usuarioIdGlobal).get();
-        if (doc.exists && doc.data().aceito === true) {
-          localStorage.setItem(chaveLocal, 'true');
-        } else {
-          document.getElementById('modalTermosLGPD').style.display = 'flex';
-        }
-      } catch (e) {
-        document.getElementById('modalTermosLGPD').style.display = 'flex';
-      }
-    }
-
-    async function confirmarAceiteLGPD() {
-      const checkbox = document.getElementById('checkAceiteLGPD');
-      if (!checkbox.checked) {
-        mostrarAlerta("Atenção", "Por favor, confirme que leu e aceita a Política de Privacidade marcando a caixa antes de continuar.", "warning");
-        return;
-      }
-
-      try {
-        await db.collection("termos_aceites").doc(usuarioIdGlobal).set({
-          aceito: true,
-          versao: "1.0",
-          nome: apelidoUsuarioGlobal,
-          email: usuarioEmailGlobal,
-          dataAceite: firebase.firestore.FieldValue.serverTimestamp(),
-          userAgent: navigator.userAgent
-        });
-        localStorage.setItem('lgpd_aceite_' + usuarioIdGlobal, 'true');
-        document.getElementById('modalTermosLGPD').style.display = 'none';
-        mostrarAlerta("Obrigado", "As suas preferências de privacidade foram registadas com sucesso.", "success");
-      } catch (err) {
-        mostrarAlerta("Erro", "Não foi possível registar o aceite: " + err.message, "error");
-      }
-    }
-
-    function mostrarToastFlutuante(titulo, mensagem, tipo = "info") {
-      const container = document.getElementById("floatingToastContainer");
-      if (!container) return;
-
-      const toast = document.createElement("div");
-      toast.className = `toast-alert ${tipo}`;
-      
-      let icone = "📢";
-      if (tipo === "warning") icone = "⏰";
-      if (tipo === "danger") icone = "⚠️";
-
-      toast.innerHTML = `
-        <div style="font-size: 20px;">${icone}</div>
-        <div style="flex: 1;">
-          <h4 style="font-size: 14px; font-weight: 700; color: var(--text-main); margin: 0 0 2px 0;">${titulo}</h4>
-          <p style="font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.4;">${mensagem}</p>
-        </div>
-      `;
-
-      container.appendChild(toast);
-
-      setTimeout(() => {
-        toast.style.animation = "fadeOut 0.3s ease-out forwards";
-        setTimeout(() => toast.remove(), 300);
-      }, 6000);
-    }
-
-    async function verificarAvisosLoginEProximidade() {
-      const hojeStr = formatarDataLocal(new Date());
-
-      db.collection("reservas").where("data", "==", hojeStr).get().then(snapshot => {
-        const agora = new Date();
-        snapshot.forEach(doc => {
-          const r = doc.data();
-          if (r.userId === usuarioIdGlobal || r.responsavel === apelidoUsuarioGlobal) {
-            if (r.canceladoPorAdmin) {
-              mostrarToastFlutuante("Reunião Cancelada", `A sua reserva "${r.titulo}" na ${r.sala} (${r.horarioInicio}) foi cancelada pela administração.`, "danger");
-            } else if (r.horarioInicio) {
-              const [hora, min] = r.horarioInicio.split(':').map(Number);
-              const dataReuniao = new Date();
-              dataReuniao.setHours(hora, min, 0, 0);
-
-              const diferencaMinutos = (dataReuniao - agora) / (1000 * 60);
-
-              if (diferencaMinutos >= 0 && diferencaMinutos <= tempoAntecedenciaMinutos) {
-                mostrarToastFlutuante("Reunião Próxima", `A reunião "${r.titulo}" (${r.sala}) começa às ${r.horarioInicio} (em ${Math.round(diferencaMinutos)} min).`, "warning");
-              }
-            }
-          }
-        });
-      }).catch(err => console.log("Erro ao verificar avisos:", err));
-    }
-
-    function mostrarAlerta(titulo, texto, tipo = "success") {
-      document.getElementById("modalAlertaTitulo").innerText = titulo;
-      document.getElementById("modalAlertaTexto").innerText = texto;
-      
-      let iconHtml = "";
-      if (tipo === "success") {
-        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
-      } else if (tipo === "error") {
-        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-      } else {
-        iconHtml = `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
-      }
-      
-      document.getElementById("modalAlertaIcone").innerHTML = iconHtml;
-      document.getElementById("modalAlerta").style.display = "flex";
-    }
-
-    function fecharModalAlerta() {
-      document.getElementById("modalAlerta").style.display = "none";
-    }
-
-    function confirmarExclusao(id) {
-      document.getElementById("idReservaParaExcluir").value = id;
-      document.getElementById("modalConfirmacaoExclusao").style.display = "flex";
-    }
-
-    function fecharModalConfirmacao() {
-      document.getElementById("modalConfirmacaoExclusao").style.display = "none";
-    }
-
-    function executarExclusaoReserva() {
-      const id = document.getElementById("idReservaParaExcluir").value;
-      if (!id) return;
-
-      db.collection("reservas").doc(id).update({
-        canceladoPorAdmin: true
-      }).then(() => {
-        return db.collection("reservas").doc(id).delete();
-      }).then(() => {
-        fecharModalConfirmacao();
-        mostrarAlerta("Sucesso", "Reserva excluída e utilizador notificado!", "success");
-      }).catch(() => {
-        db.collection("reservas").doc(id).delete().then(() => {
-          fecharModalConfirmacao();
-          mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "success");
-        }).catch(e2 => {
-          fecharModalConfirmacao();
-          mostrarAlerta("Erro", "Erro ao excluir: " + e2.message, "error");
-        });
-      });
-    }
-
     // Registo do Service Worker PWA
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('../sw.js').catch(err => console.error(err));
       });
     }
+
+    // Validação do aceite no carregamento da agenda
+    document.addEventListener("DOMContentLoaded", () => {
+      const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
+      if (sessaoStr) {
+        const usuarioSessao = JSON.parse(sessaoStr);
+        verificarAceiteTermosUtilizador(usuarioSessao);
+      }
+    });
   </script>
 
 </body>
