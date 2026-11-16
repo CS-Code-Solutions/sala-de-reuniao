@@ -2,37 +2,43 @@
 // SERVICE WORKER - MEETINGROOM (sw.js)
 // ==========================================
 
-const CACHE_NAME = 'meetingroom-cache-v1.0.0';
+const CACHE_NAME = "meetingroom-cache-v1.1.0";
 
-// Ficheiros essenciais a guardar em cache para carregamento rápido
 const ASSETS_TO_CACHE = [
-  './calendar.html',
-  './admin-users.html',
-  './privacy-policy.html',
-  './js/termos.js',
-  './ico.png',
-  './cabe.png'
+  "../index.html",
+  "../manifest.json",
+  "../termos.js",
+  "../ico.png",
+  "../cabe.png",
+  "../login.png",
+  "./firebase-config.js",
+  "./anti-flicker.js",
+  "./auth.js",
+  "../pages/calendar.html",
+  "../pages/my-reservations.html",
+  "../pages/notifications.html",
+  "../pages/rooms.html",
+  "../pages/admin-users.html",
+  "../pages/privacy-policy.html"
 ];
 
-// Instalação do Service Worker e armazenamento dos assets em cache
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] A guardar ficheiros em cache...');
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(ASSETS_TO_CACHE).catch((err) => {
+        console.warn("[Service Worker] Falha parcial ao pré-carregar cache:", err);
+      });
     })
   );
   self.skipWaiting();
 });
 
-// Ativação e limpeza de caches antigos
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(
         keyList.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('[Service Worker] A remover cache antigo:', key);
             return caches.delete(key);
           }
         })
@@ -42,21 +48,21 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Interceção de pedidos de rede (estratégia: Cache primeiro, depois rede)
-self.addEventListener('fetch', (event) => {
-  // Ignora pedidos que não sejam GET ou ligações externas do Firebase/APIs
-  if (event.request.method !== 'GET' || event.request.url.includes('firebaseio.com') || event.request.url.includes('googleapis.com')) {
+self.addEventListener("fetch", (event) => {
+  const url = event.request.url;
+  if (
+    event.request.method !== "GET" ||
+    url.includes("firestore.googleapis.com") ||
+    url.includes("identitytoolkit.googleapis.com") ||
+    url.includes("securetoken.googleapis.com") ||
+    url.includes("firebaseio.com")
+  ) {
     return;
   }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        // Se falhar e estiver offline, podes retornar uma página de fallback se desejado
-      });
+      return cachedResponse || fetch(event.request);
     })
   );
 });
