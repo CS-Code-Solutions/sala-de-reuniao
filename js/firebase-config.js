@@ -1,11 +1,9 @@
-// Importe os módulos do Firebase necessários via CDN
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+// ==========================================
+// CONFIGURAÇÃO OFICIAL DO FIREBASE (firebase-config.js)
+// ==========================================
 
-// Configuração oficial extraída diretamente do seu painel do Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDa9ztrK6VxFVelBP0ge6-31V05gnztJw",
+  apiKey: "AIzaSyDa9ztrK6VxFVeLbP0ge6-31V05gnztjJw",
   authDomain: "reuniao-d1b29.firebaseapp.com",
   projectId: "reuniao-d1b29",
   storageBucket: "reuniao-d1b29.firebasestorage.app",
@@ -13,7 +11,22 @@ const firebaseConfig = {
   appId: "1:887897617950:web:e96cf3cce4792e7e2b600f"
 };
 
-// Inicializa o Firebase
-const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
-export const db = getFirestore(app);
+window.firebaseConfig = firebaseConfig;
+
+if (typeof window.firebase !== "undefined") {
+  if (!window.firebase.apps.length) {
+    window.firebase.initializeApp(firebaseConfig);
+  }
+  window.auth = window.firebase.auth();
+  window.db = window.firebase.firestore();
+}
+
+// Instância secundária para o Admin cadastrar novos usuários sem encerrar a própria sessão
+window.obterAuthSecundario = function () {
+  const nomeAppSecundario = "AdminUserCreator";
+  let secondaryApp = window.firebase.apps.find((app) => app.name === nomeAppSecundario);
+  if (!secondaryApp) {
+    secondaryApp = window.firebase.initializeApp(firebaseConfig, nomeAppSecundario);
+  }
+  return secondaryApp.auth();
+};
