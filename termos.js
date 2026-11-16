@@ -2,10 +2,12 @@
 // MÓDULO DE TERMOS DE USO E LGPD (termos.js)
 // ==========================================
 
-const VERSAO_TERMOS_ATUAL = "v1.0.0";
+const VERSAO_TERMOS_ATUAL = "1.0.0";
 
 // Injeta o HTML do modal dinamicamente na página
 function injetarModalTermosHTML() {
+  if (document.getElementById("modalTermosUso")) return;
+
   const modalHTML = `
     <!-- Modal de Termos de Uso e Condições (Obrigatório) -->
     <div class="modal-overlay" id="modalTermosUso" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(5px); z-index: 9999; justify-content: center; align-items: center; padding: 16px;">
@@ -25,7 +27,7 @@ function injetarModalTermosHTML() {
           <strong>1. Objeto:</strong> O sistema destina-se estritamente à gestão e agendamento de salas de reuniões corporativas.<br><br>
           <strong>2. Responsabilidades:</strong> O utilizador compromete-se a inserir informações verídicas, respeitar os horários agendados e libertar o espaço pontualmente.<br><br>
           <strong>3. Privacidade:</strong> Os dados recolhidos (nome e cargo) são tratados em conformidade com a LGPD para identificação e eventual negociação interna.<br><br>
-          <strong>Versão atual dos Termos:</strong> ${VERSAO_TERMOS_ATUAL}
+          <strong>Versão atual dos Termos:</strong> v${VERSAO_TERMOS_ATUAL}
         </div>
 
         <!-- Checkbox ativo obrigatório -->
@@ -38,7 +40,7 @@ function injetarModalTermosHTML() {
 
         <!-- Botão de submissão -->
         <div style="margin-top: 8px;">
-          <button onclick="confirmarAceiteTermosFirebase()" style="width: 100%; padding: 12px; font-size: 14px; background: #0d9488; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
+          <button id="btnConfirmarTermos" onclick="confirmarAceiteTermosFirebase()" style="width: 100%; padding: 12px; font-size: 14px; background: #0d9488; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: background 0.2s;">
             Continuar para o Sistema
           </button>
         </div>
@@ -46,63 +48,79 @@ function injetarModalTermosHTML() {
       </div>
     </div>
   `;
-  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
 }
 
-// Verifica no Firebase se o utilizador já aceitou a versão vigente
+// Verifica no Cloud Firestore se o utilizador já aceitou a versão vigente
 async function verificarAceiteTermosUtilizador(usuarioSessao) {
-  if (!usuarioSessao || !usuarioSessao.uid) return;
+  const userAuth = typeof firebase !== "undefined" && firebase.auth ? firebase.auth().currentUser : null;
+  const uid = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid);
+  if (!uid || typeof firebase === "undefined") return;
 
-  // Garante que o modal existe no DOM
   if (!document.getElementById("modalTermosUso")) {
     injetarModalTermosHTML();
   }
 
-  const dbRef = firebase.database().ref(`termos_aceites/${usuarioSessao.uid}`);
-  
   try {
-    const snapshot = await dbRef.get();
-    const dadosAceite = snapshot.val();
+    const firestore = window.db || firebase.firestore();
+    const docSnap = await firestore.collection("termos_aceites").doc(uid).get();
 
-    // Se nunca aceitou ou se a versão guardada for antiga, abre o modal
-    if (!dadosAceite || dadosAceite.versao !== VERSAO_TERMOS_ATUAL) {
+    if (!docSnap.exists) {
+      document.getElementById("modalTermosUso").style.display = "flex";
+      return;
+    }
+
+    const dadosAceite = docSnap.data();
+    if (!dadosAceite.aceito || dadosAceite.versao !== VERSAO_TERMOS_ATUAL) {
       document.getElementById("modalTermosUso").style.display = "flex";
     }
   } catch (error) {
-    console.error("Erro ao verificar termos de uso no Firebase:", error);
+    console.error("Erro ao verificar termos de uso no Firestore:", error);
   }
 }
 
-// Regista a prova irrefutável no Firebase após o clique ativo
+// Regista o aceite no Cloud Firestore após o clique ativo
 async function confirmarAceiteTermosFirebase() {
   const checkbox = document.getElementById("checkAceiteTermos");
-  
-  if (!checkbox.checked) {
+  const btn = document.getElementById("btnConfirmarTermos");
+
+  if (!checkbox || !checkbox.checked) {
     alert("Para continuar, deve ler e marcar a caixa de confirmação dos Termos de Uso.");
     return;
   }
 
+  const userAuth = firebase.auth().currentUser;
   const sessaoStr = localStorage.getItem("meetingroom_sessao_atual");
-  if (!sessaoStr) return;
-  const usuarioSessao = JSON.parse(sessaoStr);
+  const usuarioSessao = sessaoStr ? JSON.parse(sessaoStr) : {};
+  const uid = (userAuth && userAuth.uid) || usuarioSessao.uid;
+
+  if (!uid) return;
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "A registar...";
+  }
 
   const registroAceite = {
-    userId: usuarioSessao.uid,
-    nome: usuarioSessao.nome || usuarioSessao.apelido || "Utilizador",
-    versao: VERSAO_TERMOS_ATUAL,
-    dataHoraAceite: new Date().toISOString(), // Prova temporal exata (ISO)
-    userAgent: navigator.userAgent            // Registo técnico complementar
+    aceito: true,
+    dataAceite: firebase.firestore.FieldValue.serverTimestamp(),
+    email: (userAuth && userAuth.email) || usuarioSessao.email || "",
+    nome: usuarioSessao.apelido || usuarioSessao.nome || "Utilizador",
+    userAgent: navigator.userAgent,
+    versao: VERSAO_TERMOS_ATUAL
   };
 
   try {
-    // Gravação imutável associada ao ID do utilizador no Firebase
-    await firebase.database().ref(`termos_aceites/${usuarioSessao.uid}`).set(registroAceite);
-    
-    // Oculta o modal e liberta o acesso à aplicação
+    const firestore = window.db || firebase.firestore();
+    await firestore.collection("termos_aceites").doc(uid).set(registroAceite, { merge: true });
     document.getElementById("modalTermosUso").style.display = "none";
-    
   } catch (error) {
-    console.error("Erro ao salvar aceite no Firebase:", error);
+    console.error("Erro ao salvar aceite no Firestore:", error);
     alert("Ocorreu um erro ao registar o seu aceite. Por favor, tente novamente.");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "Continuar para o Sistema";
+    }
   }
 }
