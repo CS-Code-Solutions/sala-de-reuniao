@@ -15,6 +15,16 @@
   <meta name="apple-mobile-web-app-title" content="MeetingRoom">
   <link rel="apple-touch-icon" href="../ico.png">
 
+  <!-- Inicialização do EmailJS -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script type="text/javascript">
+    (function(){
+      emailjs.init({
+        publicKey: "X6E_oavkyc9MgyxTc"
+      });
+    })();
+  </script>
+
   <style>
     :root {
       --sidebar-bg: #0f172a;
@@ -305,12 +315,14 @@
     .form-group { display: flex; flex-direction: column; gap: 4px; text-align: left; }
     .form-group label { font-size: 12px; font-weight: 600; color: var(--text-muted); }
     
+    /* MODIFICAÇÃO DO CSS PARA INCLUIR O SELECT BONITO */
     .form-group input, .form-group textarea, .form-group select { 
       padding: 10px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 14px; outline: none; background: white; 
     }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { 
       border-color: var(--accent-color); 
     }
+    /* FIM DA MODIFICAÇÃO DO SELECT */
 
     .modal-actions { display: flex; gap: 10px; margin-top: 6px; }
     .btn-cancel { flex: 1; padding: 10px; background: #f1f5f9; color: var(--text-muted); border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
@@ -322,6 +334,7 @@
     .modal-alert-card { background: white; width: 100%; max-width: 380px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; gap: 16px; text-align: center; }
     .btn-modal-ok { width: 100%; padding: 10px; background: var(--accent-color); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
     .btn-modal-danger { flex: 1; padding: 10px; background: #dc2626; color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-modal-danger:disabled { opacity: 0.7; cursor: not-allowed; }
 
     .cal-sidebar { display: flex; flex-direction: column; gap: 24px; }
     .side-card { background: var(--card-bg); border-radius: 12px; border: 1px solid var(--border-color); padding: 20px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
@@ -332,6 +345,41 @@
     .room-details h4 { font-size: 14px; color: var(--text-main); margin: 0 0 6px 0; }
     .room-details p { font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin: 0 0 4px 0; }
     .room-details p svg { width: 14px; height: 14px; stroke-width: 2; color: var(--accent-color); }
+
+    /* Toast Flutuante para Alertas de Proximidade e Cancelamentos */
+    .toast-container-flutuante {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9500;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 360px;
+      width: calc(100% - 40px);
+    }
+
+    .toast-item-alerta {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 14px 16px;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.2);
+      border: 1px solid var(--border-color);
+      border-left: 5px solid var(--accent-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideInToast 0.25s ease-out;
+    }
+
+    .toast-item-alerta.warning { border-left-color: #f59e0b; }
+    .toast-item-alerta.danger { border-left-color: #dc2626; }
+
+    @keyframes slideInToast {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
     
     .mobile-topbar-bar { display: none; }
     .mobile-bottom-nav { display: none; }
@@ -360,6 +408,8 @@
   </style>
 </head>
 <body>
+
+  <div id="toastContainerFlutuante" class="toast-container-flutuante"></div>
 
   <aside class="sidebar">
     <div>
@@ -425,8 +475,8 @@
           <button onclick="alterarVisao('mes', this)">Mês</button>
         </div>
         <select class="room-select" id="salaSelect" onchange="mudarSalaSelecionada()">
-          <option value="Sala de Reuniões 01">Sala de Reuniões 01</option>
-          <option value="Sala de Reuniões 02">Sala de Reuniões 02</option>
+          <option value="Sala 01">Sala de Reuniões 01</option>
+          <option value="Sala 02">Sala de Reuniões 02</option>
         </select>
       </div>
     </header>
@@ -475,6 +525,7 @@
       <div class="form-group">
         <label>Horário de Início e Fim</label>
         <div style="display: flex; gap: 8px;">
+          <!-- MODIFICAÇÃO DO SELECT AQUI COM ONCHANGE PARA AVALIAR O FIM -->
           <select id="inputHoraInicio" style="flex:1;" onchange="atualizarOpcoesFim(window.dataSelecionadaGlobal, document.getElementById('salaSelect').value)" required></select>
           <select id="inputHoraFim" style="flex:1;" required></select>
         </div>
@@ -482,7 +533,7 @@
 
       <div class="modal-actions">
         <button class="btn-cancel" onclick="document.getElementById('modalNovaReserva').style.display='none'">Cancelar</button>
-        <button class="btn-save" id="btnConfirmarReserva" onclick="salvarNovaReservaLocal()">Confirmar Reserva</button>
+        <button class="btn-save" id="btnSalvarNovaReserva" onclick="salvarNovaReservaLocal()">Confirmar Reserva</button>
       </div>
     </div>
   </div>
@@ -516,7 +567,7 @@
       <input type="hidden" id="idReservaParaExcluir">
       <div class="modal-actions">
         <button class="btn-cancel" onclick="fecharModalConfirmacao()">Voltar</button>
-        <button class="btn-modal-danger" id="btnExecutarExclusao" onclick="executarExclusaoReservaLocal()">Sim, Excluir</button>
+        <button class="btn-modal-danger" id="btnConfirmarExclusaoAdmin" onclick="executarExclusaoReservaLocal()">Sim, Excluir</button>
       </div>
     </div>
   </div>
@@ -553,6 +604,35 @@
     </a>
   </nav>
 
+  <!-- Modal de Aceite da LGPD (Obrigatório) -->
+  <div class="modal-overlay" id="modalTermosLGPD" style="z-index: 9999;">
+    <div class="modal-card" style="max-width: 450px;">
+      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0d9488" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <h3 class="modal-title" style="margin: 0;">Atualização de Privacidade</h3>
+      </div>
+      
+      <p style="font-size: 14px; color: var(--text-main); line-height: 1.5;">
+        Para continuarmos a oferecer uma ferramenta segura para as suas reservas, atualizámos a nossa Política de Privacidade em conformidade com a <strong>LGPD</strong>.
+      </p>
+      
+      <div style="background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px; color: var(--text-muted); margin-bottom: 16px;">
+        Aceda e leia a nossa <a href="privacy-policy.html" target="_blank" style="color: var(--accent-color); font-weight: 600; text-decoration: underline;">Política de Privacidade completa aqui</a> antes de prosseguir.
+      </div>
+
+      <label style="display: flex; align-items: flex-start; gap: 10px; cursor: pointer;">
+        <input type="checkbox" id="checkAceiteLGPD" style="margin-top: 2px; width: 18px; height: 18px; accent-color: var(--accent-color);">
+        <span style="font-size: 13px; color: var(--text-main); font-weight: 500;">
+          Declaro que li e concordo com a coleta do meu nome e cargo exclusivamente para a gestão de reservas de salas no sistema.
+        </span>
+      </label>
+
+      <div class="modal-actions" style="margin-top: 16px;">
+        <button class="btn-save" style="width: 100%; padding: 12px; font-size: 15px;" onclick="confirmarAceiteLGPD()">Concordar e Continuar</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase SDK v10.8.0 (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
@@ -565,12 +645,11 @@
     let usuarioSessao = null;
     let usuarioEhAdmin = false;
     let apelidoUsuarioGlobal = "Utilizador";
+    let usuarioEmailGlobal = "";
     let dataAtualObj = new Date();
     let tipoVisaoAtual = 'dia';
-
     let reservasFirestoreGlobal = [];
-    let salasFirestoreGlobal = [];
-    let usuariosMapaGlobal = {};
+    let tempoAntecedenciaUsuario = 10;
 
     function escaparHTML(str) {
       return String(str || "")
@@ -581,133 +660,249 @@
         .replace(/'/g, "&#39;");
     }
 
-    function normalizarNomeSala(nome) {
-      return String(nome || "")
-        .trim()
-        .toLowerCase()
-        .replace(/^sala de reuni[oõ]es\s*/i, "sala ")
-        .replace(/\s+/g, " ");
-    }
-
-    function mesmaSala(rSala, salaSelecionada) {
-      if (!rSala || !salaSelecionada) return false;
-      if (rSala === salaSelecionada) return true;
-      return normalizarNomeSala(rSala) === normalizarNomeSala(salaSelecionada);
-    }
-
     function formatarDataLocal(d) {
       return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      atualizarCabecalhoData();
+    // ==========================================
+    // NOTIFICAÇÕES: EMAILJS + TOAST + PROXIMIDADE
+    // ==========================================
 
+    async function dispararEmailNotificacao(emailDestino, nomeDestino, titulo, sala, dataStr, inicio, fim, tipoMensagem = "confirmada") {
+      if (!emailDestino || !String(emailDestino).includes("@")) {
+        console.warn("E-mail de destino inválido ou ausente.");
+        return false;
+      }
+
+      if (!window.emailjs || typeof window.emailjs.send !== "function") {
+        console.warn("Biblioteca EmailJS não inicializada.");
+        return false;
+      }
+
+      let mensagemTexto = `A sua reserva para a ${sala} no dia ${dataStr} das ${inicio} às ${fim} foi confirmada com sucesso!`;
+      if (tipoMensagem === "cancelada") {
+        mensagemTexto = `Atenção: A sua reserva "${titulo}" na ${sala} marcada para o dia ${dataStr} das ${inicio} às ${fim} foi cancelada pela administração.`;
+      }
+
+      const templateParams = {
+        to_email: emailDestino,
+        to_name: nomeDestino,
+        name: titulo,
+        message: mensagemTexto
+      };
+
+      try {
+        await emailjs.send('service_d30n93a', 'template_3uxpjzk', templateParams);
+        console.log("E-mail enviado com sucesso!");
+        return true;
+      } catch (err) {
+        console.error("Erro ao enviar e-mail via EmailJS:", err);
+        return false;
+      }
+    }
+
+    function mostrarToastFlutuante(titulo, mensagem, tipo = "warning") {
+      const container = document.getElementById("toastContainerFlutuante");
+      if (!container) return;
+
+      const chaveDedupe = `toast_visto_${titulo}_${mensagem}`;
+      if (sessionStorage.getItem(chaveDedupe)) return;
+      sessionStorage.setItem(chaveDedupe, "1");
+
+      const toast = document.createElement("div");
+      toast.className = `toast-item-alerta ${tipo}`;
+      toast.innerHTML = `
+        <div style="flex:1;">
+          <strong style="display:block; font-size:13px; color:#1e293b; margin-bottom:2px;">${escaparHTML(titulo)}</strong>
+          <span style="font-size:12px; color:#64748b; line-height:1.4; display:block;">${escaparHTML(mensagem)}</span>
+        </div>
+        <button onclick="this.parentElement.remove()" style="background:none; border:none; color:#94a3b8; font-size:16px; cursor:pointer; line-height:1;">&times;</button>
+      `;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        if (toast.parentElement) toast.remove();
+      }, 10000);
+    }
+
+    async function verificarGatilhosProximidade(db, usuarioId, apelidoUsuario, tempoAntecedenciaMinutos = 10) {
+      const hojeStr = formatarDataLocal(new Date());
+
+      try {
+        const snapshot = await db.collection("reservas").where("data", "==", hojeStr).get();
+        const agora = new Date();
+
+        snapshot.forEach((doc) => {
+          const r = doc.data();
+          if (r.userId === usuarioId || r.responsavel === apelidoUsuario) {
+            if (r.canceladoPorAdmin) {
+              mostrarToastFlutuante(
+                "Reunião Cancelada",
+                `A sua reserva "${r.titulo}" na ${r.sala} (${r.horarioInicio}) foi cancelada pela administração.`,
+                "danger"
+              );
+            } else if (r.horarioInicio) {
+              const [hora, min] = r.horarioInicio.split(':').map(Number);
+              const dataReuniao = new Date();
+              dataReuniao.setHours(hora, min, 0, 0);
+
+              const diferencaMinutos = (dataReuniao - agora) / (1000 * 60);
+
+              if (diferencaMinutos >= 0 && diferencaMinutos <= tempoAntecedenciaMinutos) {
+                mostrarToastFlutuante(
+                  "Reunião Próxima",
+                  `A reunião "${r.titulo}" (${r.sala}) começa às ${r.horarioInicio} (em ${Math.round(diferencaMinutos)} min).`,
+                  "warning"
+                );
+              }
+            }
+          }
+        });
+      } catch (e) {
+        console.log("Erro ao verificar gatilhos de proximidade:", e);
+      }
+    }
+
+    // ==========================================
+    // INICIALIZAÇÃO E AUTENTICAÇÃO
+    // ==========================================
+
+    document.addEventListener("DOMContentLoaded", () => {
       verificarAutenticacao({
-        onSessaoPronta: (perfil) => {
+        onSessaoPronta: async (perfil) => {
           usuarioSessao = perfil;
+          const userAuth = window.auth ? window.auth.currentUser : null;
+          const uid = (userAuth && userAuth.uid) || perfil.uid;
+
           apelidoUsuarioGlobal = perfil.apelido || (perfil.nome ? perfil.nome.split(' ')[0] : "Utilizador");
           usuarioEhAdmin = !!perfil.ehAdmin;
+          usuarioEmailGlobal = (userAuth && userAuth.email) || perfil.email || "";
 
-          iniciarListenersFirestore();
+          await verificarValidacaoLGPD(uid);
+
+          atualizarCabecalhoData();
+          mudarSalaSelecionada();
+          iniciarListenerReservasFirestore(uid);
+
+          try {
+            const userDoc = await window.db.collection("usuarios").doc(uid).get();
+            if (userDoc.exists && userDoc.data().notificacoes && userDoc.data().notificacoes.tempoAntecedencia) {
+              tempoAntecedenciaUsuario = parseInt(userDoc.data().notificacoes.tempoAntecedencia) || 10;
+            }
+          } catch (e) {
+            console.warn("Não foi possível obter tempo de antecedência:", e);
+          }
+
+          verificarGatilhosProximidade(window.db, uid, apelidoUsuarioGlobal, tempoAntecedenciaUsuario);
+          setInterval(() => {
+            carregarAgendaLocal();
+            verificarGatilhosProximidade(window.db, uid, apelidoUsuarioGlobal, tempoAntecedenciaUsuario);
+          }, 60000);
         }
       });
-
-      setInterval(carregarAgendaLocal, 30000);
     });
 
-    function iniciarListenersFirestore() {
-      // 1. Listener em tempo real das Salas
-      window.db.collection("salas").onSnapshot((snapshot) => {
-        const salas = [];
-        snapshot.forEach((doc) => {
-          salas.push({ id: doc.id, ...doc.data() });
-        });
-        salasFirestoreGlobal = salas;
-        atualizarSelectSalas();
-        mudarSalaSelecionada();
-      }, (err) => {
-        console.error("Erro ao carregar salas:", err);
-        mudarSalaSelecionada();
-      });
+    async function verificarValidacaoLGPD(uid) {
+      if (!uid) return;
+      const chaveLGPD = 'lgpd_aceite_' + uid;
+      if (localStorage.getItem(chaveLGPD) === 'true') return;
 
-      // 2. Listener em tempo real das Reservas
+      try {
+        const docSnap = await window.db.collection("usuarios").doc(uid).get();
+        if (docSnap.exists && docSnap.data().lgpdAceite === true) {
+          localStorage.setItem(chaveLGPD, 'true');
+          return;
+        }
+      } catch (e) {
+        console.warn("Erro ao verificar aceite LGPD no Firestore:", e);
+      }
+
+      const modalLGPD = document.getElementById('modalTermosLGPD');
+      if (modalLGPD) modalLGPD.style.display = 'flex';
+    }
+
+    async function confirmarAceiteLGPD() {
+      const checkbox = document.getElementById('checkAceiteLGPD');
+      if (!checkbox.checked) {
+        alert("Por favor, confirme que leu e aceita a Política de Privacidade marcando a caixa antes de continuar.");
+        return;
+      }
+
+      const userAuth = window.auth ? window.auth.currentUser : null;
+      const uid = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid);
+      if (!uid) return;
+
+      const chaveLGPD = 'lgpd_aceite_' + uid;
+      localStorage.setItem(chaveLGPD, 'true');
+
+      try {
+        await window.db.collection("usuarios").doc(uid).set({
+          lgpdAceite: true,
+          lgpdDataAceite: new Date().toISOString()
+        }, { merge: true });
+      } catch (e) {
+        console.error("Erro ao guardar aceite LGPD no Firestore:", e);
+      }
+
+      document.getElementById('modalTermosLGPD').style.display = 'none';
+      mostrarAlerta("Obrigado", "As suas preferências de privacidade foram atualizadas com sucesso.", "success");
+    }
+
+    function fazerLogoutLocal() {
+      if (typeof window.fazerLogoutReal === "function") {
+        window.fazerLogoutReal();
+      } else {
+        localStorage.removeItem("meetingroom_sessao_atual");
+        localStorage.removeItem("meetingroom_perfil_ui");
+        window.location.href = "../index.html";
+      }
+    }
+
+    function iniciarListenerReservasFirestore(uidAtual) {
       window.db.collection("reservas").onSnapshot((snapshot) => {
         const lista = [];
         snapshot.forEach((doc) => {
           const dados = doc.data();
-          if (dados.canceladoPorAdmin === true) return;
+          if (dados.canceladoPorAdmin === true) {
+            if (dados.userId === uidAtual || dados.responsavel === apelidoUsuarioGlobal) {
+              mostrarToastFlutuante(
+                "Reunião Cancelada",
+                `A sua reserva "${dados.titulo || 'Reunião'}" na ${dados.sala || 'Sala'} (${dados.horarioInicio || ''}) foi cancelada pela administração.`,
+                "danger"
+              );
+            }
+            return;
+          }
           lista.push({ id: doc.id, ...dados });
         });
         reservasFirestoreGlobal = lista;
         carregarAgendaLocal();
-      }, (err) => {
-        console.error("Erro ao carregar reservas:", err);
+      }, (error) => {
+        console.error("Erro ao sincronizar agenda com o Firestore:", error);
       });
-
-      // 3. Cache leve de usuários para contato rápido na negociação
-      window.db.collection("usuarios").get().then((snapshot) => {
-        const mapa = {};
-        snapshot.forEach((doc) => {
-          mapa[doc.id] = doc.data();
-        });
-        usuariosMapaGlobal = mapa;
-      }).catch(() => {});
-    }
-
-    function atualizarSelectSalas() {
-      const sel = document.getElementById("salaSelect");
-      if (!sel) return;
-
-      const valorAnterior = sel.value;
-      const salasAtivas = salasFirestoreGlobal.filter((s) => s.status !== "Inativa");
-      const listaParaExibir = salasAtivas.length > 0 ? salasAtivas : salasFirestoreGlobal;
-
-      if (listaParaExibir.length === 0) return;
-
-      sel.innerHTML = "";
-      listaParaExibir.forEach((sala) => {
-        const opt = document.createElement("option");
-        opt.value = sala.nome;
-        opt.textContent = sala.status === "Em breve" ? `${sala.nome} (Em breve)` : sala.nome;
-        sel.appendChild(opt);
-      });
-
-      if (valorAnterior && Array.from(sel.options).some((o) => o.value === valorAnterior)) {
-        sel.value = valorAnterior;
-      }
     }
 
     function mudarSalaSelecionada() {
-      const salaNome = document.getElementById("salaSelect").value;
-      document.getElementById("sidebarNomeSala").textContent = salaNome;
-      document.getElementById("salaHeaderTitulo").textContent = salaNome;
+      const sala = document.getElementById("salaSelect").value;
+      document.getElementById("sidebarNomeSala").innerText = sala;
+      document.getElementById("salaHeaderTitulo").innerText = sala;
 
-      const salaObj = salasFirestoreGlobal.find((s) => mesmaSala(s.nome, salaNome));
-
-      if (salaObj) {
-        const cap = salaObj.capacidade || 8;
-        const equip = salaObj.equipamentos || "TV, Videoconferência...";
-        const img = salaObj.imagem || "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
-
-        document.getElementById("sidebarCapacidade").innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: ${escaparHTML(cap)} pessoas`;
-        document.getElementById("sidebarEquipamentos").innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: ${escaparHTML(equip)}`;
-        document.getElementById("sidebarSalaImg").src = img;
-      } else if (normalizarNomeSala(salaNome).includes("02")) {
-        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 12 pessoas';
-        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: Projetor, Som, TV 4K';
-        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
-      } else {
+      if (sala === "Sala 01") {
         document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 8 pessoas';
         document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: TV, Videoconferência...';
         document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=150&q=80";
+      } else if (sala === "Sala 02") {
+        document.getElementById("sidebarCapacidade").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 1-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> Capacidade: 12 pessoas';
+        document.getElementById("sidebarEquipamentos").innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg> Equipamentos: Projetor, Som, TV 4K';
+        document.getElementById("sidebarSalaImg").src = "https://images.unsplash.com/photo-1517502884422-41eaead166d4?auto=format&fit=crop&w=150&q=80";
       }
 
       carregarAgendaLocal();
     }
 
     function mostrarAlerta(titulo, texto, tipo = "success") {
-      document.getElementById("modalAlertaTitulo").textContent = titulo;
-      document.getElementById("modalAlertaTexto").textContent = texto;
+      document.getElementById("modalAlertaTitulo").innerText = titulo;
+      document.getElementById("modalAlertaTexto").innerText = texto;
       
       let iconHtml = "";
       if (tipo === "success") {
@@ -750,7 +945,7 @@
         textoFormatado = textoFormatado.charAt(0).toUpperCase() + textoFormatado.slice(1);
       }
 
-      spanData.textContent = textoFormatado;
+      spanData.innerText = textoFormatado;
     }
 
     function mudarData(direcao) {
@@ -762,6 +957,10 @@
         dataAtualObj.setMonth(dataAtualObj.getMonth() + direcao);
       }
 
+      const userAuth = window.auth ? window.auth.currentUser : null;
+      const uid = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid);
+      if (uid) verificarValidacaoLGPD(uid);
+
       atualizarCabecalhoData();
       carregarAgendaLocal();
     }
@@ -770,6 +969,10 @@
       tipoVisaoAtual = visao;
       document.querySelectorAll(".view-toggles button").forEach(b => b.classList.remove("active"));
       btnElement.classList.add("active");
+
+      const userAuth = window.auth ? window.auth.currentUser : null;
+      const uid = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid);
+      if (uid) verificarValidacaoLGPD(uid);
 
       atualizarCabecalhoData();
       carregarAgendaLocal();
@@ -783,6 +986,10 @@
         else b.classList.remove("active");
       });
 
+      const userAuth = window.auth ? window.auth.currentUser : null;
+      const uid = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid);
+      if (uid) verificarValidacaoLGPD(uid);
+
       atualizarCabecalhoData();
       carregarAgendaLocal();
     }
@@ -790,15 +997,15 @@
     function carregarAgendaLocal() {
       const sala = document.getElementById("salaSelect").value;
       const container = document.getElementById("gridHorarios");
-      document.getElementById("salaHeaderTitulo").textContent = sala;
+      document.getElementById("salaHeaderTitulo").innerText = sala;
 
       const dataStr = formatarDataLocal(dataAtualObj);
       const reservas = reservasFirestoreGlobal;
       
       const reservasDoDia = reservas.filter(r => {
         const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        return mesmaSala(rSala, sala) && rData === dataStr;
+        const rData = r.data || r.date || (r.start && r.start.split('T')[0]);
+        return rSala === sala && rData === dataStr;
       });
 
       const iconeAgendar = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><line x1="12" y1="14" x2="12" y2="18"></line><line x1="10" y1="16" x2="14" y2="16"></line></svg>`;
@@ -812,16 +1019,16 @@
         const fimDiaMin = 23 * 60;   // 23:00
 
         reservasDoDia.sort((a, b) => {
-          const tA = a.horarioInicio || a.horaInicio || a.start?.split('T')[1]?.substring(0,5) || "00:00";
-          const tB = b.horarioInicio || b.horaInicio || b.start?.split('T')[1]?.substring(0,5) || "00:00";
+          const tA = a.horarioInicio || a.horaInicio || (a.start && a.start.split('T')[1] && a.start.split('T')[1].substring(0,5)) || "00:00";
+          const tB = b.horarioInicio || b.horaInicio || (b.start && b.start.split('T')[1] && b.start.split('T')[1].substring(0,5)) || "00:00";
           return tA.localeCompare(tB);
         });
 
         let cursorMin = inicioDiaMin;
 
         reservasDoDia.forEach(reserva => {
-          const strIni = reserva.horarioInicio || reserva.horaInicio || reserva.start?.split('T')[1]?.substring(0,5) || "00:00";
-          const strFim = reserva.horarioFim || reserva.horaFim || reserva.end?.split('T')[1]?.substring(0,5) || strIni;
+          const strIni = reserva.horarioInicio || reserva.horaInicio || (reserva.start && reserva.start.split('T')[1] && reserva.start.split('T')[1].substring(0,5)) || "00:00";
+          const strFim = reserva.horarioFim || reserva.horaFim || (reserva.end && reserva.end.split('T')[1] && reserva.end.split('T')[1].substring(0,5)) || strIni;
           
           const resIniMin = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
           const resFimMin = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
@@ -843,8 +1050,9 @@
 
           const tituloSafe = escaparHTML(reserva.titulo || reserva.title || 'Reunião');
           const respSafe = escaparHTML(reserva.responsavel || reserva.usuario || 'Equipa');
-          const userIdSafe = escaparHTML(reserva.userId || '');
           const idSafe = escaparHTML(reserva.id);
+          const respAttr = respSafe.replace(/'/g, "\\'");
+          const salaAttr = escaparHTML(sala).replace(/'/g, "\\'");
 
           fragmentoHTML += `
             <div class="slot-row reserved">
@@ -854,7 +1062,7 @@
                 <p style="font-size: 12px; color: var(--text-muted);">Responsável: ${respSafe}</p>
               </div>
               <div style="display: flex; gap: 6px; align-items: center;">
-                <button class="btn-action-slot btn-negotiate" data-sala="${escaparHTML(sala)}" data-data="${escaparHTML(dataStr)}" data-hora="${escaparHTML(strIni)}" data-resp="${respSafe}" data-uid="${userIdSafe}" onclick="abrirModalNegociacaoBtn(this)">${iconeNegociar} Negociar</button>
+                <button class="btn-action-slot btn-negotiate" onclick="abrirModalNegociacao('${salaAttr}', '${dataStr}', '${escaparHTML(strIni)}', '${respAttr}')">${iconeNegociar} Negociar</button>
                 ${usuarioEhAdmin ? `<button class="btn-delete-admin" onclick="confirmarExclusaoLocal('${idSafe}')">${iconeExcluir} Excluir</button>` : ''}
               </div>
             </div>
@@ -909,18 +1117,18 @@
           
           let reservasDoDiaSemana = reservas.filter(r => {
             const rSala = r.sala || r.room;
-            const rData = r.data || r.date || r.start?.split('T')[0];
-            return mesmaSala(rSala, sala) && rData === diaStr;
+            const rData = r.data || r.date || (r.start && r.start.split('T')[0]);
+            return rSala === sala && rData === diaStr;
           });
 
           if (reservasDoDiaSemana.length > 0) {
             reservasDoDiaSemana.forEach(r => {
-              const sIni = escaparHTML(r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5) || "");
-              const tituloSafe = escaparHTML(r.titulo || r.title || 'Reunião');
+              const sIni = escaparHTML(r.horarioInicio || r.horaInicio || (r.start && r.start.split('T')[1] && r.start.split('T')[1].substring(0,5)) || "");
+              const titSafe = escaparHTML(r.titulo || r.title || 'Reunião');
               const idSafe = escaparHTML(r.id);
               gridDivHtml += `
                 <div style="background: #f0fdfa; border: 1px solid #ccfbf1; padding: 4px; border-radius: 4px; font-size: 10px; margin-top: 4px;">
-                  <b>${sIni}</b> - ${tituloSafe}
+                  <b>${sIni}</b> - ${titSafe}
                   ${usuarioEhAdmin ? `<br><button class="btn-delete-admin" style="margin-top:2px;" onclick="event.stopPropagation(); confirmarExclusaoLocal('${idSafe}')">${iconeExcluir} Excluir</button>` : ''}
                 </div>
               `;
@@ -955,8 +1163,8 @@
 
           let reservasDia = reservas.filter(r => {
             const rSala = r.sala || r.room;
-            const rData = r.data || r.date || r.start?.split('T')[0];
-            return mesmaSala(rSala, sala) && rData === diaStr;
+            const rData = r.data || r.date || (r.start && r.start.split('T')[0]);
+            return rSala === sala && rData === diaStr;
           });
 
           wrapperHtml += `
@@ -973,30 +1181,14 @@
       }
     }
 
-    function abrirModalNegociacaoBtn(btn) {
-      const sala = btn.getAttribute("data-sala");
-      const data = btn.getAttribute("data-data");
-      const horario = btn.getAttribute("data-hora");
-      const responsavel = btn.getAttribute("data-resp");
-      const userId = btn.getAttribute("data-uid");
-      abrirModalNegociacao(sala, data, horario, responsavel, userId);
-    }
-
-    function abrirModalNegociacao(sala, data, horario, responsavel, userId) {
+    function abrirModalNegociacao(sala, data, horario, responsavel) {
       const msgPronta = `Olá ${responsavel}! Vi que reservaste a ${sala} no dia ${data} às ${horario}. Gostaria de negociar a utilização deste horário contigo.`;
       document.getElementById("inputMsgWhatsapp").value = msgPronta;
-
-      const dadosDono = userId ? usuariosMapaGlobal[userId] : null;
-      const telefoneLimpo = dadosDono && dadosDono.whatsapp ? String(dadosDono.whatsapp).replace(/\D/g, "") : "";
 
       const btnWhatsapp = document.getElementById("linkEnviarWhatsapp");
       const atualizarLink = () => {
         const textoAtual = document.getElementById("inputMsgWhatsapp").value;
-        if (telefoneLimpo) {
-          btnWhatsapp.href = `https://api.whatsapp.com/send?phone=${telefoneLimpo}&text=${encodeURIComponent(textoAtual)}`;
-        } else {
-          btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAtual)}`;
-        }
+        btnWhatsapp.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoAtual)}`;
       };
       
       atualizarLink();
@@ -1009,13 +1201,13 @@
       const inicio = document.getElementById("inputHoraInicio").value;
       const fim = document.getElementById("inputHoraFim").value;
       const sala = document.getElementById("salaSelect").value;
-      const btn = document.getElementById("btnConfirmarReserva");
 
       if (!titulo || !inicio || !fim) {
         mostrarAlerta("Atenção", "Por favor, preencha todos os campos.", "warning");
         return;
       }
 
+      const reservas = reservasFirestoreGlobal;
       const hojeStr = window.dataSelecionadaGlobal || formatarDataLocal(new Date());
 
       const minInicioTotal = parseInt(inicio.split(':')[0]) * 60 + parseInt(inicio.split(':')[1]);
@@ -1026,14 +1218,14 @@
         return;
       }
 
-      const conflito = reservasFirestoreGlobal.some(r => {
+      const conflito = reservas.some(r => {
         const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        if (!mesmaSala(rSala, sala) || rData !== hojeStr) return false;
+        const rData = r.data || r.date || (r.start && r.start.split('T')[0]);
+        if (rSala !== sala || rData !== hojeStr) return false;
         
-        const strIni = r.horarioInicio || r.horaInicio || r.start?.split('T')[1]?.substring(0,5);
-        const strFim = r.horarioFim || r.horaFim || r.end?.split('T')[1]?.substring(0,5);
-        if(!strIni || !strFim) return false;
+        const strIni = r.horarioInicio || r.horaInicio || (r.start && r.start.split('T')[1] && r.start.split('T')[1].substring(0,5));
+        const strFim = r.horarioFim || r.horaFim || (r.end && r.end.split('T')[1] && r.end.split('T')[1].substring(0,5));
+        if (!strIni || !strFim) return false;
 
         const rI = parseInt(strIni.split(':')[0]) * 60 + parseInt(strIni.split(':')[1]);
         const rF = parseInt(strFim.split(':')[0]) * 60 + parseInt(strFim.split(':')[1]);
@@ -1047,36 +1239,56 @@
       }
 
       const userAuth = window.auth ? window.auth.currentUser : null;
-      const uid = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid) || "";
+      const uidAtual = (userAuth && userAuth.uid) || (usuarioSessao && usuarioSessao.uid) || "";
 
       const novaReserva = {
         titulo: titulo,
-        sala: sala,
-        data: hojeStr,
+        title: titulo,
         horarioInicio: inicio,
+        horaInicio: inicio,
         horarioFim: fim,
+        horaFim: fim,
+        start: `${hojeStr}T${inicio}:00`,
+        end: `${hojeStr}T${fim}:00`,
+        sala: sala,
+        room: sala,
+        data: hojeStr,
+        date: hojeStr,
         responsavel: apelidoUsuarioGlobal,
-        userId: uid,
-        canceladoPorAdmin: false,
-        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+        usuario: apelidoUsuarioGlobal,
+        userId: uidAtual,
+        criadoEm: new Date().toISOString()
       };
 
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "A guardar...";
+      const btnSalvar = document.getElementById("btnSalvarNovaReserva");
+      if (btnSalvar) {
+        btnSalvar.disabled = true;
+        btnSalvar.innerText = "A guardar...";
       }
 
       try {
         await window.db.collection("reservas").add(novaReserva);
+
+        if (uidAtual && typeof dispararEmailNotificacao === "function") {
+          const userSnap = await window.db.collection("usuarios").doc(uidAtual).get();
+          const dadosUser = userSnap.exists ? userSnap.data() : {};
+          const emailDestino = dadosUser.emailNotificacao || (dadosUser.notificacoes && dadosUser.notificacoes.emailDestino) || usuarioEmailGlobal;
+          const envioAtivo = dadosUser.notificacoes ? !!dadosUser.notificacoes.email : false;
+
+          if (envioAtivo && emailDestino) {
+            await dispararEmailNotificacao(emailDestino, apelidoUsuarioGlobal, titulo, sala, hojeStr, inicio, fim, "confirmada");
+          }
+        }
+
         document.getElementById("modalNovaReserva").style.display = "none";
         mostrarAlerta("Reserva confirmada", "Reserva criada com sucesso!", "success");
       } catch (error) {
         console.error("Erro ao guardar reserva no Firestore:", error);
         mostrarAlerta("Erro", "Não foi possível confirmar a reserva. Tente novamente.", "error");
       } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Confirmar Reserva";
+        if (btnSalvar) {
+          btnSalvar.disabled = false;
+          btnSalvar.innerText = "Confirmar Reserva";
         }
       }
     }
@@ -1092,35 +1304,69 @@
 
     async function executarExclusaoReservaLocal() {
       const id = document.getElementById("idReservaParaExcluir").value;
-      const btn = document.getElementById("btnExecutarExclusao");
       if (!id) return;
 
-      if (btn) {
-        btn.disabled = true;
-        btn.textContent = "A excluir...";
+      const btnExcluir = document.getElementById("btnConfirmarExclusaoAdmin");
+      if (btnExcluir) {
+        btnExcluir.disabled = true;
+        btnExcluir.innerText = "A excluir...";
       }
 
       try {
-        await window.db.collection("reservas").doc(id).delete();
+        const docRef = window.db.collection("reservas").doc(id);
+        const docSnap = await docRef.get();
+
+        if (docSnap.exists) {
+          const reserva = docSnap.data();
+
+          // Marca como cancelada pela administração para libertar o horário e disparar alerta ao utilizador
+          await docRef.update({
+            canceladoPorAdmin: true,
+            canceladoEm: new Date().toISOString()
+          });
+
+          if (reserva.userId && typeof dispararEmailNotificacao === "function") {
+            const userSnap = await window.db.collection("usuarios").doc(reserva.userId).get();
+            const dadosUser = userSnap.exists ? userSnap.data() : {};
+            const emailDestino = dadosUser.emailNotificacao || (dadosUser.notificacoes && dadosUser.notificacoes.emailDestino) || dadosUser.email || "";
+            const envioAtivo = dadosUser.notificacoes ? !!dadosUser.notificacoes.email : false;
+
+            if (envioAtivo && emailDestino) {
+              await dispararEmailNotificacao(
+                emailDestino,
+                reserva.responsavel || dadosUser.apelido || dadosUser.nome || "Utilizador",
+                reserva.titulo || "Reunião",
+                reserva.sala || "Sala",
+                reserva.data || "",
+                reserva.horarioInicio || "",
+                reserva.horarioFim || "",
+                "cancelada"
+              );
+            }
+          }
+        }
+
         fecharModalConfirmacao();
         mostrarAlerta("Sucesso", "Reserva excluída com sucesso!", "success");
       } catch (error) {
         console.error("Erro ao excluir reserva no Firestore:", error);
         fecharModalConfirmacao();
-        mostrarAlerta("Erro", "Não foi possível excluir a reserva.", "error");
+        mostrarAlerta("Erro", "Não foi possível excluir a reserva. Tente novamente.", "error");
       } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.textContent = "Sim, Excluir";
+        if (btnExcluir) {
+          btnExcluir.disabled = false;
+          btnExcluir.innerText = "Sim, Excluir";
         }
       }
     }
 
+    /* NOVAS FUNÇÕES PARA O BLOQUEIO INTELIGENTE DOS HORÁRIOS */
     function atualizarOpcoesInicio(dataStr, sala) {
-      const reservasDoDia = reservasFirestoreGlobal.filter(r => {
+      const reservas = reservasFirestoreGlobal;
+      const reservasDoDia = reservas.filter(r => {
         const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        return mesmaSala(rSala, sala) && rData === dataStr;
+        const rData = r.data || r.date || (r.start && r.start.split('T')[0]);
+        return rSala === sala && rData === dataStr;
       });
       
       const agora = new Date();
@@ -1132,22 +1378,25 @@
 
       for (let h = 7; h <= 23; h++) {
         for (let m of [0, 30]) {
-          if (h === 23 && m === 30) continue;
+          if (h === 23 && m === 30) continue; // Último início possível é 23:00
           
           let minSlot = h * 60 + m;
           let horaStr = String(h).padStart(2,'0') + ":" + String(m).padStart(2,'0');
           
+          // Verifica se o horário já passou (apenas se for o dia de hoje)
           let isPassado = (dataStr === hojeStr && minSlot <= minAtual);
           
+          // Verifica se o horário cai dentro de uma reserva existente
           let isOcupado = reservasDoDia.some(r => {
-            const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
-            const strF = r.horarioFim || r.horaFim || r.end?.split('T')[1];
-            if(!strI || !strF) return false;
+            const strI = r.horarioInicio || r.horaInicio || (r.start && r.start.split('T')[1]);
+            const strF = r.horarioFim || r.horaFim || (r.end && r.end.split('T')[1]);
+            if (!strI || !strF) return false;
             const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
             const rF = parseInt(strF.split(':')[0]) * 60 + parseInt(strF.split(':')[1]);
             return (minSlot >= rI && minSlot < rF);
           });
 
+          // Cria a opção e bloqueia se for inválida
           let opt = new Option(horaStr + (isPassado ? " (Passado)" : (isOcupado ? " (Ocupado)" : "")), horaStr);
           if (isPassado || isOcupado) opt.disabled = true;
           selIni.add(opt);
@@ -1156,10 +1405,11 @@
     }
 
     function atualizarOpcoesFim(dataStr, sala) {
-      const reservasDoDia = reservasFirestoreGlobal.filter(r => {
+      const reservas = reservasFirestoreGlobal;
+      const reservasDoDia = reservas.filter(r => {
         const rSala = r.sala || r.room;
-        const rData = r.data || r.date || r.start?.split('T')[0];
-        return mesmaSala(rSala, sala) && rData === dataStr;
+        const rData = r.data || r.date || (r.start && r.start.split('T')[0]);
+        return rSala === sala && rData === dataStr;
       });
       
       const selIni = document.getElementById("inputHoraInicio");
@@ -1170,25 +1420,28 @@
       const [hIni, mIni] = selIni.value.split(':').map(Number);
       const minInicio = hIni * 60 + mIni;
 
-      let proximoLimite = 23 * 60 + 30;
+      // Descobrir a próxima reserva para limitar a hora de fim (não pode passar por cima)
+      let proximoLimite = 23 * 60 + 30; // Máximo permitido do dia (23:30)
       
       reservasDoDia.forEach(r => {
-        const strI = r.horarioInicio || r.horaInicio || r.start?.split('T')[1];
-        if(!strI) return;
+        const strI = r.horarioInicio || r.horaInicio || (r.start && r.start.split('T')[1]);
+        if (!strI) return;
         const rI = parseInt(strI.split(':')[0]) * 60 + parseInt(strI.split(':')[1]);
         if (rI > minInicio && rI < proximoLimite) {
-          proximoLimite = rI;
+          proximoLimite = rI; // Define a barreira
         }
       });
 
       const valorFimAtual = selFim.value;
       selFim.innerHTML = "";
 
+      // Gera os horários de fim válidos, de 30 em 30 min, apenas até encostar na próxima reserva
       for (let minSlot = minInicio + 30; minSlot <= proximoLimite; minSlot += 30) {
         let horaStr = String(Math.floor(minSlot/60)%24).padStart(2,'0') + ":" + String(minSlot%60).padStart(2,'0');
         selFim.add(new Option(horaStr, horaStr));
       }
 
+      // Tenta manter o valor anterior, se não for possível, seleciona a primeira opção (+30 min)
       if (valorFimAtual && Array.from(selFim.options).some(o => o.value === valorFimAtual)) {
         selFim.value = valorFimAtual;
       } else if (selFim.options.length > 0) {
@@ -1203,17 +1456,21 @@
       document.getElementById("reservaHorarioInicio").value = horaInicio;
       document.getElementById("inputTituloReserva").value = "";
       
+      // 1. Gera os horários de início e desativa passados/ocupados
       atualizarOpcoesInicio(dataStr, sala);
       
       const selIni = document.getElementById("inputHoraInicio");
       
+      // 2. Seleciona o horário clicado se estiver disponível
       if (Array.from(selIni.options).some(o => o.value === horaInicio && !o.disabled)) {
         selIni.value = horaInicio;
       } else {
+        // Se clicar por engano num intervalo inválido, força para o primeiro livre
         const primeiroDisponivel = Array.from(selIni.options).find(o => !o.disabled);
         if (primeiroDisponivel) selIni.value = primeiroDisponivel.value;
       }
       
+      // 3. Gera os horários de fim restringidos inteligentemente
       atualizarOpcoesFim(dataStr, sala);
 
       document.getElementById("modalNovaReserva").style.display = "flex";
